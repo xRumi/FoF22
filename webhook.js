@@ -8,7 +8,7 @@ http.createServer(function (req, res) {
     req.on('data', function(chunk) {
         let sig = "sha1=" + crypto.createHmac('sha1', secret).update(chunk.toString()).digest('hex');
         if (req.headers['x-hub-signature'] == sig) {
-            console.log('webhook received, pulling latest changes');
+            console.log('webhook received');
             exec('git pull');
         }
     });
