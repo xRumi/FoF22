@@ -9,10 +9,10 @@ http.createServer(function (req, res) {
         if (req.headers['x-hub-signature'] == sig) {
             let pull = spawn('git', ['pull']);
             pull.stdout.on('data', function (data) {
-                console.log(data);
+                console.log(data.toString());
             });
             pull.stderr.on('data', function (data) {
-                console.log(data);
+                console.log(data.toString());
             });
             pull.on('exit', function (code) {
                 console.log('child process exited with code ' + code.toString());
