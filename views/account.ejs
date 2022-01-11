@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/dist/css/account.css">
+    <link rel="stylesheet" href="/plugins/navbar/style.css">
+    <link rel="stylesheet" href="/plugins/iziToast/iziToast.min.css">
+    <title>Home Page</title>
+</head>
+<body>
+    <header class="header">
+        <div class="nav">
+            <section class="wrapper">
+            <h1><a href="/" class="nav-icon">Account</a></h1>
+                <button type="button" class="opened-menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <div class="overlay"></div>
+                <nav class="navbar">
+                    <button type="button" class="closed-menu">
+                        <div class="closed-icon">&#x2715;</div>
+                    </button>
+                    <ul class="menu">
+                        <li class="menu-item"><a href="/">Home</a></li>
+                        <li class="menu-item"><a href="/logout">Logout</a></li>
+                    </ul>
+                </nav>
+            </section>
+        </div>
+    </header>
+    <main class="main">
+        <div class="row">
+            <div class="column">
+                <div class="card">
+                    <h3>General Informations</h3><br>
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" value="<%=user.username%>" disabled><br>
+                    <form class="info">
+                    	<label for="name">Full name</label><br>
+                    	<input type="text" id="name" name="name" placeholder="<%=user.name%>"><br>
+                        <label for="email">Email</label>
+                        <input type="text" id="email" name="email" placeholder="<%=user.email%>"><br><br>
+                        <label for="c_pass_info">Confirm Password<span style="color: red;"> *</span></label>
+                        <input type="password" id="c_pass_info" name="c_pass_info" required>
+                        <button type="submit" class="button button_info">
+                            <span class="button_text button_text_info">update</span>
+                        </button><br><br>
+                    </form>
+                </div>
+            </div>
+            <div class="column">
+                <div class="card">
+                    <h3>Change Password</h3><br>
+                    <form class="password">
+                        <label for="new_pass">New Password</label>
+                        <input type="password" id="new_pass" name="new_pass" minlength="6" maxlength="20" title="hello" required>
+                        <label for="c_new_pass">Confirm New Password</label>
+                        <input type="password" id="c_new_pass" name="c_new_pass" required><br><br>
+                        <label for="old_pass">Current Password<span style="color: red;"> *</span></label>
+                        <input type="password" id="c_old_pass" name="c_pass_pass" required>
+                        <button type="submit" class="button button_pass">
+                            <span class="button_text button_text_pass">update</span>
+                        </button><br><br>
+                    </form>
+                </div>
+            </div>
+            <div class="column">
+                <div class="card">
+                    <h3>Danger Zone</h3><br>
+                    <form class="danger">
+                        <label for="c_pass_danger">Confirm Password<span style="color: red;"> *</span></label>
+                        <input type="password" id="c_pass_danger" name="c_pass_danger" required>
+                        <button type="submit" class="button button_deactive" style="background-color: orange" onclick="deactive()">
+                            <span class="button_text button_text_deactive">deactive</span>
+                        </button>
+                        <button type="submit" class="button button_delete" style="background-color: red; margin-left: 10px" onclick="$delete()">
+                            <span class="button_text button_text_delete">delete</span>
+                        </button><br><br>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+    <div class="cover"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="/plugins/iziToast/iziToast.min.js"></script>
+    <script src="/dist/js/account.js"></script>
+    <script src="/plugins/navbar/script.js"></script>
+</body>
+</html>
