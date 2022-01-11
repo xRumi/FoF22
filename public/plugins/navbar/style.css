@@ -1,6 +1,6 @@
 .nav {
 	margin: 0 auto;
-    padding: 2px 16px;
+    padding: 2px 12px;
 }
 
 *, *::before, *::after {
@@ -26,7 +26,7 @@ a, button {
 }
 
 .nav-icon {
-	color: lightgray;
+	color: lightblue;
 }
 
 .header {
