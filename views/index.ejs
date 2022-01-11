@@ -10,45 +10,32 @@
     <title><%=c_page%></title>
 </head>
 <body onload="init('<%=c_page%>', '<%=user.username%>')">
-    <header class="header" id="header">
-        <nav class="nav container">
-            <a class="nav__title"><span onclick="hide_nav()">F<sub>o</sub>F<sub>22</sub></span></a>
-            <div class="nav__menu" id="nav-menu">
-                <ul class="nav__list">
-                    <li class="nav__item">
-                        <a onclick="load_page()" class="home nav__link<%=c_page == 'home' ? ' active-link': ''%>">
-                            <i class='bx bx-home-alt nav__icon'></i>
-                            <span class="nav__name">Home</span>
-                        </a>
-                    </li>
-                    <li class="nav__item">
-                        <a onclick="load_page('profile')" class="profile nav__link<%=c_page == 'profile' ? ' active-link': ''%>">
-                            <i class='bx bx-user nav__icon'></i>
-                            <span class="nav__name">Profile</span>
-                        </a>
-                    </li>
-                    <li class="nav__item">
-                        <a onclick="load_page('messages')" class="messages nav__link<%=c_page == 'messages' ? ' active-link': ''%>">
-                            <i class='bx bx-message nav__icon'></i>
-                            <span class="nav__name">Messages</span>
-                        </a>
-                    </li>
-                    <li class="nav__item">
-                        <a onclick="load_page('search')" class="search nav__link<%=c_page == 'search' ? ' active-link': ''%>">
-                            <i class='bx bx-search-alt-2 nav__icon'></i>
-                            <span class="nav__name">Search</span>
-                        </a>
-                    </li>
-                    <li class="nav__item">
-                        <a onclick="load_page('menu')" class="menu nav__link<%=c_page == 'menu' ? ' active-link': ''%>">
-                            <i class='bx bx-menu nav__icon'></i>
-                            <span class="nav__name">Menu</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            <!-- <img src="/dist/img/profile/<%=user.username%>.png" alt="" class="nav__img"> -->
-        </nav>
+    </header>
+        <header class="header">
+        <div class="nav">
+            <section class="wrapper">
+            <h1><a href="/" class="nav-icon">F<sub>o</sub>F<sub>22</sub><i class='fab fa-connectdevelop'></i></a></h1>
+                <button type="button" class="opened-menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <div class="overlay"></div>
+                <nav class="navbar">
+                    <button type="button" class="closed-menu">
+                        <img src="/plugins/navbar/closed.svg" class="closed-icon" alt="closed">
+                    </button>
+                    <ul class="menu">
+                        <li class="menu-item"><a href="#">Home</a></li>
+                        <li class="menu-item"><a href="#">Profile</a></li>
+                        <li class="menu-item"><a href="#">Messages</a></li>
+                        <li class="menu-item"><a href="#">Search</a></li>
+                        <li class="menu-item"><a href="#">Menu</a></li>
+                    </ul>
+                </nav>
+            </section>
+        </div>
     </header>
     <div class="cover"></div>
     <div class="loader loader__home"></div>
