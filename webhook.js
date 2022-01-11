@@ -7,7 +7,7 @@ http.createServer(function (req, res) {
     req.on('data', function(chunk) {
         let sig = "sha1=" + crypto.createHmac('sha1', secret).update(chunk.toString()).digest('hex');
         if (req.headers['x-hub-signature'] == sig) {
-            let pull = spawn('git', 'pull');
+            let pull = spawn('git', ['pull']);
             pull.stdout.on('data', function (data) {
                 console.log(data.toString());
             });
