@@ -1,7 +1,6 @@
 .nav {
 	margin: 0 auto;
     padding: 2px 16px;
-    color: white;
 }
 
 *, *::before, *::after {
@@ -27,7 +26,7 @@ a, button {
 }
 
 .nav-icon {
-	color: #fff;
+	color: lightgray;
 }
 
 .header {
@@ -37,8 +36,7 @@ a, button {
 	width: 100%;
 	height: auto;
 	z-index: 999;
-	background: #3A4149;
-	background: var(--color-white);
+	background: #fff;
     -webkit-box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
@@ -70,7 +68,7 @@ a, button {
 	padding: 1rem 0;
 	border: none;
 	outline: none;
-	color: #fff;
+	color: black;
 	text-transform: capitalize;
 	text-rendering: optimizeLegibility;
 	transition: all 0.35s ease;
