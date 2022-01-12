@@ -4,14 +4,12 @@ var current_page, current_user, route_histroy = [], retry_function;
 function init (route_str, username) {
     current_user = username;
     router(route_str);
-    console.log('init function');
 }
 
 function pre_render_main (url, title) {
     history.pushState({}, title, url);
     $('.loader__home').fadeIn();
     document.title = title;
-    console.log('pre render main')
 }
 
 const routes = {
@@ -21,11 +19,8 @@ const routes = {
         render: () => {
             console.log('rendering home page');
             ajax('home', '/fetch').then((data, textStatus, xhr) => {
-                console.log(current_page);
                 if (current_page == 'home') {
-                    console.log('rendering home page');
                     if (xhr.status == 200) {
-                        console.log(data)
                         $('.main').html(data);
                     }
                 }
@@ -38,10 +33,10 @@ const routes = {
         name: 'profile',
         cache: null,
         render: () => {
-            ajax('profile', '/profile/fetch').then((data, textStatus, xhr) => {
+            ajax('profile', '/profile/fetch').then(x => {
                 if (current_page == 'profile') {
-                    if (xhr.status == 200) {
-                        $('.main').html(data);
+                    if (x.xhr.status == 200) {
+                        $('.main').html(x.data);
                     }
                 }
             }).catch(() => {
@@ -53,10 +48,10 @@ const routes = {
         name: 'messages',
         cache: null,
         render: () => {
-            ajax('messages', '/messages/fetch').then((data, textStatus, xhr) => {
+            ajax('messages', '/messages/fetch').then(x => {
                 if (current_page == 'messages') {
-                    if (xhr.status == 200) {
-                        $('.main').html(data);
+                    if (x.xhr.status == 200) {
+                        $('.main').html(x.data);
                     }
                 }
             }).catch(() => {
@@ -68,10 +63,10 @@ const routes = {
         name: 'search',
         cache: null,
         render: () => {
-            ajax('search', '/search/fetch').then((data, textStatus, xhr) => {
+            ajax('search', '/search/fetch').then(x => {
                 if (current_page == 'search') {
-                    if (xhr.status == 200) {
-                        $('.main').html(data);
+                    if (x.xhr.status == 200) {
+                        $('.main').html(x.data);
                     }
                 }
             }).catch(() => {
@@ -83,10 +78,10 @@ const routes = {
         name: 'menu',
         cache: null,
         render: () => {
-            ajax('menu', '/menu/fetch').then((data, textStatus, xhr) => {
+            ajax('menu', '/menu/fetch').then(x => {
                 if (current_page == 'menu') {
-                    if (xhr.status == 200) {
-                        $('.main').html(data);
+                    if (x.xhr.status == 200) {
+                        $('.main').html(x.data);
                     }
                 }
             }).catch(() => {
@@ -97,26 +92,24 @@ const routes = {
 }
 
 function ajax (page, url, retry = false, type = 'GET') {
-    console.log('sending ajax request')
     return new Promise((resolve, reject) => {
         let ajax_ =$.ajax({
             type,
             url,
             timeout: 30000,
             success: function (data, textStatus, xhr) {
-                console.log('request success')
-                resolve(data, textStatus, xhr);
+                resolve({ data, textStatus, xhr });
             },
             error: function (xhr, textStatus, errorThrown) {
                 if (xhr.status == 403) {
                     window.location.replace(`/login?ref=${page}`);
-                    reject();
+                    reject({ });
                 } else {
                     if (retry && current_page == page) {
                         retry_function = setTimeout(function() {
                             if (current_page == page) ajax_();
                         }, 5000);
-                    } else reject(xhr, textStatus, errorThrown);
+                    } else reject({ });
                 }
             }
         })
@@ -125,8 +118,6 @@ function ajax (page, url, retry = false, type = 'GET') {
 
 function router (route_str) {
     const route = route_str.split('.').reduce((v, k) => (v || {})[k], routes);
-    console.log(route_str)
-    console.log(route);
     if (route) {
         if (route_histroy[route_histroy.length - 1] !== route.name) route_histroy.push(route.name);
         current_page = route.name;
