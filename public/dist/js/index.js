@@ -2,9 +2,8 @@ var current_page, current_user, route_histroy = [], retry_function;
 
 // init function
 function init (route_str, username) {
-    current_page = page;
     current_user = username;
-    handle_route(route_str);
+    router(route_str);
 }
 
 function pre_render_main (url, title) {
@@ -116,10 +115,11 @@ function ajax (page, url, retry = false, type = 'GET') {
     });
 }
 
-function handle_route (route_str) {
+function router (route_str) {
     const route = route_str.split('.').reduce((v, k) => (v || {})[k], routes);
     if (route) {
         if (route_histroy[route_histroy.length - 1] !== route.name) route_histroy.push(route.name);
+        current_page = route.name;
         route.render();
     }
 }
