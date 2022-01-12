@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/dist/css/index.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
     <link rel="stylesheet" href="/plugins/navbar/style.css">
-    <script src="/socket.io/socket.io.js"></script>
     <title><%=c_page%></title>
 </head>
 <body onload="init('<%=c_page%>', '<%=user.username%>')">
@@ -27,11 +25,11 @@
                         <img src="/plugins/navbar/closed.svg" class="closed-icon" alt="closed">
                     </button>
                     <ul class="menu">
-                        <li class="menu-item"><a href="#">Home</a></li>
-                        <li class="menu-item"><a href="#">Profile</a></li>
-                        <li class="menu-item"><a href="#">Messages</a></li>
-                        <li class="menu-item"><a href="#">Search</a></li>
-                        <li class="menu-item"><a href="#">Menu</a></li>
+                        <li class="menu-item"><a onclick="routes.home.render();">Home</a></li>
+                        <li class="menu-item"><a onclick="routes.profile.render();">Profile</a></li>
+                        <li class="menu-item"><a onclick="routes.messages.render();">Messages</a></li>
+                        <li class="menu-item"><a onclick="routes.search.render()">Search</a></li>
+                        <li class="menu-item"><a onclick="routes.menu.render();">Menu</a></li>
                     </ul>
                 </nav>
             </section>
@@ -42,6 +40,8 @@
     <main class="main"></main>
     <script src="/plugins/navbar/script.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script src="/dist/js/index.js"></script>
+    <script src="/dist/js/chat.js"></script>
 </body>
 </html>

@@ -1,3 +1,130 @@
+var current_page, current_user, route_histroy = [], retry_function;
+
+// init function
+function init (route_str, username) {
+    current_page = page;
+    current_user = username;
+    handle_route(route_str);
+}
+
+function pre_render_main (url, title) {
+    history.pushState({}, title, url);
+    $('.loader__home').fadeIn();
+    document.title = title;
+}
+
+const routes = {
+    home: {
+        name: 'home',
+        cache: null,
+        render: () => {
+            ajax('home', '/fetch').then((data, textStatus, xhr) => {
+                if (current_page == 'home') {
+                    if (xhr.status == 200) {
+                        $('.main').html(data);
+                    }
+                }
+            }).catch(() => {
+                
+            });
+        }
+    },
+    profile: {
+        name: 'profile',
+        cache: null,
+        render: () => {
+            ajax('profile', '/profile/fetch').then((data, textStatus, xhr) => {
+                if (current_page == 'profile') {
+                    if (xhr.status == 200) {
+                        $('.main').html(data);
+                    }
+                }
+            }).catch(() => {
+            
+            });
+        }
+    },
+    messages: {
+        name: 'messages',
+        cache: null,
+        render: () => {
+            ajax('messages', '/messages/fetch').then((data, textStatus, xhr) => {
+                if (current_page == 'messages') {
+                    if (xhr.status == 200) {
+                        $('.main').html(data);
+                    }
+                }
+            }).catch(() => {
+            
+            });
+        }
+    },
+    search: {
+        name: 'search',
+        cache: null,
+        render: () => {
+            ajax('search', '/search/fetch').then((data, textStatus, xhr) => {
+                if (current_page == 'search') {
+                    if (xhr.status == 200) {
+                        $('.main').html(data);
+                    }
+                }
+            }).catch(() => {
+            
+            });
+        }
+    },
+    menu: {
+        name: 'menu',
+        cache: null,
+        render: () => {
+            ajax('menu', '/menu/fetch').then((data, textStatus, xhr) => {
+                if (current_page == 'menu') {
+                    if (xhr.status == 200) {
+                        $('.main').html(data);
+                    }
+                }
+            }).catch(() => {
+            
+            });
+        }
+    }
+}
+
+function ajax (page, url, retry = false, type = 'GET') {
+    return new Promise((resolve, reject) => {
+        let ajax_ =$.ajax({
+            type,
+            url,
+            timeout: 30000,
+            success: function (data, textStatus, xhr) {
+                resolve(data, textStatus, xhr);
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                if (xhr.status == 403) {
+                    window.location.replace(`/login?ref=${page}`);
+                    reject();
+                } else {
+                    if (retry && current_page == page) {
+                        retry_function = setTimeout(function() {
+                            if (current_page == page) ajax_();
+                        }, 5000);
+                    } else reject(xhr, textStatus, errorThrown);
+                }
+            }
+        })
+    });
+}
+
+function handle_route (route_str) {
+    const route = route_str.split('.').reduce((v, k) => (v || {})[k], routes);
+    if (route) {
+        if (route_histroy[route_histroy.length - 1] !== route.name) route_histroy.push(route.name);
+        route.render();
+    }
+}
+
+/*
 function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
@@ -131,12 +258,12 @@ function format(type, data) {
         $('.main').html(html.join(''));
     } else $('.main').html(data);
 }
-/*
+
 window.onpopstate = function (event) {
     //if (event.state.current_page) load_page(event.state.current_page == 'home' ? null : event.state.current_page);
 }
-*/
 
 function url_handler() {
     
 }
+*/
