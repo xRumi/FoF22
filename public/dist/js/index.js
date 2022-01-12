@@ -6,9 +6,14 @@ function init (route_str, username) {
     router(route_str);
 }
 
-function pre_render_main (url, title) {
+function pre_render (url, title) {
     history.pushState({}, title, url);
-    $('.loader__home').fadeIn();
+    $('.loader__home').fadeIn(100);
+    document.title = title;
+}
+
+function after_render (title) {
+    $('.loader__home').fadeOut(100);
     document.title = title;
 }
 
@@ -17,9 +22,11 @@ const routes = {
         name: 'home',
         cache: null,
         render: () => {
+            pre_render('/', 'home');
             ajax('home', '/fetch').then(x => {
                 if (current_page == 'home') {
                     if (x.xhr.status == 200) {
+                        after_render('home');
                         $('.main').html(x.data);
                     }
                 }
@@ -32,9 +39,11 @@ const routes = {
         name: 'profile',
         cache: null,
         render: () => {
+            pre_render('/profile', 'profile');
             ajax('profile', '/profile/fetch').then(x => {
                 if (current_page == 'profile') {
                     if (x.xhr.status == 200) {
+                        after_render('profile');
                         $('.main').html(x.data);
                     }
                 }
@@ -47,9 +56,11 @@ const routes = {
         name: 'messages',
         cache: null,
         render: () => {
+            pre_render('/messages', 'messages');
             ajax('messages', '/messages/fetch').then(x => {
                 if (current_page == 'messages') {
                     if (x.xhr.status == 200) {
+                        after_render('messages');
                         $('.main').html(x.data);
                     }
                 }
@@ -62,9 +73,11 @@ const routes = {
         name: 'search',
         cache: null,
         render: () => {
+            pre_render('/search', 'search');
             ajax('search', '/search/fetch').then(x => {
                 if (current_page == 'search') {
                     if (x.xhr.status == 200) {
+                        after_render('search');
                         $('.main').html(x.data);
                     }
                 }
@@ -77,9 +90,11 @@ const routes = {
         name: 'menu',
         cache: null,
         render: () => {
+            pre_render('/menu', 'menu');
             ajax('menu', '/menu/fetch').then(x => {
                 if (current_page == 'menu') {
                     if (x.xhr.status == 200) {
+                        after_render('menu');
                         $('.main').html(x.data);
                     }
                 }
