@@ -61,7 +61,19 @@ const routes = {
                 if (current_page == 'messages') {
                     if (x.xhr.status == 200) {
                         after_render('messages');
-                        $('.main').html(x.data);
+                        let html = [];
+                        x.data.forEach(y => {
+                            html.push(`<div class="messages__item" onclick="join_room('${x.id}')">
+                                <div class="messages__image">
+                                    <img src="${y.image}">
+                                </div>
+                                <div class="messages__title">
+                                    <h4>${y.name.includes('.') ? y.name.split('.')[0] === current_user ? y.name.split('.')[1] : y.name.split('.')[0] : y.name}</h4>
+                                    <p>${y.last_message}</p>
+                                </div>
+                            </div>`);
+                        });
+                        $('.main').html(html.join(''));
                     }
                 }
             }).catch(() => {
