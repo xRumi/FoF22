@@ -21,8 +21,11 @@ const routes = {
         render: () => {
             console.log('rendering home page');
             ajax('home', '/fetch').then((data, textStatus, xhr) => {
+                console.log(current_page);
                 if (current_page == 'home') {
+                    console.log('rendering home page');
                     if (xhr.status == 200) {
+                        console.log(data)
                         $('.main').html(data);
                     }
                 }
