@@ -17,11 +17,10 @@ const routes = {
         name: 'home',
         cache: null,
         render: () => {
-            console.log('rendering home page');
-            ajax('home', '/fetch').then((data, textStatus, xhr) => {
+            ajax('home', '/fetch').then(x => {
                 if (current_page == 'home') {
-                    if (xhr.status == 200) {
-                        $('.main').html(data);
+                    if (x.xhr.status == 200) {
+                        $('.main').html(x.data);
                     }
                 }
             }).catch(() => {
