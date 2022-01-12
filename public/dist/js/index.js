@@ -4,12 +4,14 @@ var current_page, current_user, route_histroy = [], retry_function;
 function init (route_str, username) {
     current_user = username;
     router(route_str);
+    console.log('init function');
 }
 
 function pre_render_main (url, title) {
     history.pushState({}, title, url);
     $('.loader__home').fadeIn();
     document.title = title;
+    console.log('pre render main')
 }
 
 const routes = {
@@ -17,6 +19,7 @@ const routes = {
         name: 'home',
         cache: null,
         render: () => {
+            console.log('rendering home page');
             ajax('home', '/fetch').then((data, textStatus, xhr) => {
                 if (current_page == 'home') {
                     if (xhr.status == 200) {
@@ -91,12 +94,14 @@ const routes = {
 }
 
 function ajax (page, url, retry = false, type = 'GET') {
+    console.log('sending ajax request')
     return new Promise((resolve, reject) => {
         let ajax_ =$.ajax({
             type,
             url,
             timeout: 30000,
             success: function (data, textStatus, xhr) {
+                console.log('request success')
                 resolve(data, textStatus, xhr);
             },
             error: function (xhr, textStatus, errorThrown) {
@@ -117,6 +122,8 @@ function ajax (page, url, retry = false, type = 'GET') {
 
 function router (route_str) {
     const route = route_str.split('.').reduce((v, k) => (v || {})[k], routes);
+    console.log(route_str)
+    console.log(route);
     if (route) {
         if (route_histroy[route_histroy.length - 1] !== route.name) route_histroy.push(route.name);
         current_page = route.name;
