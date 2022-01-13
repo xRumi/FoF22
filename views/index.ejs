@@ -5,43 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/dist/css/index.css">
     <link rel="stylesheet" href="/plugins/navbar/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jQuery.mmenu/9.0.1/mmenu.min.css" integrity="sha512-pHFBBVl3Z0rF9jL666olgOerFoZfjxXEXNIOW3KBW/AZsnIxA6K9GXoGV+iCbB7SvCL1+WtY2nVP2sX60OxP6g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <title><%=c_page%></title>
 </head>
-<body onload="init('<%=c_page%>', '<%=user.username%>')">
-    </header>
-        <header class="header">
-        <div class="nav">
-            <section class="wrapper">
-            <h1><a href="/" class="nav-icon">F<sub>o</sub>F<sub>22</sub><i class='fab fa-connectdevelop'></i></a></h1>
-                <button type="button" class="opened-menu">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-                <div class="overlay"></div>
-                <nav class="navbar">
-                    <button type="button" class="closed-menu">
-                        <img src="/plugins/navbar/closed.svg" class="closed-icon" alt="closed">
-                    </button>
-                    <ul class="menu">
-                        <li class="menu-item"><a onclick="router('home'); toggleMenu();">Home</a></li>
-                        <li class="menu-item"><a onclick="router('profile'); toggleMenu();">Profile</a></li>
-                        <li class="menu-item"><a onclick="router('messages'); toggleMenu();">Messages</a></li>
-                        <li class="menu-item"><a onclick="router('search'); toggleMenu();">Search</a></li>
-                        <li class="menu-item"><a onclick="router('menu'); toggleMenu();">Menu</a></li>
-                    </ul>
-                </nav>
-            </section>
-        </div>
-    </header>
+    <nav id="menu">
+        <ul>
+            <li class="Selected"><a href="/">Home</a></li>
+            <li><a href="/about/">About us</a>
+                <ul>
+                    <li><a href="/about/history/">History</a></li>
+                    <li><a href="/about/team/">The team</a></li>
+                    <li><a href="/about/address/">Our address</a></li>
+                </ul>
+            </li>
+            <li><a href="/contact/">Contact</a></li>
+        </ul>
+    </nav>
     <div class="cover"></div>
     <div class="loader loader__home"></div>
-    <main class="main"></main>
+    <main class="main" id="page"></main>
+    
     <script src="/plugins/navbar/script.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery.mmenu/9.0.1/mmenu.min.js" integrity="sha512-26/2NywsM009+CSghWJmlsK0YGJIMHRckuObF+PSMW+PYoNyvt5LNJjBmqOiAo8ycv9OuBenQ5OM4STfPqRfVg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="/dist/js/index.js"></script>
     <script src="/dist/js/chat.js"></script>
+    <script>
+        document.addEventListener(
+            "DOMContentLoaded", () => {
+                const menu = new Mmenu( "#menu", {
+                    // options
+                }, {
+                    // configuration
+                    classNames: {
+                        selected: "active"
+                    }
+                });
+                const api = menu.API;
+                api.open();
+            }
+        );
+    </script>
 </body>
 </html>
