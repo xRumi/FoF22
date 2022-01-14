@@ -8,15 +8,15 @@ function init (route_str, username) {
 
 function pre_render (url, title) {
     history.pushState({}, title, url);
+    if (!$(`.${current_page}`).hasClass('active-link')) {
+        $(".active-link").removeClass('active-link');
+        $(`.${current_page}`).addClass('active-link');
+    }
     $('.loader__center').fadeIn(100);
     document.title = title;
 }
 
 function after_render (title) {
-    if (!$(`.${current_page}`).hasClass('active-link')) {
-        $(".active-link").removeClass('active-link');
-        $(`.${current_page}`).addClass('active-link');
-    }
     $('.nav__menu').css('transform', 'unset');
     $('.loader__center').fadeOut(100);
     document.title = title;
