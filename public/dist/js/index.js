@@ -8,12 +8,12 @@ function init (route_str, username) {
 
 function pre_render (url, title) {
     history.pushState({}, title, url);
-    $('.loader__home').fadeIn(100);
+    $('.loader__center').fadeIn(100);
     document.title = title;
 }
 
 function after_render (title) {
-    $('.loader__home').fadeOut(100);
+    $('.loader__center').fadeOut(100);
     document.title = title;
 }
 
@@ -171,14 +171,14 @@ function go_back() {
 
 function join_room (room_id) {
     $('.main').html(`<div class="message__main"></div>`);
-    $('.loader__home').fadeIn(100);
+    $('.loader__center').fadeIn(100);
     socket.emit('join_room', room_id);
 }
 
 socket.on('messages', ({ messages, room_id }) => {
     if (current_page == 'messages') {
         window.history.pushState('messages', '', '/messages');
-        $('.loader__home').fadeOut(100);
+        $('.loader__center').fadeOut(100);
         hide_nav(true);
         $('.nav__title').html('<i class="bx bx-arrow-back nav__back" onclick="go_back()"></i>');
         chat__id = room_id;
@@ -230,7 +230,7 @@ function load_page(page, init) {
     $('.nav__title').html('<span onclick="hide_nav()">F<sub>o</sub>F<sub>22</sub></span>');
     current_page = page ? page : 'home';
     if (!init) $('.main').html('');
-    $('.loader__home').fadeIn();
+    $('.loader__center').fadeIn();
     document.title = 'loading ...' ;
     window.history.pushState({ current_page }, '', page ? `/${page}` : '/');
     $(".active-link").removeClass('active-link');
@@ -248,7 +248,7 @@ function load_page(page, init) {
                     $(".active-link").removeClass('active-link');
                     $(`.${current_page}`).addClass('active-link');
                 }
-                $('.loader__home').fadeOut(100);
+                $('.loader__center').fadeOut(100);
                 document.title = current_page;
                 if (xhr.status == 200) format(current_page, result);
                 else window.location.reload();

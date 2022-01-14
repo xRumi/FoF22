@@ -17,7 +17,7 @@
     animation: spinner 1s ease infinite;
 }
 
-.loader__home {
+.loader__center {
     position: absolute;
     border-width: 4px;
     width: 100px;
