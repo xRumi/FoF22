@@ -3,7 +3,7 @@ const router = require('express').Router(),
     profile = require('./profile'),
     messages = require('./messages'),
     search = require('./search'),
-    menu = require('./menu');
+    settings = require('./settings');
 
 router.get('/', async (req, res) => {
     if (req.user) res.render("index", { user: req.user, c_page: 'home' });
@@ -46,7 +46,7 @@ router.use('/auth', auth);
 router.use('/profile', profile);
 router.use('/messages', messages);
 router.use('/search', search);
-router.use('/menu', menu);
+router.use('/settings', settings);
 
 router.get('/login', async (req, res) => {
     if (!req.user) res.render("login");

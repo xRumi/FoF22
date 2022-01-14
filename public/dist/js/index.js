@@ -103,15 +103,15 @@ const routes = {
             });
         }
     },
-    menu: {
-        name: 'menu',
+    settings: {
+        name: 'settings',
         cache: null,
         render: () => {
-            pre_render('/menu', 'menu');
-            ajax('menu', '/menu/fetch').then(x => {
-                if (current_page == 'menu') {
+            pre_render('/settings', 'settings');
+            ajax('settings', '/settings/fetch').then(x => {
+                if (current_page == 'settings') {
                     if (x.xhr.status == 200) {
-                        after_render('menu');
+                        after_render('settings');
                         $('.main').html(x.data);
                     }
                 }

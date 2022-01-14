@@ -7,7 +7,7 @@ router.get('/', async (req, res) => {
 
 router.get('/fetch', async (req, res) => {
     if (req.user) {
-        res.status(200).send(`this is menu page`);
+        res.status(200).send(`this is settings page`);
     } else res.status(403).send('forbidden');
 });
 
