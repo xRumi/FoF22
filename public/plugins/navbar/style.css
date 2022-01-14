@@ -107,8 +107,8 @@ img {
       padding: 0.3rem;
   }
   .nav__menu {
-    position: fixed;
-    /*bottom: 0;*/
+    position: absolute;
+    bottom: 0;
     left: 0;
     background-color: var(--container-color);
     box-shadow: 0 -1px 12px hsla(var(--hue), var(--sat), 15%, 0.15);
@@ -116,9 +116,9 @@ img {
     height: 3.9rem;
     display: grid;
     align-content: center;
-    /*border-radius: 1.25rem 1.25rem 0 0;*/
+    border-radius: 1.25rem 1.25rem 0 0;
     transition: 0.4s;
-    /*transform: translateY(90%);*/
+    transform: translateY(90%);
   }
 }
 
@@ -173,7 +173,7 @@ img {
     padding: 7rem 0 2rem;
   }
   .nav {
-    /*height: calc(var(--header-height) + 1.5rem);  4.5rem */
+    height: calc(var(--header-height) + 1.5rem); /* 4.5rem */
   }
   .nav__img {
     display: none;
