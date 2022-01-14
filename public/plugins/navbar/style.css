@@ -150,6 +150,7 @@ img {
   position: relative;
   color: var(--first-color);
   transition: .3s;
+  border: solid 1px lightskyblue;
 }
 
 @media screen and (max-width: 320px) {
