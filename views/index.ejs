@@ -3,41 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/plugins/navbar/style.css">
     <link rel="stylesheet" href="/dist/css/index.css">
     <title><%=c_page%></title>
 </head>
 <body onload="init('<%=c_page%>', '<%=user.username%>')">
     <header class="header" id="header">
         <nav class="nav container">
-            <a class="nav__title"><span onclick="hide_nav()">F<sub>o</sub>F<sub>22</sub></span></a>
+            <a class="nav__title"><span onclick="hide_nav();">F<sub>o</sub>F<sub>22</sub></span></a>
             <div class="nav__menu" id="nav-menu">
                 <ul class="nav__list">
                     <li class="nav__item">
-                        <a onclick="load_page()" class="home nav__link<%=c_page == 'home' ? ' active-link': ''%>">
+                        <a onclick="router('home);" class="home nav__link<%=c_page == 'home' ? ' active-link': ''%>">
                             <i class='bx bx-home-alt nav__icon'></i>
                             <span class="nav__name">Home</span>
                         </a>
                     </li>
                     <li class="nav__item">
-                        <a onclick="load_page('profile')" class="profile nav__link<%=c_page == 'profile' ? ' active-link': ''%>">
+                        <a onclick="router('profile');" class="profile nav__link<%=c_page == 'profile' ? ' active-link': ''%>">
                             <i class='bx bx-user nav__icon'></i>
                             <span class="nav__name">Profile</span>
                         </a>
                     </li>
                     <li class="nav__item">
-                        <a onclick="load_page('messages')" class="messages nav__link<%=c_page == 'messages' ? ' active-link': ''%>">
+                        <a onclick="router('messages');" class="messages nav__link<%=c_page == 'messages' ? ' active-link': ''%>">
                             <i class='bx bx-message nav__icon'></i>
                             <span class="nav__name">Messages</span>
                         </a>
                     </li>
                     <li class="nav__item">
-                        <a onclick="load_page('search')" class="search nav__link<%=c_page == 'search' ? ' active-link': ''%>">
+                        <a onclick="router('search');" class="search nav__link<%=c_page == 'search' ? ' active-link': ''%>">
                             <i class='bx bx-search-alt-2 nav__icon'></i>
                             <span class="nav__name">Search</span>
                         </a>
                     </li>
                     <li class="nav__item">
-                        <a onclick="load_page('menu')" class="menu nav__link<%=c_page == 'menu' ? ' active-link': ''%>">
+                        <a onclick="router('menu');" class="menu nav__link<%=c_page == 'menu' ? ' active-link': ''%>">
                             <i class='bx bx-menu nav__icon'></i>
                             <span class="nav__name">Menu</span>
                         </a>
@@ -52,6 +53,7 @@
     <main class="main"></main>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="/plugins/navbar/script.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/dist/js/index.js"></script>
     <script src="/dist/js/chat.js"></script>
