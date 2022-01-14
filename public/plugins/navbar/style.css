@@ -149,8 +149,7 @@ img {
 .active-link {
   position: relative;
   color: var(--first-color);
-  transition: .3s;
-  border: solid 1px lightskyblue;
+  transition: 0.3s;
 }
 
 @media screen and (max-width: 320px) {
