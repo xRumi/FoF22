@@ -13,6 +13,7 @@ function pre_render (url, title) {
 }
 
 function after_render (title) {
+    $('.nav__menu').css('transform', 'unset');
     $('.loader__center').fadeOut(100);
     document.title = title;
 }
