@@ -53,6 +53,7 @@ body {
 
 @media screen and (max-width: 767px) {
     .nav {
+        transition: 0.4s;
         transform: translateY(-90%);
     }
     .nav__logo {
