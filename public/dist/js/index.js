@@ -17,7 +17,7 @@ function pre_render (url, title, nav = false) {
 }
 
 function after_render (title) {
-    $('.nav__menu').css('transform', 'unset');
+    $('.nav').css('transform', 'unset');
     $('.loader__center').fadeOut(100);
     document.title = title;
 }
