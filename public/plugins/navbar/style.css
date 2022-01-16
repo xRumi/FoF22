@@ -50,11 +50,6 @@ body {
     justify-items: center;
 }
 
-
-.nav__link:hover {
-    background-color: #eeeeee;
-}
-
 @media screen and (max-width: 767px) {
     .nav__logo {
         display: none;
@@ -87,6 +82,10 @@ body {
 
 .nav__active {
     color: #009578;
+}
+
+.nav__link:hover {
+    background-color: #eeeeee;
 }
 
 .main {
