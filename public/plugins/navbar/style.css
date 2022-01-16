@@ -55,10 +55,6 @@ body {
     background-color: #eeeeee;
 }
 
-.nav__active {
-    color: #009578;
-}
-
 @media screen and (max-width: 767px) {
     .nav__logo {
         display: none;
@@ -87,4 +83,12 @@ body {
     .nav__text {
         display: none;
     }
+}
+
+.nav__active {
+    color: #009578;
+}
+
+.main {
+    margin-top: 50px;
 }
