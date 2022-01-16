@@ -6,11 +6,11 @@ function init (route_str, username) {
     router(route_str);
 }
 
-function pre_render (url, title) {
+function pre_render (url, title, nav = false) {
     history.pushState({}, title, url);
-    if (!$(`.${current_page}`).hasClass('active-link')) {
-        $(".active-link").removeClass('active-link');
-        $(`.${current_page}`).addClass('active-link');
+    if (nav && !$(`._${current_page}`).hasClass('nav__active')) {
+        $(".nav__active").removeClass('nav__active');
+        $(`._${current_page}`).addClass('nav__active');
     }
     $('.loader__center').fadeIn(100);
     document.title = title;
@@ -27,7 +27,7 @@ const routes = {
         name: 'home',
         cache: null,
         render: () => {
-            pre_render('/', 'home');
+            pre_render('/', 'home', true);
             ajax('home', '/fetch').then(x => {
                 if (current_page == 'home') {
                     if (x.xhr.status == 200) {
@@ -44,7 +44,7 @@ const routes = {
         name: 'profile',
         cache: null,
         render: () => {
-            pre_render('/profile', 'profile');
+            pre_render('/profile', 'profile', true);
             ajax('profile', '/profile/fetch').then(x => {
                 if (current_page == 'profile') {
                     if (x.xhr.status == 200) {
@@ -61,7 +61,7 @@ const routes = {
         name: 'messages',
         cache: null,
         render: () => {
-            pre_render('/messages', 'messages');
+            pre_render('/messages', 'messages', true);
             ajax('messages', '/messages/fetch').then(x => {
                 if (current_page == 'messages') {
                     if (x.xhr.status == 200) {
@@ -90,7 +90,7 @@ const routes = {
         name: 'search',
         cache: null,
         render: () => {
-            pre_render('/search', 'search');
+            pre_render('/search', 'search', true);
             ajax('search', '/search/fetch').then(x => {
                 if (current_page == 'search') {
                     if (x.xhr.status == 200) {
@@ -107,7 +107,7 @@ const routes = {
         name: 'settings',
         cache: null,
         render: () => {
-            pre_render('/settings', 'settings');
+            pre_render('/settings', 'settings', true);
             ajax('settings', '/settings/fetch').then(x => {
                 if (current_page == 'settings') {
                     if (x.xhr.status == 200) {

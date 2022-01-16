@@ -3,50 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="/plugins/navbar/style.css">
     <link rel="stylesheet" href="/dist/css/index.css">
     <title><%=c_page%></title>
 </head>
 <body onload="init('<%=c_page%>', '<%=user.username%>')">
     <header class="header" id="header">
-        <nav class="nav container">
-            <a class="nav__title"><span onclick="hide_nav();">F<sub>o</sub>F<sub>22</sub></span></a>
-            <div class="nav__menu" id="nav-menu">
-                <ul class="nav__list">
-                    <li class="nav__item">
-                        <a onclick="router('home');" class="home nav__link<%=c_page == 'home' ? ' active-link': ''%>">
-                            <i class='bx bx-home-alt nav__icon'></i>
-                            <span class="nav__name">Home</span>
-                        </a>
-                    </li>
-                    <li class="nav__item">
-                        <a onclick="router('profile');" class="profile nav__link<%=c_page == 'profile' ? ' active-link': ''%>">
-                            <i class='bx bx-user nav__icon'></i>
-                            <span class="nav__name">Profile</span>
-                        </a>
-                    </li>
-                    <li class="nav__item">
-                        <a onclick="router('messages');" class="messages nav__link<%=c_page == 'messages' ? ' active-link': ''%>">
-                            <i class='bx bx-message nav__icon'></i>
-                            <span class="nav__name">Messages</span>
-                        </a>
-                    </li>
-                    <li class="nav__item">
-                        <a onclick="router('search');" class="search nav__link<%=c_page == 'search' ? ' active-link': ''%>">
-                            <i class='bx bx-search-alt-2 nav__icon'></i>
-                            <span class="nav__name">Search</span>
-                        </a>
-                    </li>
-                    <li class="nav__item">
-                        <a onclick="router('settings');" class="settings nav__link<%=c_page == 'settings' ? ' active-link': ''%>">
-                            <i class='bx bx-menu nav__icon'></i>
-                            <span class="nav__name">Settings</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            <!-- <img src="/dist/img/profile/<%=user.username%>.png" alt="" class="nav__img"> -->
+        <nav class="nav">
+            <span class="nav__logo">
+                <h3>F<sub>o</sub>F<sub>22</sub></h3>
+            </span>
+            <a onclick="router('home');" class="_home nav__link<%=c_page == 'home' ? ' nav__active': ''%>">
+                <i class="material-icons nav__icon">home</i>
+                <span class="nav__text">Home</span>
+            </a>
+            <a onclick="router('profile');" class="_profile nav__link<%=c_page == 'profile' ? ' nav__active': ''%>">
+                <i class="material-icons nav__icon">person</i>
+                <span class="nav__text">Profile</span>
+            </a>
+            <a onclick="router('messages');" class="_messages nav__link<%=c_page == 'messages' ? ' nav__active': ''%>">
+                <i class="material-icons nav__icon">message</i>
+                <span class="nav__text">Messages</span>
+            </a>
+            <a onclick="router('search');" class="_search nav__link<%=c_page == 'search' ? ' nav__active': ''%>">
+                <i class="material-icons nav__icon">search</i>
+                <span class="nav__text">Search</span>
+            </a>
+            <a onclick="router('settings');" class="_settings nav__link<%=c_page == 'settings' ? ' nav__active': ''%>">
+                <i class="material-icons nav__icon">settings</i>
+                <span class="nav__text">Settings</span>
+            </a>
         </nav>
     </header>
     <div class="cover"></div>
