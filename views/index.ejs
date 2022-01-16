@@ -14,26 +14,26 @@
             <span class="nav__logo">
                 <h3>F<sub>o</sub>F<sub>22</sub></h3>
             </span>
-            <a href="#" onclick="router('home'); event.preventDefault();" class="_home nav__link<%=c_page == 'home' ? ' nav__active': ''%>">
+            <span onclick="router('home');" class="_home nav__link<%=c_page == 'home' ? ' nav__active': ''%>">
                 <i class="material-icons nav__icon">home</i>
                 <span class="nav__text">Home</span>
-            </a>
-            <a href="#" onclick="router('profile'); event.preventDefault();" class="_profile nav__link<%=c_page == 'profile' ? ' nav__active': ''%>">
+            </span>
+            <span onclick="router('profile');" class="_profile nav__link<%=c_page == 'profile' ? ' nav__active': ''%>">
                 <i class="material-icons nav__icon">person</i>
                 <span class="nav__text">Profile</span>
-            </a>
-            <a href="#" onclick="router('messages'); event.preventDefault();" class="_messages nav__link<%=c_page == 'messages' ? ' nav__active': ''%>">
+            </span>
+            <span onclick="router('messages');" class="_messages nav__link<%=c_page == 'messages' ? ' nav__active': ''%>">
                 <i class="material-icons nav__icon">message</i>
                 <span class="nav__text">Messages</span>
-            </a>
-            <a href="#" onclick="router('search'); event.preventDefault();" class="_search nav__link<%=c_page == 'search' ? ' nav__active': ''%>">
+            </span>
+            <span onclick="router('search');" class="_search nav__link<%=c_page == 'search' ? ' nav__active': ''%>">
                 <i class="material-icons nav__icon">search</i>
                 <span class="nav__text">Search</span>
-            </a>
-            <a href="#" onclick="router('settings'); event.preventDefault();" class="_settings nav__link<%=c_page == 'settings' ? ' nav__active': ''%>">
+            </span>
+            <span onclick="router('settings');" class="_settings nav__link<%=c_page == 'settings' ? ' nav__active': ''%>">
                 <i class="material-icons nav__icon">settings</i>
                 <span class="nav__text">Settings</span>
-            </a>
+            </span>
         </nav>
     </header>
     <div class="cover"></div>
