@@ -13,11 +13,11 @@ socket.on('redirect', url => {
 
 socket.on('messages', ({ messages, room_id, title }) => {
     if (current_page == 'messages' && chat_page) {
-        window.history.pushState({}, '', `/messages/${id}`);
+        window.history.pushState({}, '', `/messages/${room_id}`);
         document.title = title;
         $('.loader__center').fadeOut(100);
         chat_id = room_id;
-        let html = ['<div class="chat__msgs">'];
+        let html = ['<div cla,ss="chat__msgs">'];
         messages.forEach(x => {
 	        html.push(`<div class="chat__wrapper">
 	            <div class="chat__container ${current_user == x.user ? 'chat__own' : 'chat__other'}">

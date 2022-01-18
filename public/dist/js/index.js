@@ -124,7 +124,7 @@ const routes = {
 
 function ajax (page, url, retry = false, type = 'GET') {
     return new Promise((resolve, reject) => {
-        let ajax_ =$.ajax({
+        let ajax_ = $.ajax({
             type,
             url,
             timeout: 30000,
@@ -139,6 +139,7 @@ function ajax (page, url, retry = false, type = 'GET') {
                     if (retry && current_page == page) {
                         retry_function = setTimeout(function() {
                             if (current_page == page) ajax_();
+                            console.log('retrying');
                         }, 5000);
                     } else reject({ });
                 }
