@@ -68,7 +68,7 @@ const routes = {
                         after_render('messages');
                         let html = [];
                         x.data.forEach(y => {
-                            html.push(`<div class="messages__item" onclick="join_room('${x.id}')">
+                            html.push(`<div class="messages__item" onclick="join_room('${y.id}')">
                                 <div class="messages__image">
                                     <img src="${y.image}">
                                 </div>
