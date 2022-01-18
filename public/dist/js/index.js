@@ -28,7 +28,7 @@ const routes = {
         cache: null,
         render: () => {
             pre_render('/', 'home', true);
-            ajax('home', '/fetch').then(x => {
+            ajax('home', '/fetch', true).then(x => {
                 if (current_page == 'home') {
                     if (x.xhr.status == 200) {
                         after_render('home');
@@ -45,7 +45,7 @@ const routes = {
         cache: null,
         render: () => {
             pre_render('/profile', 'profile', true);
-            ajax('profile', '/profile/fetch').then(x => {
+            ajax('profile', '/profile/fetch', true).then(x => {
                 if (current_page == 'profile') {
                     if (x.xhr.status == 200) {
                         after_render('profile');
@@ -62,7 +62,7 @@ const routes = {
         cache: null,
         render: () => {
             pre_render('/messages', 'messages', true);
-            ajax('messages', '/messages/fetch').then(x => {
+            ajax('messages', '/messages/fetch', true).then(x => {
                 if (current_page == 'messages') {
                     if (x.xhr.status == 200) {
                         after_render('messages');
@@ -91,7 +91,7 @@ const routes = {
         cache: null,
         render: () => {
             pre_render('/search', 'search', true);
-            ajax('search', '/search/fetch').then(x => {
+            ajax('search', '/search/fetch', true).then(x => {
                 if (current_page == 'search') {
                     if (x.xhr.status == 200) {
                         after_render('search');
@@ -108,7 +108,7 @@ const routes = {
         cache: null,
         render: () => {
             pre_render('/settings', 'settings', true);
-            ajax('settings', '/settings/fetch').then(x => {
+            ajax('settings', '/settings/fetch', true).then(x => {
                 if (current_page == 'settings') {
                     if (x.xhr.status == 200) {
                         after_render('settings');
