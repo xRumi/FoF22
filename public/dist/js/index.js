@@ -123,7 +123,7 @@ const routes = {
 }
 
 function ajax (page, url, retry = false, type = 'GET') {
-    return new Promise((resolve, reject) => { ajax_();
+    return new Promise((resolve, reject) => {
         let ajax_ = () => {
             $.ajax({
                 type,
@@ -146,6 +146,7 @@ function ajax (page, url, retry = false, type = 'GET') {
                 }
             });
         }
+        ajax_();
     });
 }
 
