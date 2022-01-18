@@ -28,12 +28,8 @@ body {
 }
 
 .nav__logo {
-    float: left;
-    position: relative;
-    margin: 10px 15px 15px 10px;
-}
-
-.nav__logo h3 {
+    position: absolute;
+    left: 30px;
     color: lightgray;
 }
 
