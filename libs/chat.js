@@ -6,8 +6,13 @@ module.exports.sockets = function(io, client) {
             if (!room_id) return;
             console.log('1');
             let user, _user = socket.request.session?.passport?.user;
+            console.log('1.1')
             if (_user) user = await client.database.functions.get_user(_user);
+            console.log('1.2');
             if (!user) return socket.emit('redirect', '/login?ref=messages');
+            console.log('1.3');
+            console.log(room_id);
+            console.log(user);
             if (user.rooms.includes(room_id)) {
                 console.log('2');
                 const room = await client.database.functions.get_room(room_id);
