@@ -87,10 +87,6 @@ body {
     color: #009578;
 }
 
-.nav__link:hover {
-    color: lightskyblue;
-}
-
 .main {
     margin-top: 60px;
     margin-left: 10px;
