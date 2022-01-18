@@ -123,30 +123,29 @@ const routes = {
 }
 
 function ajax (page, url, retry = false, type = 'GET') {
-    return new Promise((resolve, reject) => {
-        let ajax_ = $.ajax({
-            type,
-            url,
-            timeout: 30000,
-            success: function (data, textStatus, xhr) {
-                resolve({ data, textStatus, xhr });
-            },
-            error: function (xhr, textStatus, errorThrown) {
-                if (xhr.status == 403) {
-                    window.location.replace(`/login?ref=${page}`);
-                    reject({ });
-                } else {
-                    console.log('retry?')
-                    if (retry && current_page == page) {
-                        console.log('yes retry');
-                        retry_function = setTimeout(function() {
-                            if (current_page == page) ajax_();
-                            console.log('retrying');
-                        }, 5000);
-                    } else reject({ });
+    return new Promise((resolve, reject) => { ajax_();
+        let ajax_ = () => {
+            $.ajax({
+                type,
+                url,
+                timeout: 30000,
+                success: function (data, textStatus, xhr) {
+                    resolve({ data, textStatus, xhr });
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    if (xhr.status == 403) {
+                        window.location.replace(`/login?ref=${page}`);
+                        reject({ });
+                    } else {
+                        if (retry && current_page == page) {
+                            retry_function = setTimeout(function() {
+                                if (current_page == page) ajax_();
+                            }, 5000);
+                        } else reject({ });
+                    }
                 }
-            }
-        })
+            });
+        }
     });
 }
 
