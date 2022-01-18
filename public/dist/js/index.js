@@ -136,7 +136,9 @@ function ajax (page, url, retry = false, type = 'GET') {
                     window.location.replace(`/login?ref=${page}`);
                     reject({ });
                 } else {
+                    console.log('retry?')
                     if (retry && current_page == page) {
+                        console.log('yes retry');
                         retry_function = setTimeout(function() {
                             if (current_page == page) ajax_();
                             console.log('retrying');
