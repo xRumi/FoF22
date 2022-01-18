@@ -1,10 +1,10 @@
 var socket = io(), chat_page, chat_id, chat_form;
 
-function join_room (id) {
+function join_room (room_id) {
     $('.main').html(`<div class="message__main"></div>`);
     $('.loader__center').fadeIn(100);
     chat_page = true;
-    socket.emit('join_room', id);
+    socket.emit('join_room', room_id);
 }
 
 socket.on('redirect', url => {
