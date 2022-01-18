@@ -2,6 +2,7 @@ module.exports.sockets = function(io, client) {
     io.on("connection", (socket) => {
         console.log("socketio chat connected.");
         socket.on("join_room", async (room_id) => {
+            console.log('0');
             if (room_id) return;
             console.log('1');
             let user, _user = socket.request.session?.passport?.user;
