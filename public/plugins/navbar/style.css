@@ -30,6 +30,7 @@ body {
 .nav__logo {
     position: absolute;
     left: 30px;
+    top: 15px;
     color: lightgray;
 }
 
