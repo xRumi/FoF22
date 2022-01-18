@@ -88,7 +88,7 @@ body {
 }
 
 .nav__link:hover {
-    background-color: #eeeeee;
+    color: lightskyblue;
 }
 
 .main {
