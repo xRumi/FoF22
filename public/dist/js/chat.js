@@ -1,7 +1,7 @@
 var socket = io(), chat_page, chat_id, chat_form;
 
 function join_room (id) {
-    $('.main').html(`<div class="message__main">chat</div>`);
+    $('.main').html(`<div class="message__main"></div>`);
     $('.loader__center').fadeIn(100);
     chat_page = true;
     socket.emit('join_room', id);
