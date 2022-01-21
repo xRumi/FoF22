@@ -15,6 +15,10 @@ body {
     margin: 0 0 55px 0;
 }
 
+.header {
+    margin-bottom: 58px;
+}
+
 .nav {
     position: fixed;
     top: 0;
@@ -89,6 +93,5 @@ body {
 }
 
 .main {
-    margin-top: 60px;
     margin-left: 10px;
 }
