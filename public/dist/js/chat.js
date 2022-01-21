@@ -2,7 +2,7 @@ var socket = io(), chat_page, chat_id, chat_form;
 
 function join_room (room_id, name) {
     $('.header').fadeOut();
-    $('.main').html(`<div class="msg__main">
+    $('.main').html(`<div class="msg__main ${room_id}">
         <div class="msg__head">
             <div class="msg__head__back">
                 <i class="bx bx-arrow-back"></i>
@@ -16,7 +16,8 @@ function join_room (room_id, name) {
         </div>
     </div>`);
     $('.loader__center').fadeIn(100);
-    chat_page = true;
+    window.history.pushState({}, '', `/messages/${room_id}`);
+    document.title = name;
     socket.emit('join_room', room_id);
 }
 
@@ -25,9 +26,7 @@ socket.on('redirect', url => {
 });
 
 socket.on('messages', ({ messages, room_id, title }) => {
-    if (current_page == 'messages' && chat_page) {
-        window.history.pushState({}, '', `/messages/${room_id}`);
-        document.title = title;
+    if (current_page == 'messages') {
         $('.msgs__head__txt').text(title);
         $('.loader__center').fadeOut(100);
         chat_id = room_id;
@@ -48,7 +47,7 @@ socket.on('messages', ({ messages, room_id, title }) => {
                     <input type="text" id="chat__input" placeholder="enter your message">
                 </form>
             </div>`);
-        $('.msg__main').append(html.join(''));
+        $(`.${room_id}`).append(html.join(''));
         chat_form = $('.chat__form').submit(function(e) {
             e.preventDefault();
             let message = $('#chat__input').val();

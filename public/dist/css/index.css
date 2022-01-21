@@ -169,6 +169,7 @@ span.chat__own, span.chat__other {
 }
 
 .msg__head {
+    position: fixed;
     padding: 15px;
     box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
 }
