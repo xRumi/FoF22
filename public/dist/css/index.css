@@ -186,9 +186,10 @@ span.chat__own, span.chat__other {
 .msg__head__txt p {
     color: lightgray;
     display: inline-block;
+    margin-left: 2px;
 }
 
 .msg__head__txt span {
-    color: orange;
+    color: lightskyblue;
 }
 /* end */
