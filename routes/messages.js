@@ -33,7 +33,7 @@ router.get('/private/:room_id', async (req, res) => {
     if (req.user) {
         let room_id = req.params.room_id;
         if (req.user.rooms.includes(room_id)) {
-            let room = await req.client.database.functions.get(room_id);
+            let room = await req.client.database.functions.get_room(room_id);
             let name, _name = room.name.split('.');
             if (_name[0] == req.user.username) name = _name[1];
             else name = _name[0];
