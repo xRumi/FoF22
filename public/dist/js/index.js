@@ -6,11 +6,11 @@ function init (route_str, username, args) {
     router(route_str, args);
 }
 
-function pre_render (url, title, nav = false) {
+function pre_render (url, title, page, nav = false) {
     history.pushState({}, title, url);
-    if (nav && !$(`._${current_page}`).hasClass('nav__active')) {
+    if (nav && !$(`._${page}`).hasClass('nav__active')) {
         $(".nav__active").removeClass('nav__active');
-        $(`._${current_page}`).addClass('nav__active');
+        $(`._${page}`).addClass('nav__active');
     }
     $('.loader__center').fadeIn(100);
     document.title = title;
@@ -28,7 +28,7 @@ const routes = {
         name: 'home',
         cache: null,
         render: () => {
-            pre_render('/', 'home', true);
+            pre_render('/', 'home', 'home', true);
             ajax('home', '/fetch', true).then(x => {
                 if (current_page == 'home') {
                     if (x.xhr.status == 200) {
@@ -45,7 +45,7 @@ const routes = {
         name: 'profile',
         cache: null,
         render: () => {
-            pre_render('/profile', 'profile', true);
+            pre_render('/profile', 'profile', 'profile', true);
             ajax('profile', '/profile/fetch', true).then(x => {
                 if (current_page == 'profile') {
                     if (x.xhr.status == 200) {
@@ -62,7 +62,7 @@ const routes = {
         name: 'messages',
         cache: null,
         render: () => {
-            pre_render('/messages', 'messages', true);
+            pre_render('/messages', 'messages', 'messages', true);
             ajax('messages', '/messages/fetch', true).then(x => {
                 if (current_page == 'messages') {
                     if (x.xhr.status == 200) {
@@ -90,7 +90,7 @@ const routes = {
             name: 'private',
             render: (args) => {
                 $('.nav').css('transform', 'unset');
-                pre_render(`/messages/private/${args.room_id}`, 'messages', true);
+                pre_render(`/messages/private/${args.room_id}`, args.name, 'messages', true);
                 $('.main').html(`<div class="msg__main ${args.room_id}">
                     <div class="msg__head">
                         <div class="msg__head__opt">
@@ -111,7 +111,7 @@ const routes = {
         name: 'search',
         cache: null,
         render: () => {
-            pre_render('/search', 'search', true);
+            pre_render('/search', 'search', 'search', true);
             ajax('search', '/search/fetch', true).then(x => {
                 if (current_page == 'search') {
                     if (x.xhr.status == 200) {
@@ -128,7 +128,7 @@ const routes = {
         name: 'settings',
         cache: null,
         render: () => {
-            pre_render('/settings', 'settings', true);
+            pre_render('/settings', 'settings', 'settings', true);
             ajax('settings', '/settings/fetch', true).then(x => {
                 if (current_page == 'settings') {
                     if (x.xhr.status == 200) {
