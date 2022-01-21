@@ -169,8 +169,8 @@ span.chat__own, span.chat__other {
 }
 
 .msg__head {
-    padding: 15px;
-    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+    padding: 10px;
+    border-bottom: solid 0.1px;
 }
 
 .msg__head__opt {
@@ -179,11 +179,13 @@ span.chat__own, span.chat__other {
 
 .msg__head__txt p {
     color: lightgray;
-    font-size: 15px;
+    font-size: 25px;
+    margin-top: 5px;
     display: inline-block;
 }
 
 .msg__head__txt span {
+    font-size: 20px;
     color: lightskyblue;
 }
 /* end */
