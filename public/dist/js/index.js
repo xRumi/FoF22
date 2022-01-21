@@ -68,7 +68,7 @@ const routes = {
                         after_render('messages');
                         let html = [];
                         x.data.forEach(y => {
-                            html.push(`<div class="msgs__item" onclick="join_room('${y.id}', '${y.name}')">
+                            html.push(`<div class="msgs__item" onclick="router('messages.private', { room_id: '${y.id}', name: '${y.name}'})">
                                 <div class="msgs__image">
                                     <img src="${y.image}">
                                 </div>
@@ -84,6 +84,24 @@ const routes = {
             }).catch(() => {
             
             });
+        },
+        private: {
+            render: (args) => {
+                $('.main').html(`<div class="msg__main ${args.room_id}">
+                    <div class="msg__head">
+                        <div class="msg__head__opt">
+                            <i class="bx bx-dots-vertical"></i>
+                        </div>
+                        <div class="msg__head__txt">
+                            <h4>${args.name}</h4><span>●</span><p>online</p>
+                        </div>
+                    </div>
+                </div>`);
+                $('.loader__center').fadeIn(100);
+                window.history.pushState({}, '', `/messages/${args.room_id}`);
+                document.title = args.name;
+                socket.emit('join_room', args.room_id);
+            }
         }
     },
     search: {
@@ -150,11 +168,11 @@ function ajax (page, url, retry = false, type = 'GET') {
     });
 }
 
-function router (route_str) {
+function router (route_str, args) {
     const route = route_str.split('.').reduce((v, k) => (v || {})[k], routes);
     if (route) {
         if (route_histroy[route_histroy.length - 1] !== route_str) route_histroy.push(route_str);
         current_page = route.name;
-        route.render();
+        route.render(args);
     }
 }
