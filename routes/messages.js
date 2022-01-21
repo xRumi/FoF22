@@ -30,7 +30,7 @@ router.get('/fetch', async (req, res) => {
 });
 
 router.get('/private/:room_id', async (req, res) => {
-    if (res.user) {
+    if (req.user) {
         let room_id = req.params.room_id;
         if (req.user.rooms.includes(room_id)) {
             let room = await req.client.database.functions.get(room_id);
