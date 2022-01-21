@@ -175,17 +175,20 @@ span.chat__own, span.chat__other {
 
 .msg__head__opt {
     float: right;
+    font-size: 25px;
+    margin-top: 5px;
+}
+
+.msg__head__opt i {
+    color: lightgray;
 }
 
 .msg__head__txt p {
     color: lightgray;
-    font-size: 25px;
-    margin-top: 5px;
     display: inline-block;
 }
 
 .msg__head__txt span {
-    font-size: 20px;
-    color: lightskyblue;
+    color: orange;
 }
 /* end */
