@@ -3,7 +3,7 @@ socket.on('redirect', url => {
 });
 
 socket.on('messages', ({ messages, room_id, title }) => {
-    if (current_page == 'messages') {
+    if (current_page == 'private') {
         $('.msgs__head__txt').text(title);
         $('.loader__center').fadeOut(100);
         chat_id = room_id;

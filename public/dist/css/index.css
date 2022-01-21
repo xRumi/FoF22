@@ -184,7 +184,7 @@ span.chat__own, span.chat__other {
 }
 
 .msg__head__txt p {
-    font-size: 15px;
+    font-size: 13px;
     color: lightgray;
     display: inline-block;
     margin-left: 5px;
