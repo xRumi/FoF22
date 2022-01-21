@@ -1,9 +1,9 @@
 var current_page, current_user, route_histroy = [], retry_function;
 var socket = io(), chat_page, chat_id, chat_form;
 
-function init (route_str, username) {
+function init (route_str, username, args) {
     current_user = username;
-    router(route_str);
+    router(route_str, args);
 }
 
 function pre_render (url, title, nav = false) {
@@ -100,7 +100,7 @@ const routes = {
                     </div>
                 </div>`);
                 $('.loader__center').fadeIn(100);
-                window.history.pushState({}, '', `/messages/${args.room_id}`);
+                window.history.pushState({}, '', `/messages/private/${args.room_id}`);
                 document.title = args.name;
                 socket.emit('join_room', args.room_id);
             }
