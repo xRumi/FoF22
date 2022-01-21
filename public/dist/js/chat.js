@@ -2,14 +2,14 @@ var socket = io(), chat_page, chat_id, chat_form;
 
 function join_room (room_id) {
     $('.main').html(`<div class="msg__main">
-        <div class="msgs__head">
-            <div class="msgs__head__back">
+        <div class="msg__head">
+            <div class="msg__head__back">
                 <i class="bx bx-arrow-back"></i>
             </div>
-            <div class="msgs__head__opt">
+            <div class="msg__head__opt">
                 <i class="bx bx-dots-vertical></i>
             </div>
-            <div class="msgs__head__txt">
+            <div class="msg__head__txt">
                 <p>loading...</p><span>●</span>
             </div>
         </div>

@@ -168,28 +168,28 @@ span.chat__own, span.chat__other {
   cursor: pointer;
 }
 
-.msgs__head {
+.msg__head {
     padding: 15px;
     box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
 }
 
-.msgs__head__back {
+.msg__head__back {
     float: left;
 }
 
-.msgs__head__opt {
+.msg__head__opt {
     float: right;
 }
 
-.msgs__head__txt {
+.msg__head__txt {
     text-align: center;
 }
 
-.msgs__head__txt p {
+.msg__head__txt p {
     display: inline-block;
 }
 
-.msgs__head__txt span {
+.msg__head__txt span {
     color: lightgray;
 }
 /* end */
