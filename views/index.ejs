@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/plugins/navbar/style.css">
     <link rel="stylesheet" href="/dist/css/index.css">
+    <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
     <title><%=c_page%></title>
 </head>
 <body onload="init('<%=c_page%>', '<%=user.username%>')">
@@ -14,23 +15,23 @@
                 <h3>F<sub>o</sub>F<sub>22</sub></h3>
             </span>
             <a onclick="router('home');" class="_home nav__link<%=c_page == 'home' ? ' nav__active': ''%>">
-                <box-icon class="nav__icon" name="home"></box-icon>
+                <i class="bx bx-home nav__icon"></i>
                 <span class="nav__text">Home</span>
             </a>
             <a onclick="router('profile');" class="_profile nav__link<%=c_page == 'profile' ? ' nav__active': ''%>">
-                <box-icon class="nav__icon" name="user"></box-icon>
+                <i class="bx bx-user nav__icon"></i>
                 <span class="nav__text">Profile</span>
             </a>
             <a onclick="router('messages');" class="_messages nav__link<%=c_page == 'messages' ? ' nav__active': ''%>">
-                <box-icon class="nav__icon" name="message-dots,"></box-icon>
+                <i class="bx bx-message-dots nav__icon"></i>
                 <span class="nav__text">Messages</span>
             </a>
             <a onclick="router('search');" class="_search nav__link<%=c_page == 'search' ? ' nav__active': ''%>">
-                <box-icon class="nav__icon" name="search"></box-icon>
+                <i class="bx bx-search nav__icon"></i>
                 <span class="nav__text">Search</span>
             </a>
             <a onclick="router('settings');" class="_settings nav__link<%=c_page == 'settings' ? ' nav__active': ''%>">
-                <box-icon class="nav__icon" name="menu"></box-icon>
+                <i class="bx bx-menu nav__icon"></i>
                 <span class="nav__text">Settings</span>
             </a>
         </nav>

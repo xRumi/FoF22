@@ -4,10 +4,10 @@ function join_room (room_id) {
     $('.main').html(`<div class="msg__main">
         <div class="msgs__head">
             <div class="msgs__head__back">
-                <box-icon name="arrow-back"></box-icon>
+                <i class="bx bx-arrow-back"></i>
             </div>
             <div class="msgs__head__opt">
-                <box-icon name="dots-vertical"></box-icon>
+                <i class="bx bx-dots-vertical></i>
             </div>
             <div class="msgs__head__txt">
                 <p>loading...</p><span>●</span>

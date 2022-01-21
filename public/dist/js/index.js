@@ -10,8 +10,6 @@ function pre_render (url, title, nav = false) {
     if (nav && !$(`._${current_page}`).hasClass('nav__active')) {
         $(".nav__active").removeClass('nav__active');
         $(`._${current_page}`).addClass('nav__active');
-        $('box-icon').attr('color', '');
-        $(`._${current_page} > box-icon`).attr('color', '#009578');
     }
     $('.loader__center').fadeIn(100);
     document.title = title;
