@@ -18,7 +18,7 @@
     bottom: 0;
 }
 
-.loader__message {
+.loader__msg {
     border-width: 2px;
     border-top-color: rgb(208,135,170);
     width: 15px;
@@ -55,24 +55,24 @@
 }
 
 /* chat room */
-.messages__item {
+.msgs__item {
     border-bottom: solid 1px;
     height: 70px;
     padding-top: 10px;
 }
-.messages__image img {
+.msgs__image img {
     border-radius: 50%;
     width: 42px;
     height: 40px;
     float: left;
     margin: 10px;
 }
-.messages__title {
+.msgs__title {
     float: left;
     position: relative;
     top: 10px;
 }
-.messages__title p {
+.msgs__title p {
     display: inline-block;
     width: 200px;
     white-space: nowrap;
@@ -83,7 +83,7 @@
 }
 
 /* chat */
-.message__main {
+.msg__main {
     padding: 3px;
 }
 .chat__msgs {
@@ -166,5 +166,30 @@ span.chat__own, span.chat__other {
   background-color: #37C88D;
   color: #fff;
   cursor: pointer;
+}
+
+.msgs__head {
+    padding: 15px;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+}
+
+.msgs__head__back {
+    float: left;
+}
+
+.msgs__head__opt {
+    float: right;
+}
+
+.msgs__head__txt {
+    text-align: center;
+}
+
+.msgs__head__txt p {
+    display: inline-block;
+}
+
+.msgs__head__txt span {
+    color: lightgray;
 }
 /* end */

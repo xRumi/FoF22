@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="/plugins/navbar/style.css">
     <link rel="stylesheet" href="/dist/css/index.css">
     <title><%=c_page%></title>
@@ -15,23 +14,23 @@
                 <h3>F<sub>o</sub>F<sub>22</sub></h3>
             </span>
             <a onclick="router('home');" class="_home nav__link<%=c_page == 'home' ? ' nav__active': ''%>">
-                <i class="material-icons nav__icon">home</i>
+                <box-icon class="nav__icon" name="home"></box-icon>
                 <span class="nav__text">Home</span>
             </a>
             <a onclick="router('profile');" class="_profile nav__link<%=c_page == 'profile' ? ' nav__active': ''%>">
-                <i class="material-icons nav__icon">person</i>
+                <box-icon class="nav__icon" name="user"></box-icon>
                 <span class="nav__text">Profile</span>
             </a>
             <a onclick="router('messages');" class="_messages nav__link<%=c_page == 'messages' ? ' nav__active': ''%>">
-                <i class="material-icons nav__icon">message</i>
+                <box-icon class="nav__icon" name="messages"></box-icon>
                 <span class="nav__text">Messages</span>
             </a>
             <a onclick="router('search');" class="_search nav__link<%=c_page == 'search' ? ' nav__active': ''%>">
-                <i class="material-icons nav__icon">search</i>
+                <box-icon class="nav__icon" name="search"></box-icon>
                 <span class="nav__text">Search</span>
             </a>
             <a onclick="router('settings');" class="_settings nav__link<%=c_page == 'settings' ? ' nav__active': ''%>">
-                <i class="material-icons nav__icon">settings</i>
+                <box-icon class="nav__icon" name="menu"></box-icon>
                 <span class="nav__text">Settings</span>
             </a>
         </nav>
@@ -39,6 +38,7 @@
     <div class="cover"></div>
     <div class="loader loader__center"></div>
     <main class="main"></main>
+    <script src="https://unpkg.com/boxicons@2.1.1/dist/boxicons.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="/plugins/navbar/script.js"></script>
     <script src="/socket.io/socket.io.js"></script>
