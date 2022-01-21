@@ -89,6 +89,7 @@ const routes = {
         private: {
             name: 'private',
             render: (args) => {
+                $('.nav').css('transform', 'unset');
                 $('.main').html(`<div class="msg__main ${args.room_id}">
                     <div class="msg__head">
                         <div class="msg__head__opt">
