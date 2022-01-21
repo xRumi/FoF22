@@ -16,11 +16,10 @@ body {
 }
 
 .header {
-    margin-bottom: 58px;
 }
 
 .nav {
-    position: fixed;
+    position: relative;
     top: 0;
     width: 100%;
     height: 55px;
