@@ -90,7 +90,7 @@ const routes = {
             name: 'private',
             render: (args) => {
                 $('.nav').css('transform', 'unset');
-                pre_render(`/messages/private/${args.room_id}`, args.name, true);
+                pre_render(`/messages/private/${args.room_id}`, 'messages', true);
                 $('.main').html(`<div class="msg__main ${args.room_id}">
                     <div class="msg__head">
                         <div class="msg__head__opt">
