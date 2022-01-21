@@ -16,10 +16,10 @@ function pre_render (url, title, nav = false) {
     document.title = title;
 }
 
-function after_render (title) {
+function after_render (title, loader = true) {
     $('.nav').css('transform', 'unset');
     $('.cover').fadeOut();
-    $('.loader__center').fadeOut(100);
+    if (loader) $('.loader__center').fadeOut(100);
     document.title = title;
 }
 
@@ -90,6 +90,7 @@ const routes = {
             name: 'private',
             render: (args) => {
                 $('.nav').css('transform', 'unset');
+                pre_render(`/messages/private/${args.room_id}`, args.name, true);
                 $('.main').html(`<div class="msg__main ${args.room_id}">
                     <div class="msg__head">
                         <div class="msg__head__opt">
@@ -101,9 +102,8 @@ const routes = {
                     </div>
                 </div>`);
                 $('.loader__center').fadeIn(100);
-                window.history.pushState({}, '', `/messages/private/${args.room_id}`);
-                document.title = args.name;
                 socket.emit('join_room', args.room_id);
+                after_render(args.name, false);
             }
         }
     },
