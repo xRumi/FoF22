@@ -19,7 +19,7 @@ body {
 }
 
 .nav {
-    position: relative;
+    position: fixed;
     top: 0;
     width: 100%;
     height: 55px;
@@ -89,8 +89,4 @@ body {
 
 .nav__active {
     color: #009578;
-}
-
-.main {
-    margin-left: 10px;
 }
