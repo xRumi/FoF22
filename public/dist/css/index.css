@@ -173,23 +173,16 @@ span.chat__own, span.chat__other {
     box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
 }
 
-.msg__head__back {
-    float: left;
-}
-
 .msg__head__opt {
     float: right;
 }
 
-.msg__head__txt {
-    text-align: center;
-}
-
 .msg__head__txt p {
+    color: lightgray;
     display: inline-block;
 }
 
 .msg__head__txt span {
-    color: lightgray;
+    color: lightskyblue;
 }
 /* end */

@@ -1,17 +1,13 @@
 var socket = io(), chat_page, chat_id, chat_form;
 
 function join_room (room_id, name) {
-    $('.header').fadeOut();
     $('.main').html(`<div class="msg__main ${room_id}">
         <div class="msg__head">
-            <div class="msg__head__back">
-                <i class="bx bx-arrow-back"></i>
-            </div>
             <div class="msg__head__opt">
                 <i class="bx bx-dots-vertical"></i>
             </div>
             <div class="msg__head__txt">
-                <p>${name}</p><span>●</span>
+                <h4>${name}</h4><span>●</span><p>online</p>
             </div>
         </div>
     </div>`);
