@@ -1,4 +1,5 @@
 var current_page, current_user, route_histroy = [], retry_function;
+var socket = io(), chat_page, chat_id, chat_form;
 
 function init (route_str, username) {
     current_user = username;

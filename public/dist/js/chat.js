@@ -1,5 +1,3 @@
-var socket = io(), chat_page, chat_id, chat_form;
-
 socket.on('redirect', url => {
     window.location.replace(url);
 });
