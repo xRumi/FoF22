@@ -18,7 +18,6 @@ function pre_render (url, title, page, nav = false) {
 
 function after_render (title, loader = true) {
     $('.nav').css('transform', 'unset');
-    $('.cover').fadeOut();
     if (loader) $('.loader__center').fadeOut(100);
     document.title = title;
 }
@@ -102,15 +101,10 @@ const routes = {
                     </div>
                 </div>`);
                 $('.loader__center').fadeIn(100);
-                //socket.emit('join_room', args.room_id);
                 ajax(args.name, `/messages/private/${args.room_id}/fetch`, true).then(x => {
-                    console.log(x);
-                    console.log(x.xhr.status);
                     if (x.xhr.status == 200) {
-                        console.log('1');
                         chat_id = x.data.room_id;
                         let html = ['<div class="chat__msgs">'];
-                        console.log('2');
                         x.data.messages.forEach(y => {
                 	        html.push(`<div class="chat__wrapper">
                 	            <div class="chat__container ${current_user == y.user ? 'chat__own' : 'chat__other'}">
@@ -121,15 +115,12 @@ const routes = {
                 	            </div><span class="${current_user == y.user ? 'chat__own' : 'chat__other'}">18:00</span>
                 	        </div>`);
                         });
-                        console.log('3');
                         html.push(`</div>
                         <div class="chat__input">
                             <form class="chat__form">
                                 <input type="text" id="chat__input" placeholder="enter your message">
                             </form>
                         </div>`);
-                        console.log(x.data.room_id);
-                        console.log($(`.${x.data.room_id}`));
                         $(`.${x.data.room_id}`).append(html.join(''));
                         chat_form = $('.chat__form').submit(function(e) {
                             e.preventDefault();
@@ -137,10 +128,10 @@ const routes = {
                             $('#chat__input').val('');
                             if (message) socket.emit('send_message', ({ room_id: chat_id, message }));
                         });
-                        after_render(args.name, false);
+                        after_render(args.name);
                     }
                 }).catch(() => {
-                
+                    
                 });
             }
         }
