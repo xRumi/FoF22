@@ -108,7 +108,7 @@ const routes = {
                     console.log(x.xhr.status);
                     if (x.xhr.status == 200) {
                         console.log('1');
-                        chat_id = room_id;
+                        chat_id = x.data.room_id;
                         let html = ['<div class="chat__msgs">'];
                         console.log('2');
                         x.data.messages.forEach(y => {
