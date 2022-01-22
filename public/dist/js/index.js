@@ -107,8 +107,10 @@ const routes = {
                     console.log(x);
                     console.log(x.xhr.status);
                     if (x.xhr.status == 200) {
+                        console.log('1');
                         chat_id = room_id;
                         let html = ['<div class="chat__msgs">'];
+                        console.log('2');
                         x.data.messages.forEach(y => {
                 	        html.push(`<div class="chat__wrapper">
                 	            <div class="chat__container ${current_user == y.user ? 'chat__own' : 'chat__other'}">
@@ -119,6 +121,7 @@ const routes = {
                 	            </div><span class="${current_user == y.user ? 'chat__own' : 'chat__other'}">18:00</span>
                 	        </div>`);
                         });
+                        console.log('3');
                         html.push(`</div>
                         <div class="chat__input">
                             <form class="chat__form">
