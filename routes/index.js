@@ -10,6 +10,12 @@ router.get('/', async (req, res) => {
     else res.status(403).redirect('/login');
 });
 
+router.get('/fetch', async (req, res) => {
+    if (req.user) {
+        res.status(200).send('this is home page');
+    } else res.status(403).send('forbidden');
+});
+
 router.use('/auth', auth);
 router.use('/profile', profile);
 router.use('/messages', messages);
