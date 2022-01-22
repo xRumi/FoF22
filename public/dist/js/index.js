@@ -102,8 +102,42 @@ const routes = {
                     </div>
                 </div>`);
                 $('.loader__center').fadeIn(100);
-                socket.emit('join_room', args.room_id);
-                after_render(args.name, false);
+                //socket.emit('join_room', args.room_id);
+                ajax(args.name, `/messages/${room_id}/fetch`, true).then(x => {
+                    if (current_page == args.name) {
+                        if (x.xhr.status == 200) {
+                            $('.msgs__head__txt').text(title);
+                            chat_id = room_id;
+                            let html = ['<div class="chat__msgs">'];
+                            x.data.messages.forEach(y => {
+                    	        html.push(`<div class="chat__wrapper">
+                    	            <div class="chat__container ${current_user == y.user ? 'chat__own' : 'chat__other'}">
+                    	                ${current_user !== y.user ? `<img class="chat__icon" src="/dist/img/profile/${y.user}.png">` : ``}
+                    	                <div class="${current_user == y.user ? 'chat__own__bubble chat__own' : 'chat__other__bubble chat__other'}">
+                    	                    ${y.message}
+                    	                </div>
+                    	            </div><span class="${current_user == y.user ? 'chat__own' : 'chat__other'}">18:00</span>
+                    	        </div>`);
+                            });
+                            html.push(`</div>
+                            <div class="chat__input">
+                                <form class="chat__form">
+                                    <input type="text" id="chat__input" placeholder="enter your message">
+                                </form>
+                            </div>`);
+                            $(`.${x.data.room_id}`).append(html.join(''));
+                            chat_form = $('.chat__form').submit(function(e) {
+                                e.preventDefault();
+                                let message = $('#chat__input').val();
+                                $('#chat__input').val('');
+                                if (message) socket.emit('send_message', ({ room_id: chat_id, message }));
+                            });
+                            after_render(args.name, false);
+                        }
+                    }
+                }).catch(() => {
+                
+                });
             }
         }
     },
