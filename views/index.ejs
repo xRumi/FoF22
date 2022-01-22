@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="/plugins/navbar/style.css">
     <link rel="stylesheet" href="/dist/css/index.css">
     <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
-    <title><%=page || route%></title>
+    <title><%=if (page) page; else route%></title>
 </head>
 <body onload="init('<%=route%>', '<%=user.username%>', <%=args || 'null'%>)">
     <header class="header" id="header">
