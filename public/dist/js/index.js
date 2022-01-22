@@ -104,9 +104,7 @@ const routes = {
                 $('.loader__center').fadeIn(100);
                 //socket.emit('join_room', args.room_id);
                 ajax(args.name, `/messages/private/${args.room_id}/fetch`, true).then(x => {
-                    console.log(x);
                     if (x.xhr.status == 200) {
-                        $('.msgs__head__txt').text(title);
                         chat_id = room_id;
                         let html = ['<div class="chat__msgs">'];
                         x.data.messages.forEach(y => {
@@ -125,6 +123,8 @@ const routes = {
                                 <input type="text" id="chat__input" placeholder="enter your message">
                             </form>
                         </div>`);
+                        console.log(x.data.room_id);
+                        console.log($(`.${x.data.room_id}`));
                         $(`.${x.data.room_id}`).append(html.join(''));
                         chat_form = $('.chat__form').submit(function(e) {
                             e.preventDefault();
