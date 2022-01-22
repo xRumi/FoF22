@@ -1,7 +1,7 @@
 const router = require('express').Router();
 
 router.get('/', async (req, res) => {
-    if (req.user) res.render("index", { user: req.user, c_page: 'search'});
+    if (req.user) res.render("index", { user: req.user, route: 'search' });
     else res.redirect('/login?ref=search');
 });
 

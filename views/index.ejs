@@ -6,31 +6,31 @@
     <link rel="stylesheet" href="/plugins/navbar/style.css">
     <link rel="stylesheet" href="/dist/css/index.css">
     <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
-    <title><%=c_page%></title>
+    <title><%=page || route%></title>
 </head>
-<body onload="init('<%=c_page%>', '<%=user.username%>', <%=args ? args : null%>)">
+<body onload="init('<%=route%>', '<%=user.username%>', <%=args || 'null'%>)">
     <header class="header" id="header">
         <nav class="nav">
             <span class="nav__logo">
                 <h3>F<sub>o</sub>F<sub>22</sub></h3>
             </span>
-            <a onclick="router('home');" class="_home nav__link<%=c_page == 'home' ? ' nav__active': ''%>">
+            <a onclick="router('home');" class="_home nav__link<%=page || route == 'home' ? ' nav__active': ''%>">
                 <i class="bx bx-home nav__icon"></i>
                 <span class="nav__text">Home</span>
             </a>
-            <a onclick="router('profile');" class="_profile nav__link<%=c_page == 'profile' ? ' nav__active': ''%>">
+            <a onclick="router('profile');" class="_profile nav__link<%=page || route == 'profile' ? ' nav__active': ''%>">
                 <i class="bx bx-user nav__icon"></i>
                 <span class="nav__text">Profile</span>
             </a>
-            <a onclick="router('messages');" class="_messages nav__link<%=c_page == 'messages' ? ' nav__active': ''%>">
+            <a onclick="router('messages');" class="_messages nav__link<%=page || route == 'messages' ? ' nav__active': ''%>">
                 <i class="bx bx-message-dots nav__icon"></i>
                 <span class="nav__text">Messages</span>
             </a>
-            <a onclick="router('search');" class="_search nav__link<%=c_page == 'search' ? ' nav__active': ''%>">
+            <a onclick="router('search');" class="_search nav__link<%=page || route == 'search' ? ' nav__active': ''%>">
                 <i class="bx bx-search nav__icon"></i>
                 <span class="nav__text">Search</span>
             </a>
-            <a onclick="router('settings');" class="_settings nav__link<%=c_page == 'settings' ? ' nav__active': ''%>">
+            <a onclick="router('settings');" class="_settings nav__link<%=page || route == 'settings' ? ' nav__active': ''%>">
                 <i class="bx bx-cog nav__icon"></i>
                 <span class="nav__text">Settings</span>
             </a>

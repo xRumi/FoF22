@@ -6,40 +6,8 @@ const router = require('express').Router(),
     settings = require('./settings');
 
 router.get('/', async (req, res) => {
-    if (req.user) res.render("index", { user: req.user, c_page: 'home' });
+    if (req.user) res.render("index", { user: req.user, route: 'home' });
     else res.status(403).redirect('/login');
-});
-
-router.get('/logs', async (req, res) => {
-  const a = [
-      {
-        name: 'ping',
-        author: 'rumi#9990',
-        author_id: '792328424248442900'
-      },
-      {
-        name: 'hello',
-        author: 'rumi#9990',
-        author_id: '792328424248442900'
-      },
-      {
-        name: 'ban',
-        author: 'rumi#9990',
-        author_id: '792328424248442900'
-      },
-      {
-        name: 'kick',
-        author: 'rumi#9990',
-        author_id: '792328424248442900'
-      }
-    ]
-  res.status(200).send(JSON.stringify(a))
-})
-
-router.get('/fetch', async (req, res) => {
-    if (req.user) {
-        res.status(200).send('this is home page');
-    } else res.status(403).send('forbidden');
 });
 
 router.use('/auth', auth);

@@ -1,7 +1,7 @@
 const router = require('express').Router();
 
 router.get('/', async (req, res) => {
-    if (req.user) res.render('index', { user: req.user, c_page: 'settings' });
+    if (req.user) res.render('index', { user: req.user, route: 'settings' });
     else res.status(403).redirect('/login?ref=menu');
 });
 
