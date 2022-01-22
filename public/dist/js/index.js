@@ -104,6 +104,8 @@ const routes = {
                 $('.loader__center').fadeIn(100);
                 //socket.emit('join_room', args.room_id);
                 ajax(args.name, `/messages/private/${args.room_id}/fetch`, true).then(x => {
+                    console.log(x);
+                    console.log(x.xhr.status);
                     if (x.xhr.status == 200) {
                         chat_id = room_id;
                         let html = ['<div class="chat__msgs">'];
