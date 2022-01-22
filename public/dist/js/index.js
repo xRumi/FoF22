@@ -103,7 +103,7 @@ const routes = {
                 </div>`);
                 $('.loader__center').fadeIn(100);
                 //socket.emit('join_room', args.room_id);
-                ajax(args.name, `/messages/${room_id}/fetch`, true).then(x => {
+                ajax(args.name, `/messages/${args.room_id}/fetch`, true).then(x => {
                     if (current_page == args.name) {
                         if (x.xhr.status == 200) {
                             $('.msgs__head__txt').text(title);
