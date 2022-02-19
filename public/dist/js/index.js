@@ -23,7 +23,7 @@ function ajax (page, url, retry = false, type = 'GET') {
 }
 
 $('#refresh_friends').click(() => {
-    $('#refresh_friends').prop("disabled", true);
+    $('#refresh_friends').prop("disabled", true).html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="visually-hidden">Refresh</span>`);
     ajax('home', '/friends/fetch').then(x => {
         let html = ['<ul class="list-group list-group-flush">'];
         if (x.data.length) {
@@ -38,6 +38,7 @@ $('#refresh_friends').click(() => {
         } else html.push(`<p class="card-text">You do not have any <b>friends</b></p>`)
         html.push('</ul>');
         $('#friends_list').html(html.join(''));
+        $('#refresh_friends').prop("disabled", false).html('Refresh');
     });
 });
 

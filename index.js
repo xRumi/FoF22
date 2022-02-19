@@ -30,6 +30,8 @@ const session_store = session({
     unset: 'destroy'
 });
 
+const nodemailer = require('nodemailer');
+
 io.use(function(socket, next) {
     session_store(socket.request, socket.request.res || {}, next);
 });
@@ -50,6 +52,16 @@ client.database_cache.rooms = new Map();
 client.cache = {};
 client.cache.functions = {};
 client.cache.users = new Map();
+
+client.transporter = nodemailer.createTransport({
+    host: 'smtp.mail.yahoo.com',
+    port: 465,
+    secure: true,
+    auth: {
+        user: 'mehedihasanrumi@yahoo.com',
+        pass: 'udxiaghwxqrvzadq'
+    }
+});
 
 require("./functions/db")(client);
 require("./libs/schedule")(client);
@@ -92,7 +104,7 @@ const func = async () => {
 
 //func();
 
-const server = http.listen(80, () => {
+const server = http.listen(process.env.PORT || 80, () => {
     console.log('server is running on port', server.address().port);
 });
 
