@@ -6,7 +6,7 @@ $.fn.isValid = function() {
 $('.form').submit(function(e) {
     e.preventDefault();
     if (!$('.form').isValid()) return false;
-    $('#sub-btn').prop("disabled", true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> logging...');
+    $('#sub-btn').prop("disabled", true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Proceeding');
     const username = $("#username").val(), password = $("#password").val();
     $.ajax({
         type: 'POST',
@@ -18,19 +18,15 @@ $('.form').submit(function(e) {
         },
         timeout: 30000,
         success: function(result, textStatus, xhr) {
-            $('#sub-btn').html('logged in').addClass('btn-success').css('opacity', '1');
+            $('#sub-btn').html('Proceed').addClass('btn-success').css('opacity', '1');
 		    window.location.replace(result.returnTo || `/${ref}` || "/");
         },
         error: function(xhr, textStatus, errorThrown) {
             $('#password').val('');
             if (xhr.status == 400) {
-                $('.alert-section').html(`<div class="alert alert-primary d-flex align-items-center" role="alert">
-                    <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Info:"><use xlink:href="#info-fill"/></svg>
-                    <div>${xhr.responseText}</div>
-                </div>`);
+                $('.alert-section').html(`<div class="alert alert-danger" role="alert">${xhr.responseText || 'Something went wrong! Try again later.'}</div>`);
             } else $('.invalid-feedback').text(xhr.responseText || 'no response');
-            $('#sub-btn').html('Login');
-            $('#sub-btn').prop("disabled", false);
+            $('#sub-btn').html('Proceed').prop("disabled", false);
         },
     });
 });
