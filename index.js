@@ -40,18 +40,23 @@ client.database = {};
 client.database.user = require("./models/User");
 client.database.room = require("./models/Room");
 client.database.chat = require("./models/Chat");
+client.database.token = require("./models/Token");
 client.database.functions = {};
+
 client.database_cache = {};
 client.database_cache.users = new Map();
 client.database_cache.rooms = new Map();
-client.database_cache.delete_schedule_users = new Map();
+client.database_cache.tokens = new Map();
 
-client.search = {};
+client.cache = {};
+client.cache.functions = {};
+client.cache.users = new Map();
 
 require("./functions/db")(client);
-require("./functions/delete_schedule")(client);
+require("./libs/schedule")(client);
+require("./functions/cache")(client);
 
-require("./libs/chat.js").sockets(io, client);
+require("./libs/socket-io.js").sockets(io, client);
 
 app.use(compression());
 app.use(express.json());
@@ -79,13 +84,18 @@ const func = async () => {
     //const room = await client.database.functions.create_room('console', ['rumi', 'system']);
     //const room = await client.database.room.find({ type: 'private', members: {$in: ['1234', '5678']} });
     //console.log(await client.database.chat.findById('61d00496cd80afdc9c2e7242'));
+    const friend = await client.database.functions.get_user('shanto');
+    const user = await client.database.functions.get_user('rumi');
+    user.friends = [friend.username];
+    await user.save();
+    console.log(user);
 }
 
 //func();
 
-const server = http.listen(80, () => {
+const server = http.listen(8080, () => {
     console.log('server is running on port', server.address().port);
 });
 
 local_strategy.init(client);
-client.database.functions.delete_schedule_users();
+client.database.functions.schedule();

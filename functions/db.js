@@ -12,6 +12,19 @@ module.exports = (client) => {
             } else return false;
         }
     }
+    client.database.functions.get_user_by_email = async ( email ) => {
+        if (!email) return false;
+        let user;
+        for (const [key, value] of client.database_cache.users) if (value.elements?.email == email) user = client.database_cache.users.get(key);
+        if (user) return user;
+        else {
+            user = await client.database.user.findOne({ email });
+            if (user) {
+                client.database_cache.users.set(user.username, user);
+                return user;
+            } else return false;
+        }
+    }
     client.database.functions.create_user = async ( username, password, email ) => {
         let user = client.database_cache.users.get(username);
         if (user) return false;
@@ -86,4 +99,12 @@ module.exports = (client) => {
         }
     }
     // end
+
+    client.database.functions.create_or_get_token = async (username, type = 'reset-token') => {
+        let token = await client.database.token.findOne({ type, username });
+        if (token) return token;
+        else token = new client.database.token({ type, username });
+        await token.save();
+        return token;
+    }
 }

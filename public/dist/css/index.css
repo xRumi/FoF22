@@ -1,196 +1,60 @@
-.loader {
-    content: "";
-    margin: auto;
-    border: solid transparent;
-    border-top-color: #ADD8E6;
-    border-radius: 50%;
-    animation: spinner 1s ease infinite;
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
 }
 
-.loader__center {
-    position: absolute;
-    border-width: 4px;
-    width: 100px;
-    height: 100px;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+body {
+    font-family: 'Open Sans', sans-serif;
+    background-color: #121212;
 }
 
-.loader__msg {
-    border-width: 2px;
-    border-top-color: rgb(208,135,170);
-    width: 15px;
-    height: 15px;
-    display: inline-block;
-    margin-left: 6px;
-    margin-top: 3px;
+.row {
+    margin-right: 15px;
 }
 
-.loading__text {
-    text-align: center;
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    color: gray;
-}
-
-@keyframes spinner {
-    from {
-        transform: rotate(0turn);
-    }
-    to {
-        transform: rotate(1turn);
-    }
-}
-
-.cover {
-   position: absolute;
-   top: 0;
-   left: 0;
-   right: 0;
-   bottom: 0;
-   z-index: 10;
-}
-
-/* chat room */
-.msgs__item {
-    border-bottom: solid 1px;
-    height: 70px;
-    padding-top: 10px;
-}
-.msgs__image img {
-    border-radius: 50%;
-    width: 42px;
-    height: 40px;
-    float: left;
+.card {
     margin: 10px;
-}
-.msgs__title {
-    float: left;
-    position: relative;
-    top: 10px;
-}
-.msgs__title p {
-    display: inline-block;
-    width: 200px;
-    white-space: nowrap;
-    overflow: hidden !important;
-    text-overflow: ellipsis;
-    color: gray;
-    font-size: 14px;
-}
-
-/* chat */
-.msg__main {
-    padding: 3px;
-}
-.chat__msgs {
-    min-height: 70vh;
-    max-height: 70vh;
-    overflow: scroll;
-}
-.chat__wrapper {
-	padding: 10px 10px;
-	display: flex;
-	justify-content: flex-end;
-	flex-direction: column;
-	align-self: flex-end;
-    color: #fff;
-}
-.chat__container {
-    display: inline-flex;
-    word-wrap: break-word;
-    width: 95%;
-}
-.chat__container.chat__own {
-    flex-direction: row-reverse;
-}
-.chat__icon {
-    width: 20px;
-    object-fit: contain;
-}
-.chat__own__bubble {
-	min-width: 60px;
-	max-width: 700px;
-	padding: 14px 18px;
-    margin: 6px 8px;
-	background-color: #5b5377;
-	border-radius: 16px 16px 0 16px;
-	border: 1px solid #443f56;
-}
-.chat__other__bubble {
-	min-width: 60px;
-	max-width: 700px;
-	padding: 14px 18px;
-    margin: 6px 8px;
-	background-color: #6C8EA4;
-	border-radius: 16px 16px 16px 0;
-	border: 1px solid #54788e;
-}
-.chat__own {
-	align-self: flex-end;
-}
-.chat__other {
-	align-self: flex-start;
-}
-span.chat__own, span.chat__other {
-    font-size: 14px;
-    color: grey;
-}
-.chat__input {
-    position: relative;
-    bottom: 0;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+    height: 200px;
     width: 100%;
 }
-.chat__input input {
-    letter-spacing: 0.1em;
-    width: 100%;
-    padding: 15px;
-}
-.chat__input button {
-    letter-spacing: 0.2px;
-    position: absolute;
-    right: 10px;
-    top: 7px;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    border: none;
-    background: #ededed;
-    border-radius: 3px;
-    padding: 10px;
-    transition: all 0.2s;
-}
-.chat__input button:hover {
-  background-color: #37C88D;
-  color: #fff;
-  cursor: pointer;
+
+.loader-wave div {
+    background:#E8E8E8;
 }
 
-.msg__head {
-    padding: 10px;
-    border-bottom: solid 0.1px;
+.loader-wave .line { height: 12px; margin: 0 0 10px; width: 200px; }
+.loader-wave .line:nth-child(2) { width: 150px; }
+.loader-wave .line:nth-child(3) { width: 240px; }
+.loader-wave .line:nth-child(4) { width: 190px; }
+
+.loader-wave div {
+    animation: wave 1s infinite linear forwards;
+    -webkit-animation: wave 1.5s infinite linear forwards;
+    background: #f6f7f8;
+    background: linear-gradient(to right, #eeeeee 8%, #dddddd 18%, #eeeeee 33%);
+    background-size: 800px 104px;
 }
 
-.msg__head__opt {
+@keyframes wave {
+    0% {
+        background-position: -468px 0;
+    }
+    100% {
+        background-position: 468px 0;
+    }
+}
+
+@-webkit-keyframes wave {
+    0% {
+        background-position: -468px 0;
+    }
+    100% {
+        background-position: 468px 0;
+    }
+}
+
+.card-header button {
     float: right;
-    font-size: 25px;
-    margin-top: 5px;
 }
-
-.msg__head__opt i {
-    color: lightgray;
-}
-
-.msg__head__txt p {
-    font-size: 13px;
-    color: lightgray;
-    display: inline-block;
-    margin-left: 5px;
-}
-
-.msg__head__txt span {
-    color: lightskyblue;
-}
-/* end */

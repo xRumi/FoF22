@@ -8,8 +8,8 @@ router.post('/local', async (req, res, next) => {
         if (err) return res.status(400).send( err );
         if (!user) return res.status(401).send( 'username or password is incorrect' );
         req.logIn(user, async (err) => {
+            if (req.body.remember == 'false') req.session.cookie.expires = false;
             if (err) return res.status(400).send( err );
-            console.log(user);
             if (user.status == 'active') return res.status(200).json({ message: 'user logged in', returnTo });
             else if (user.status == 'deactive') {
                 user.status = 'active';
@@ -20,7 +20,7 @@ router.post('/local', async (req, res, next) => {
                 user.delete_time = null;
                 await user.save();
                 return res.status(200).json({ message: 'account deletion cancelled', returnTo });
-            } else if (user.status == 'deleted') return res.status(400).send( 'account deleted' )
+            } else if (user.status == 'deleted') return res.status(400).send( 'account already deleted' );
             else {
                 console.log(user);
                 return res.status(200).json({ message: 'account status unknown', returnTo });
