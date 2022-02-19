@@ -46,7 +46,6 @@ client.database.functions = {};
 client.database_cache = {};
 client.database_cache.users = new Map();
 client.database_cache.rooms = new Map();
-client.database_cache.tokens = new Map();
 
 client.cache = {};
 client.cache.functions = {};
@@ -93,7 +92,7 @@ const func = async () => {
 
 //func();
 
-const server = http.listen(8080, () => {
+const server = http.listen(80, () => {
     console.log('server is running on port', server.address().port);
 });
 
