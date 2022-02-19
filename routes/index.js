@@ -63,7 +63,7 @@ router.post('/reset-password/email', async (req, res) => {
             from: 'mehedihasanrumi@yahoo.com',
             to: user.email,
             subject: 'reset password',
-            html: `<p>You requested for reset password, kindly use this <a href="http://88.99.83.158:8080/reset-password/?token=${token.id}">link</a> to reset your password.</p><br><p>This link will expire in <b>${humanize_duration((token.expire_at) - Date.now())}</b></p>`,
+            html: `<p>You requested for reset password, kindly use this <a href="http://88.99.83.158/reset-password/?token=${token.id}">link</a> to reset your password.</p><br><p>This link will expire in <b>${humanize_duration((token.expire_at) - Date.now())}</b></p>`,
         }, function(error, info) {
             if (error) console.log(error);
         });
