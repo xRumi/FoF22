@@ -19,7 +19,7 @@ $('.form').submit(function(e) {
         timeout: 30000,
         success: function(result, textStatus, xhr) {
             $('#sub-btn').html('Proceed').addClass('btn-success').css('opacity', '1');
-		    window.location.replace(result.returnTo || `/${ref}` || "/");
+		    window.location.replace(result.returnTo || `/${ref}` || "/home");
         },
         error: function(xhr, textStatus, errorThrown) {
             $('#password').val('');

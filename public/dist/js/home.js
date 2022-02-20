@@ -1,5 +1,3 @@
-var socket = io();
-
 function ajax (page, url, retry = false, type = 'GET') {
     return new Promise((resolve, reject) => {
         let ajax_ = () => {
