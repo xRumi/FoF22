@@ -8,13 +8,10 @@ const router = require('express').Router(),
     register = require('./register');
 
 router.get('/', async (req, res) => {
-    res.render('index', { logged_in: req.user ? true : false });
-});
-
-router.get('/home', async (req, res) => {
-    let friends;
-    if (req.user) friends = await req.client.cache.functions.get_friends(req.user.friends);
-    res.render('home', { user: req.user, friends, route: 'home' });
+    if (req.user) {
+        let friends = await req.client.cache.functions.get_friends(req.user.friends);
+        res.render("index", { user: req.user, friends, route: 'home' });
+    } else res.status(403).redirect('/login');
 });
 
 router.get('/friends/fetch', async (req, res) => {
@@ -39,7 +36,7 @@ router.get('/login', async (req, res) => {
 
 router.get('/logout', async (req, res) => {
     if (req.user) await req.session.destroy();
-    res.redirect('/');
+    res.redirect('/login');
 });
 
 module.exports = router;

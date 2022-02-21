@@ -1,5 +1,3 @@
-var socket = io();
-
 socket.on('redirect', url => {
     window.location.replace(url);
 });

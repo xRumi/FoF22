@@ -1,7 +1,7 @@
 const router = require('express').Router();
 
 router.get('/', async (req, res) => {
-    if (req.user) res.render("home", { user: req.user, route: 'messages' });
+    if (req.user) res.render("index", { user: req.user, route: 'messages' });
     else res.status(403).redirect('/login?ref=messages');
 });
 
@@ -38,7 +38,7 @@ router.get('/private/:room_id', async (req, res) => {
                 let name, _name = room.name.split('.');
                 if (_name[0] == req.user.username) name = _name[1];
                 else name = _name[0];
-                res.render("home", { user: req.user, page: name, route: 'messages.private', args: `{room_id:'${room_id}',name:'${name}'}` });
+                res.render("index", { user: req.user, page: name, route: 'messages.private', args: `{room_id:'${room_id}',name:'${name}'}` });
             }
         }
     } else res.status(403).redirect('/login?ref=messages');
