@@ -1,10 +1,6 @@
 const token = new URLSearchParams(window.location.search).get('token');
-$.fn.isValid = function() {
-    return this[0].checkValidity();
-}
-$('.form').submit(function(e) {
-    e.preventDefault();
-    if (!$('.form').isValid()) return false;
+$('#sub-btn').click(function() {
+    if (!is_valid()) return false;
     $('#sub-btn').prop("disabled", true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Proceeding');
     const password = $("#password").val();
     $.ajax({
@@ -25,3 +21,15 @@ $('.form').submit(function(e) {
         },
     });
 });
+
+$('#password, #password-confirm').on('keyup', function () {
+    if ($("#password").val() && $("#password").val().length >= 8) $('#password').removeClass('is-invalid').addClass('is-valid');
+    else $('#password').removeClass('is-valid').addClass('is-invalid');
+    if ($('#password').val() == $('#password-confirm').val()) $('#password-confirm').removeClass('is-invalid').addClass('is-valid');
+    else $('#password-confirm').removeClass('is-valid').addClass('is-invalid');
+});
+
+function is_valid() {
+    if ($('#password').val() && $('#password').val().length >= 8 && $('#password').val() == $('#password-confirm').val()) return true;
+    else return false;
+}
