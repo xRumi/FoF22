@@ -13,10 +13,10 @@ router.get('/forgot-password', async (req, res) => {
     else res.redirect('/');
 });
 
-router.post('/reset-password/email', async (req, res) => {
+router.post('/forgot-password/post', async (req, res) => {
     const user = req.body.email ? await req.client.database.functions.get_user_by_email(req.body.email) : false;
     if (user) {
-        const token = await req.client.database.functions.create_or_get_token(user.username, 'reset-token');
+        const token = await req.client.database.functions.create_token(user.username);
         req.client.transporter.sendMail({
             from: 'mehedihasanrumi@yahoo.com',
             to: user.email,
@@ -33,13 +33,19 @@ router.get('/reset-password', async (req, res) => {
     if (!req.user) {
         if (req.query.token && ObjectID.isValid(req.query.token)) {
             let token = await req.client.database.token.findById(req.query.token);
-            if (token) res.render("reset-password", { username: token.username, expire: humanize_duration(token.expire_at - Date.now()) });
-            else res.redirect('/login');
+            if (token && token.type == 'reset-token') {
+                let user = await req.client.database.functions.get_user(token.username);
+                if (user) res.render("reset-password", { expire: humanize_duration(token.expire_at - Date.now()) });
+                else {
+                    await token.remove();
+                    res.redirect('/login');
+                }
+            } else res.redirect('/login');
         } else res.redirect('/login');
     } else res.redirect('/');
 });
 
-router.post('/reset-password/change', async (req, res) => {
+router.post('/reset-password/post', async (req, res) => {
     let _token = req.body.token,
         password = req.body.password;
     if (_token && password?.length >= 8 && ObjectID.isValid(_token)) {
@@ -57,7 +63,10 @@ router.post('/reset-password/change', async (req, res) => {
                     await user.save();
                     res.status(200).send('Password changed successfully');
                 }
-            } else res.status(400).send('User does not exist');
+            } else {
+                await token.remove();
+                res.status(400).send('User does not exist');
+            }
         } else res.status(400).send('Invalid or expired token was provided');
     } else res.status(400).send('Invalid data was provided');
 });

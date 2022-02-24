@@ -25,7 +25,7 @@ module.exports = (client) => {
             } else return false;
         }
     }
-    client.database.functions.create_user = async ( username, password, email ) => {
+    client.database.functions.create_user = async ( username, email, password, name) => {
         let user = client.database_cache.users.get(username);
         if (user) return false;
         else {
@@ -35,7 +35,7 @@ module.exports = (client) => {
                 return false;
             } else {
                 try {
-                    let user_data = new client.database.user({ username, password, email });
+                    let user_data = new client.database.user({ username, email, password, name });
                     await user_data.save();
                     client.database_cache.users.set(user_data.username, user_data);
                     return user_data;
@@ -100,11 +100,13 @@ module.exports = (client) => {
     }
     // end
 
-    client.database.functions.create_or_get_token = async (username, type = 'reset-token') => {
-        let token = await client.database.token.findOne({ type, username });
+    client.database.functions.create_token = async ( username, type = 'verification', expire_at = Date.now() + 24 * 60 * 60 * 1000 ) => {
+        let token = await client.database.token.findOne({ username, type });
         if (token) return token;
-        else token = new client.database.token({ type, username });
-        await token.save();
-        return token;
+        else {
+            token = new client.database.token({ username, token });
+            await token.save();
+            return token;
+        }
     }
 }

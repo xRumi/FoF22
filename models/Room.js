@@ -4,7 +4,7 @@ module.exports = mongoose.model("room", new mongoose.Schema({
 
     name: { type: String, default: null },
 
-    createdAt: { type: Date, default: Date.now },
+    created_at: { type: Date, default: Date.now },
     status: { type: String, default: 'active' },
     type: { type: String, default: 'private' },
 

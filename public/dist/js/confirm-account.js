@@ -5,7 +5,7 @@ $('#sub-btn').click(function() {
     const password = $("#password").val();
     $.ajax({
         type: 'POST',
-        url: `/reset-password/post`,
+        url: `/register/confirm/post`,
         data: {
             token,
             password
@@ -13,7 +13,8 @@ $('#sub-btn').click(function() {
         timeout: 30000,
         success: function(result, textStatus, xhr) {
             $('.alert-section').html(`<div class="alert alert-success" role="alert">${result}</div>`);
-            $('#sub-btn').html('Proceed').prop("disabled", false);
+            $('#sub-btn').html('Proceed').prop("disabled", true);
+            setTimeout(() => { window.location.replace('/login'); }, 5000);
         },
         error: function(xhr, textStatus, errorThrown) {
             $('.alert-section').html(`<div class="alert alert-danger" role="alert">${xhr.responseText || 'Something went wrong! Try again later.'}</div>`);

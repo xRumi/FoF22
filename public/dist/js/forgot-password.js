@@ -8,14 +8,14 @@ $('.form').submit(function(e) {
     const email = $("#email").val();
     $.ajax({
         type: 'POST',
-        url: `/reset-password/email`,
+        url: `/forgot-password/post`,
         data: {
             email
         },
         timeout: 30000,
         success: function(result, textStatus, xhr) {
             $('.alert-section').html(`<div class="alert alert-success" role="alert">
-                <p>If there is any user associated with this address, we will send an email with instructions to change the password. Please make sure to check the both index and spam folder.</p>
+                <p>If there is any user associated with this address, we will send an email with instructions to change the password. Make sure to check the both index and spam folder.</p>
                 <hr>
                 <p class="mb-0">The link will expire in about <span class="text-danger">24 hours</span></p>
             </div>`);

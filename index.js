@@ -43,6 +43,7 @@ client.database.user = require("./models/User");
 client.database.room = require("./models/Room");
 client.database.chat = require("./models/Chat");
 client.database.token = require("./models/Token");
+client.database._user = require("./models/_User");
 client.database.functions = {};
 
 client.database_cache = {};
@@ -89,6 +90,10 @@ app.use(async function(req, res, next) {
 });
 
 app.use('/', routes);
+
+app.get('*', (req, res) => {
+    res.render('404');
+});
 
 const func = async () => {
     //const room = await client.database.functions.get_message_room('61cc4c4363fd215377b41da1');

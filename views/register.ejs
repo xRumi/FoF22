@@ -17,19 +17,19 @@
 							<h1 class="fs-4 card-title fw-bold mb-4">Register</h1>
 							<form class="form was-validated" novalidate="" autocomplete="off">
 								<div class="mb-3">
-									<label class="mb-2 text-muted" for="name">Name</label>
-									<input id="name" type="text" class="form-control shadow-none" name="name" value="" required autofocus>
+									<label class="mb-2 text-muted" for="username">Username</label>
+									<input id="username" type="text" class="form-control shadow-none" name="username" value="" minlength="4" maxlength="16" required autofocus>
+									<div class="invalid-feedback">The length must be above <b>4</b></div>
+								</div>
+
+								<div class="mb-3">
+									<label class="mb-2 text-muted" for="name">Full Name</label>
+									<input id="name" type="text" class="form-control shadow-none" name="name" value="" minlength="4" maxlength="32" required>
 								</div>
 
 								<div class="mb-3">
 									<label class="mb-2 text-muted" for="email">E-Mail Address</label>
 									<input id="email" type="email" class="form-control shadow-none" name="email" value="" required>
-								</div>
-
-								<div class="mb-3">
-									<label class="mb-2 text-muted" for="password">Password</label>
-									<input id="password" type="password" class="form-control shadow-none" name="password" required>
-								    <div class="invalid-feedback">The length must be above <b>8</b></div>
 								</div>
 
 								<p class="form-text text-muted mb-3">By registering you agree with our terms and condition.</p>

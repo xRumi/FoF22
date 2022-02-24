@@ -5,7 +5,8 @@ const router = require('express').Router(),
     search = require('./search'),
     settings = require('./settings'),
     password = require('./password'),
-    register = require('./register');
+    register = require('./register'),
+    admin = require('./admin');
 
 router.get('/', async (req, res) => {
     if (req.user) {
@@ -28,6 +29,7 @@ router.use('/search', search);
 router.use('/settings', settings);
 router.use('/', password);
 router.use('/register', register);
+router.use('/admin', admin);
 
 router.get('/login', async (req, res) => {
     if (!req.user) res.render("login");
