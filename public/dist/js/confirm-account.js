@@ -2,13 +2,17 @@ const token = new URLSearchParams(window.location.search).get('token');
 $('#sub-btn').click(function() {
     if (!is_valid()) return false;
     $('#sub-btn').prop("disabled", true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Proceeding');
-    const password = $("#password").val();
+    const password = $("#password").val(),
+        username = $("#username").val(),
+        name = $("#name").val();
     $.ajax({
         type: 'POST',
         url: `/register/confirm/post`,
         data: {
             token,
-            password
+            password,
+            username,
+            name
         },
         timeout: 30000,
         success: function(result, textStatus, xhr) {
@@ -31,6 +35,6 @@ $('#password, #password-confirm').on('keyup', function () {
 });
 
 function is_valid() {
-    if ($('#password').val() && $('#password').val().length >= 8 && $('#password').val() == $('#password-confirm').val()) return true;
+    if ($('#password').val() && $('#password').val().length >= 8 && $('#password').val() == $('#password-confirm').val() && $("#username").val() && $("#name").val()) return true;
     else return false;
 }
