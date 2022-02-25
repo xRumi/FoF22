@@ -17,7 +17,9 @@ const logger = require("morgan");
 
 app.use(logger("dev"));
 
-mongoose.connect('mongodb+srv://main:iVAFZ0z5YDcHf5jm@cluster0.pcm42.mongodb.net/main?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true }).catch((err) => {
+// mongodb+srv://main:iVAFZ0z5YDcHf5jm@cluster0.pcm42.mongodb.net/main?retryWrites=true&w=majority
+
+mongoose.connect('mongodb://uiovm4harlqdnivtyta2:LS1tyebp4rqh6rvDtrnL@bvy91rqyhikvvsm-mongodb.services.clever-cloud.com:27017/bvy91rqyhikvvsm', { useNewUrlParser: true, useUnifiedTopology: true }).catch((err) => {
     return console.log(`MongoDB database error: ${err}`);
 });
 
@@ -26,7 +28,7 @@ const session_store = session({
     cookie: { maxAge: 60000 * 60 * 24 },
     resave: false,
     saveUninitialized: false,
-    store: mongo_store.create({ mongoUrl: 'mongodb+srv://main:iVAFZ0z5YDcHf5jm@cluster0.pcm42.mongodb.net/main?retryWrites=true&w=majority' }),
+    store: mongo_store.create({ mongoUrl: 'mongodb://uiovm4harlqdnivtyta2:LS1tyebp4rqh6rvDtrnL@bvy91rqyhikvvsm-mongodb.services.clever-cloud.com:27017/bvy91rqyhikvvsm' }),
     unset: 'destroy'
 });
 
