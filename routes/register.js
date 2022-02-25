@@ -61,8 +61,8 @@ router.post('/confirm/post', async (req, res) => {
         _token = req.body.token,
         password = req.body.password;
     if (_token && username?.length >= 4 && username.length <= 16 && name?.length >= 4 && name.length <= 32 && password?.length >= 8 && password.length <= 32 && ObjectID.isValid(_token)) {
-        if (username.match(/[^A-Za-z0-9]/)) return res.status(400).send('Special characters in username are not allowed');
-        if (name.match(/[^A-Za-z0-9]/)) return res.status(400).send('Special characters in full name are not allowed');
+        if (username.match(/[^A-Za-z0-9]/)) return res.status(400).send('Special character/space in username is not allowed');
+        if (name.match(/[^A-Za-z0-9 ]/)) return res.status(400).send('Special character in full name is not allowed');
         let _user = await req.client.database._user.findById(_token);
         if (_user) {
             let user_exists = await req.client.database.user.exists({ username });
