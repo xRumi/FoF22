@@ -14,6 +14,4 @@ module.exports = mongoose.model("user", new mongoose.Schema({
     friends: { type: Array, default: [] },
     rooms: { type: Array, default: [] },
 
-    activity_status: { type: String, default: 'offline' }
-
 }) );

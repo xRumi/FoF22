@@ -97,20 +97,6 @@ app.get('*', (req, res) => {
     res.render('404');
 });
 
-const func = async () => {
-    //const room = await client.database.functions.get_message_room('61cc4c4363fd215377b41da1');
-    //const room = await client.database.functions.create_room('console', ['rumi', 'system']);
-    //const room = await client.database.room.find({ type: 'private', members: {$in: ['1234', '5678']} });
-    //console.log(await client.database.chat.findById('61d00496cd80afdc9c2e7242'));
-    const friend = await client.database.functions.get_user('shanto');
-    const user = await client.database.functions.get_user('rumi');
-    user.friends = [friend.username];
-    await user.save();
-    console.log(user);
-}
-
-//func();
-
 const server = http.listen(process.env.PORT || 80, () => {
     console.log('server is running on port', server.address().port);
 });
