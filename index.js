@@ -17,8 +17,6 @@ const logger = require("morgan");
 
 app.use(logger("dev"));
 
-// mongodb://uiovm4harlqdnivtyta2:LS1tyebp4rqh6rvDtrnL@bvy91rqyhikvvsm-mongodb.services.clever-cloud.com:27017/bvy91rqyhikvvsm
-
 mongoose.connect('mongodb+srv://main:iVAFZ0z5YDcHf5jm@cluster0.pcm42.mongodb.net/main?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true }).catch((err) => {
     return console.log(`MongoDB database error: ${err}`);
 });
