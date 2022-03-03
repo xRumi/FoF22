@@ -11,7 +11,7 @@ router.get('/', async (req, res) => {
 router.post('/post', async (req, res) => {
     const email = req.body.email;
     if (email && email.match(/^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i)) {
-        let _user = await req.client.database._user.exists({ email });
+        let _user = await req.client.database._user.findOne({ email });
         if (!_user) {
             _user = await req.client.database.user.exists({ email });
             if (_user) return res.status(400).send('Email address is not available');
