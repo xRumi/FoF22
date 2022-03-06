@@ -1,7 +1,15 @@
 const router = require('express').Router(),
     passport = require('passport');
 
-router.post('/local', async (req, res, next) => {
+const rateLimit = require('express-rate-limit');
+
+const limiter = rateLimit({
+	windowMs: 60 * 1000,
+	max: 8,
+	message: 'Too many requests',
+});
+
+router.post('/local', limiter, async (req, res, next) => {
     const returnTo = req.query.ref ? req.query.ref : '/';
     if (req.user) res.status(200).json({ message: 'user already logged in', returnTo });
     else passport.authenticate('local', (err, user, info) => {

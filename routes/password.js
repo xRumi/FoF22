@@ -7,13 +7,20 @@ const mongoose = require('mongoose'),
 const humanize_duration = require("humanize-duration");
 const ObjectID = require("mongodb").ObjectID;
 
+const rateLimit = require('express-rate-limit');
 
 router.get('/forgot-password', async (req, res) => {
     if (!req.user) res.render("forgot-password");
     else res.redirect('/');
 });
 
-router.post('/forgot-password/post', async (req, res) => {
+const limiter1 = rateLimit({
+	windowMs: 15 * 60 * 1000,
+	max: 5,
+	message: 'Too many requests',
+});
+
+router.post('/forgot-password/post', limiter1, async (req, res) => {
     const user = req.body.email ? await req.client.database.functions.get_user_by_email(req.body.email) : false;
     if (user) {
         const token = await req.client.database.functions.create_token(user.username);
@@ -29,7 +36,13 @@ router.post('/forgot-password/post', async (req, res) => {
     res.sendStatus(200);
 });
 
-router.get('/reset-password', async (req, res) => {
+const limiter2 = rateLimit({
+	windowMs: 60 * 1000,
+	max: 8,
+	message: 'Too many requests',
+});
+
+router.get('/reset-password', limiter2, async (req, res) => {
     if (!req.user) {
         if (req.query.token && ObjectID.isValid(req.query.token)) {
             let token = await req.client.database.token.findById(req.query.token);
@@ -45,7 +58,13 @@ router.get('/reset-password', async (req, res) => {
     } else res.redirect('/');
 });
 
-router.post('/reset-password/post', async (req, res) => {
+const limiter3 = rateLimit({
+	windowMs: 60 * 1000,
+	max: 10,
+	message: 'Too many requests',
+});
+
+router.post('/reset-password/post', limiter3, async (req, res) => {
     let _token = req.body.token,
         password = req.body.password;
     if (_token && password?.length >= 8 && ObjectID.isValid(_token)) {
@@ -61,7 +80,7 @@ router.post('/reset-password/post', async (req, res) => {
                     let filter = {'session':{'$regex': '.*"user":"'+user.username+'".*'}};
                     Session.deleteMany(filter, function(err, data) { if (err) console.log(err); });
                     await user.save();
-                    res.status(200).send('Password changed successfully');
+                    res.status(200).send('Password changed successfully, redirecting to login page in 5 seconds');
                 }
             } else {
                 await token.remove();

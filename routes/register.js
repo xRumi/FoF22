@@ -3,12 +3,20 @@ const ObjectID = require("mongodb").ObjectID;
 
 const router = require('express').Router();
 
+const rateLimit = require('express-rate-limit');
+
 router.get('/', async (req, res) => {
     if (!req.user) res.render('register');
     else res.redirect('/');
 });
 
-router.post('/post', async (req, res) => {
+const limiter1 = rateLimit({
+	windowMs: 15 * 60 * 1000,
+	max: 5,
+	message: 'Too many requests',
+});
+
+router.post('/post', limiter1, async (req, res) => {
     const email = req.body.email;
     if (email && email.match(/^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i)) {
         let _user = await req.client.database._user.findOne({ email });
@@ -40,7 +48,13 @@ router.post('/post', async (req, res) => {
     } else res.status(400).send('Invalid data was provided');
 });
 
-router.get('/confirm', async (req, res) => {
+const limiter2 = rateLimit({
+	windowMs: 60 * 1000,
+	max: 8,
+	message: 'Too many requests',
+});
+
+router.get('/confirm', limiter2, async (req, res) => {
     if (!req.user) {
         if (req.query.token && ObjectID.isValid(req.query.token)) {
             let _user = await req.client.database._user.findById(req.query.token);
@@ -54,7 +68,13 @@ router.get('/confirm', async (req, res) => {
     } else res.redirect('/');
 });
 
-router.post('/confirm/post', async (req, res) => {
+const limiter3 = rateLimit({
+	windowMs: 60 * 1000,
+	max: 10,
+	message: 'Too many requests',
+});
+
+router.post('/confirm/post', limiter3, async (req, res) => {
     console.log
     let username = req.body.username?.toLowerCase(),
         name = req.body.name,
@@ -70,7 +90,7 @@ router.post('/confirm/post', async (req, res) => {
             let user = await req.client.database.functions.create_user(username, _user.email, password, name);
             if (user) {
                 await _user.remove();
-                res.status(200).send('Password changed successfully, redirecting to login page in 5 secs');  
+                res.status(200).send('Password changed successfully, redirecting to login page in 5 seconds');  
             } else res.status(400).send('Error activating account, try again later');
         } else res.status(400).send('Invalid token was provided');
     } else res.status(400).send('Invalid data was provided');

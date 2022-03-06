@@ -3,3 +3,7 @@
     top: 165px;
     right: 25px;
 }
+
+#remember {
+    border-color: unset;
+}
