@@ -19,6 +19,7 @@
     "express-session": "^1.17.2",
     "http": "^0.0.1-security",
     "humanize-duration": "^3.27.1",
+    "helmet": "^5.0.2",
     "mongodb": "^4.4.1",
     "mongoose": "^6.2.4",
     "morgan": "^1.10.0",
