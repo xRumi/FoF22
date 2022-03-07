@@ -12,11 +12,17 @@ router.get('/', async (req, res) => {
 
 const limiter1 = rateLimit({
 	windowMs: 15 * 60 * 1000,
-	max: 5,
+	max: 4,
 	message: 'Too many requests',
 });
 
-router.post('/post', limiter1, async (req, res) => {
+const _limiter1 = rateLimit({
+    windowMs: 24 * 60 * 60 * 1000,
+    max: 15,
+    message: 'Too many requests'
+})
+
+router.post('/post', limiter1, _limiter1, async (req, res) => {
     const email = req.body.email;
     if (email && email.match(/^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i)) {
         let _user = await req.client.database._user.findOne({ email });
