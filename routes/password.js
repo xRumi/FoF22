@@ -20,7 +20,13 @@ const limiter1 = rateLimit({
 	message: 'Too many requests',
 });
 
-router.post('/forgot-password/post', limiter1, async (req, res) => {
+const _limiter1 = rateLimit({
+    windowMs: 24 * 60 * 60 * 1000,
+    max: 15,
+    message: 'Too many requests'
+});
+
+router.post('/forgot-password/post', limiter1, _limiter1, async (req, res) => {
     const user = req.body.email ? await req.client.database.functions.get_user_by_email(req.body.email) : false;
     if (user) {
         const token = await req.client.database.functions.create_token(user.username);
