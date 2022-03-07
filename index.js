@@ -12,14 +12,9 @@ const passport = require('passport'),
     routes = require('./routes/');
 
 const path = require('path'),
-    logger = require("morgan"),
-    helmet = require('helmet');
+    logger = require("morgan");
 
 app.set('trust proxy', true);
-app.use(helmet({
-    crossOriginOpenerPolicy: false,
-    originAgentCluster: false
-}));
 
 app.use(logger("dev"));
 
