@@ -1,10 +1,9 @@
 const compression = require('compression'),
     express = require('express'),
     session = require('express-session'),
-    app = express();
-    
-const http = require('http').Server(app);
-const io = require('socket.io')(http);
+    app = express(),
+    http = require('http').Server(app),
+    io = require('socket.io')(http);
 
 const passport = require('passport'),
     mongoose = require("mongoose"),
@@ -12,8 +11,12 @@ const passport = require('passport'),
     local_strategy = require('./strategies/local'),
     routes = require('./routes/');
 
-const path = require('path');
-const logger = require("morgan");
+const path = require('path'),
+    logger = require("morgan"),
+    helmet = require('helmet');
+
+app.set('trust proxy', true);
+app.use(helmet());
 
 app.use(logger("dev"));
 

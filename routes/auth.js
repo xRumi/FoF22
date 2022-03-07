@@ -9,7 +9,13 @@ const limiter = rateLimit({
 	message: 'Too many requests',
 });
 
-router.post('/local', limiter, async (req, res, next) => {
+const _limiter = rateLimit({
+    windowMs: 24 * 60 * 60 * 1000,
+    max: 100,
+    message: 'Too many requests, make sure you are not behind a proxy'
+});
+
+router.post('/local', limiter, _limiter, async (req, res, next) => {
     const returnTo = req.query.ref ? req.query.ref : '/';
     if (req.user) res.status(200).json({ message: 'user already logged in', returnTo });
     else passport.authenticate('local', (err, user, info) => {
