@@ -2,8 +2,10 @@
     position: absolute;
     top: 165px;
     right: 25px;
+    text-decoration: none;
 }
 
 #remember {
     border-color: unset;
 }
+
