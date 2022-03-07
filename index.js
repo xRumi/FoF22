@@ -16,7 +16,10 @@ const path = require('path'),
     helmet = require('helmet');
 
 app.set('trust proxy', true);
-app.use(helmet());
+app.use(helmet({
+    crossOriginOpenerPolicy: false,
+    originAgentCluster: false
+}));
 
 app.use(logger("dev"));
 
