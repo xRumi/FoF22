@@ -15,6 +15,18 @@ router.get('/', async (req, res) => {
     } else res.status(403).redirect('/login');
 });
 
+router.get('/spa', async (req, res) => {
+    if (req.user) {
+        res.render("spa");
+    } else res.status(403).redirect('/login');
+});
+
+router.get('/spa/*', async (req, res) => {
+    if (req.user) {
+        res.render("spa");
+    } else res.status(403).redirect('/login');
+});
+
 router.get('/friends/fetch', async (req, res) => {
     if (req.user) {
         let friends = await req.client.cache.functions.get_friends(req.user.friends);
