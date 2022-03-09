@@ -214,3 +214,9 @@ img {
     float: left;
     margin-right: 5px;
 }
+
+#menu__app .card .card-body {
+    padding: 0;
+}
+
+
