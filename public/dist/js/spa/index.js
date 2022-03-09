@@ -17,7 +17,6 @@ const getParams = match => {
 };
 
 const navigateTo = url => {
-    console.log(url);
     history.pushState(null, null, url);
     router();
 };

@@ -12,6 +12,6 @@ export default class extends Constructor {
     }
 
     async getHtml() {
-        return `this is home page <index></index>`;
+        return `this is home page`;
     }
 }

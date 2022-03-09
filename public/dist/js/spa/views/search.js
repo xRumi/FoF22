@@ -12,6 +12,6 @@ export default class extends Constructor {
     }
 
     async getHtml() {
-        return `thia is search page`;
+        return `this is search page`;
     }
 }
