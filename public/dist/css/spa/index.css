@@ -49,12 +49,6 @@ a {
   text-decoration: none;
 }
 
-#app {
-  height: 100vh;
-  width: 100%;
-  background-size: cover;
-}
-
 img {
   display: inline;
   margin: 0 auto;
@@ -62,21 +56,32 @@ img {
   width: auto;
 }
 
-.header {
+.nav {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  background-color: var(--container-color);
-  z-index: var(--z-fixed);
-  transition: .4s;
-}
-
-.nav {
-  display: block;
+  display: flex;
   box-shadow: 0 1px 12px hsla(var(--hue), var(--sat), 15%, 0.15);
   justify-content: space-between;
   align-items: center;
+  z-index: var(--z-fixed);
+}
+
+.nav__back {
+    width: 100%;
+}
+
+.nav__back a {
+    pointer-events: pointed;
+    color: black;
+}
+
+.nav__back i {
+    float: left;
+}
+.nav__back span {
+    font-weight: lighter;
 }
 
 .nav__img {
@@ -118,6 +123,14 @@ img {
     align-content: center;
     border-radius: 1.25rem 1.25rem 0 0;
     transition: .4s;
+  }
+  .nav__back i {
+      font-size: 30px;
+      margin-left: 10px;
+      margin-right: 15px;
+  }
+  .nav__back span {
+      font-size: 20px;
   }
 }
 
@@ -173,8 +186,17 @@ img {
 }
 
 @media screen and (min-width: 767px) {
-  .nav, .header {
+  .nav {
+    display: flex-end;
     height: calc(var(--header-height) + 1.5rem);
+  }
+  .nav__back i {
+      font-size: 40px;
+      margin-left: 10px;
+      margin-right: 20px;
+  }
+  .nav__back span {
+      font-size: 30px;
   }
   #app {
       margin-top: calc(var(--header-height) + 1.5rem);
@@ -184,7 +206,6 @@ img {
   }
   .nav__img {
       left: -15px;
-      top: -45px;
       width: 50px;
       height: 50px;
       float: right;
@@ -215,8 +236,7 @@ img {
     margin-right: 5px;
 }
 
-#menu__app .card .card-body {
+.no-padding {
     padding: 0;
 }
-
 

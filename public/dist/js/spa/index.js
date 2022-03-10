@@ -4,6 +4,8 @@ import Messages from "./views/messages.js";
 import Search from "./views/search.js";
 import Menu from "./views/menu.js";
 
+// menu
+import Settings from "./views/menu/settings.js";
 
 const pathToRegex = path => new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
 
@@ -27,7 +29,9 @@ const router = async () => {
         { path: "/spa/profile", view: Profile },
         { path: "/spa/messages", view: Messages },
         { path: "/spa/search", view: Search },
-        { path: "/spa/menu", view: Menu }
+        { path: "/spa/menu", view: Menu },
+        // menu
+        { path: "/spa/menu/settings", view: Settings }
     ];
 
     const potentialMatches = routes.map(route => {
@@ -53,9 +57,29 @@ const router = async () => {
 
 window.addEventListener("popstate", router);
 
-$('a[data-link]').click(e => {
+$('*').on('click', 'a[data-link]', e => {
     e.preventDefault();
     navigateTo($(e.currentTarget).attr('href'));
 });
+
+$.fn.nav__back = (show, url) => {
+    if (show) {
+        $('#nav').hide();
+        $('#nav__back').show();
+        $('.nav__back a').attr('href', url);
+    } else {
+        $('#nav__back').hide();
+        $('#nav').show();
+    }
+}
+
+$.fn.nav = (id, show) => {
+    const nl = $(id);
+    if (nl && !nl.hasClass('nav__active')) {
+        $('.nav__active').removeClass('nav__active');
+        nl.addClass('nav__active');
+    }
+    if (show) $.fn.nav__back(false);
+}
 
 $(document).ready(() => router());

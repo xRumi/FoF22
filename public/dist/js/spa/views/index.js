@@ -4,11 +4,7 @@ export default class extends Constructor {
     constructor(params) {
         super(params);
         this.setTitle("Home");
-        const nh = $('#nav__link__home');
-        if (!nh.hasClass('nav__active')) {
-            $('.nav__active').removeClass('nav__active');
-            nh.addClass('nav__active');
-        }
+        $.fn.nav('#nav__link__home', true);
     }
 
     async getHtml() {

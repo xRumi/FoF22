@@ -1,16 +1,8 @@
-<!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
-        <link rel="stylesheet" href="/dist/css/spa/index.css">
-        <title>FoF22</title>
-    </head>
-    <body>
-        <header>
-            <nav id="nav" class="nav">
+export default class Navbar extends HTMLElement {
+    constructor() {
+        super();
+        this.innerHTML = `
+            <nav class="nav">
                 <a href="#" class="nav__logo">FoF22</a>
                 <div class="nav__menu" id="nav-menu">
 
@@ -55,20 +47,14 @@
                     <img src="/dist/img/profile/rumi.png" alt="">
                 </div>
             </nav>
-            <nav id="nav__back" class="nav" style="display: none;">
-                <div class="nav__back">
-                    <a href="/spa" data-link>
-                        <i class="bx bx-arrow-back"></i>
-                        <span>Settings</span>
-                    </a>
-                </div>
-            </nav>
-        </header>
+        `;
+        $('.nav a[data-link]').off('click');
+        $('.nav a[data-link]').on('click', e => {
+            e.preventDefault();
+            $.fn.navigateTo($(e.currentTarget).attr('href'));
+        });
 
-        <main id="app">
+    }
+}
 
-        </main>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <script type="module" src="/dist/js/spa/index.js"></script>
-    </body>
-</html>
+customElements.define("nav-bar", Navbar);
