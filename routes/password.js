@@ -1,9 +1,5 @@
 const router = require('express').Router();
-
-const mongoose = require('mongoose'),
-    Schema = mongoose.Schema,
-    Session = mongoose.model('Session', new Schema(), 'sessions');
-
+const Session = require('../models/Session.js');
 const humanize_duration = require("humanize-duration");
 const ObjectID = require("mongodb").ObjectID;
 

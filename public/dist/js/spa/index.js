@@ -7,6 +7,10 @@ import Menu from "./views/menu.js";
 // menu
 import Settings from "./views/menu/settings.js";
 
+// menu > settings
+import AccountSettings from "./views/menu/settings/account.js";
+import ChangePassword from "./views/menu/settings/change-password.js"
+
 const pathToRegex = path => new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
 
 const getParams = match => {
@@ -29,9 +33,11 @@ const router = async () => {
         { path: "/spa/profile", view: Profile },
         { path: "/spa/messages", view: Messages },
         { path: "/spa/search", view: Search },
+
         { path: "/spa/menu", view: Menu },
-        // menu
-        { path: "/spa/menu/settings", view: Settings }
+        { path: "/spa/menu/settings", view: Settings },
+        { path: "/spa/menu/settings/account", view: AccountSettings },
+        { path: "/spa/menu/settings/change-password", view: ChangePassword }
     ];
 
     const potentialMatches = routes.map(route => {
@@ -49,7 +55,10 @@ const router = async () => {
             result: [location.pathname]
         };
     }
-
+    if ($.fn.cleanup) {
+        $.fn.cleanup();
+        $.fn.cleanup = null;
+    }
     const view = new match.route.view(getParams(match));
 
     document.querySelector("#app").innerHTML = await view.getHtml();
@@ -57,12 +66,13 @@ const router = async () => {
 
 window.addEventListener("popstate", router);
 
-$('*').on('click', 'a[data-link]', e => {
+$('body').on('click', 'a[data-link]', e => {
     e.preventDefault();
     navigateTo($(e.currentTarget).attr('href'));
 });
 
-$.fn.nav__back = (show, url) => {
+$.fn.nav__back = (show, title, url) => {
+    if (title) $('.nav__back a span').text(title);
     if (show) {
         $('#nav').hide();
         $('#nav__back').show();

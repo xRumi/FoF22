@@ -1,12 +1,14 @@
 const router = require('express').Router();
+const Session = require('../models/Session.js');
 
-const mongoose = require('mongoose'),
-    Schema = mongoose.Schema,
-    Session = mongoose.model('Session', new Schema(), 'sessions');
-
-router.get('/', (req, res) => {
-    if (req.user) res.render("account", { user: req.user });
-    else res.redirect('/login');
+router.get('/info', async (req, res) => {
+    if (req.user) {
+        res.status(200).json({
+            username: req.user.username,
+            name: req.user.name,
+            email: req.user.email,
+        });
+    } else res.status(403).send('forbidden');
 });
 
 router.post('/update/info', async (req, res) => {
@@ -62,17 +64,15 @@ router.post('/update/password', async (req, res) => {
             if (new_pass.length > 5 && new_pass.length < 21) {
                 req.user.password = new_pass;
                 await req.user.save();
-                res.status(200).json({
-                    messages: [
-                        {
-                            message: 'password successfully changed',
-                            status: 'success'
-                        }
-                    ]
+                await req.session.destroy();
+                var filter = {'session':{'$regex': '.*"user":"'+req.user.username+'".*'}};
+                Session.deleteMany(filter, function(err, data) {
+                    if (err) console.log(err);
                 });
-            } else res.status(400).send ( 'invalid data' );
-        } else res.status(401).send( 'password is incorrect' );
-    } else res.status(403).send( 'forbidden' )
+                res.status(200).send('password successfully changed');
+            } else res.status(400).send ('invalid data');
+        } else res.status(401).send('password is incorrect');
+    } else res.status(403).send('forbidden')
 });
 
 router.post('/force_logout', async (req, res) => {
