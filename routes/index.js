@@ -4,7 +4,7 @@ const router = require('express').Router(),
     messages = require('./messages'),
     search = require('./search'),
     settings = require('./settings'),
-    password = require('./reset-password'),
+    password = require('./password'),
     register = require('./register'),
     admin = require('./admin');
 

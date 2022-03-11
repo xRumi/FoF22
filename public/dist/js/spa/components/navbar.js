@@ -1,64 +1,60 @@
-<!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
-        <link rel="stylesheet" href="dist/css/index.css">
-        <title>Spa</title>
-    </head>
-    <body>
-        <header class="header" id="header">
+export default class Navbar extends HTMLElement {
+    constructor() {
+        super();
+        this.innerHTML = `
             <nav class="nav">
                 <a href="#" class="nav__logo">FoF22</a>
                 <div class="nav__menu" id="nav-menu">
 
                     <ul class="nav__list">
                         <li class="nav__item">
-                            <a href="#" class="nav__link nav__active">
+                            <a id="nav__link__home" href="/spa" class="nav__link" data-link>
                                 <i class='bx bx-home-alt nav__icon'></i>
                                 <span class="nav__name">Home</span>
                             </a>
                         </li>
                         
                         <li class="nav__item">
-                            <a href="#" class="nav__link">
+                            <a id="nav__link__profile" href="/spa/profile" class="nav__link" data-link>
                                 <i class='bx bx-user nav__icon'></i>
                                 <span class="nav__name">Profile</span>
                             </a>
                         </li>
 
                         <li class="nav__item">
-                            <a href="#" class="nav__link">
+                            <a id="nav__link__messages" href="/spa/messages" class="nav__link" data-link>
                                 <i class='bx bx-chat nav__icon'></i>
                                 <span class="nav__name">Messages</span>
                             </a>
                         </li>
 
                         <li class="nav__item">
-                            <a href="#" class="nav__link">
+                            <a id="nav__link__search" href="/spa/search" class="nav__link" data-link>
                                 <i class='bx bx-search nav__icon'></i>
                                 <span class="nav__name">Search</span>
                             </a>
                         </li>
 
                         <li class="nav__item">
-                            <a href="#" class="nav__link">
-                                <i class='bx bx-menu nav__icon'></i>
+                            <a id="nav__link__menu" href="/spa/menu" class="nav__link" data-link>
+                                <i class='bx bx-cog nav__icon'></i>
                                 <span class="nav__name">Menu</span>
                             </a>
                         </li>
                     </ul>
                 </div>
                 <div class="nav__img">
-                    <img src="dist/img/profile/rumi.png" alt="">
+                    <img src="/dist/img/profile/rumi.png" alt="">
                 </div>
             </nav>
-        </header>
+        `;
+        $('.nav a[data-link]').off('click');
+        $('.nav a[data-link]').on('click', e => {
+            e.preventDefault();
+            $.fn.navigateTo($(e.currentTarget).attr('href'));
+        });
 
-        <main>
+    }
+}
 
-        </main>
-        <script type="module" src="/dist/js/index.js"></script>
-    </body>
-</html>
+customElements.define("nav-bar", Navbar);
