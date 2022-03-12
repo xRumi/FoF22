@@ -1,13 +1,14 @@
 import Index from "./views/index.js";
 import Profile from "./views/profile.js";
-import Messages from "./views/messages.js";
 import Search from "./views/search.js";
-import Menu from "./views/menu.js";
+
+// messages
+import Messages from "./views/messages.js";
+import Message from "./views/messages/message.js"
 
 // menu
+import Menu from "./views/menu.js";
 import Settings from "./views/menu/settings.js";
-
-// menu > settings
 import AccountSettings from "./views/menu/settings/account.js";
 import ChangePassword from "./views/menu/settings/change-password.js"
 
@@ -31,7 +32,10 @@ const router = async () => {
     const routes = [
         { path: "/spa", view: Index },
         { path: "/spa/profile", view: Profile },
+
         { path: "/spa/messages", view: Messages },
+        { path: "/spa/messages/:id", view: Message },
+
         { path: "/spa/search", view: Search },
 
         { path: "/spa/menu", view: Menu },
