@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Console</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            transition: all .3s ease;
+        }
+
+        html, body {
+            background: #eee;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        main {
+            width: calc(100% - 20px);
+            margin: 0 auto;
+        }
+
+        h1 {
+            margin: 0;
+            padding: 10px 0;
+            font-size: 32px;
+        }
+
+        .chat {
+            content: '';
+            width: 100%;
+            height: calc(100vh - 165px);
+            background: white;
+            padding: 5px 10px;
+            overflow: scroll;
+            overflow-x: hidden;
+        }
+
+        .chat p {
+            margin: 0 0 5px 0;
+        }
+
+        input, button {
+            width: 100%;
+            font: inherit;
+            background: #fff;
+            border: none;
+            margin-top: 10px;
+            padding: 5px 10px;
+        }
+
+        button:hover {
+            cursor: pointer;
+            background: #ddd;
+        }
+
+        @media all and (min-width: 500px) {
+            .chat {
+                height: calc(100vh - 140px);
+            }
+            input {
+                width: calc(100% - 160px);
+            }
+            button {
+                float: right;
+                width: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Debug Console</h1>
+        <section id="chat" class="chat"></section>
+        <form class="form" autocomplete="off">
+          <input type="text" id="code" placeholder="Run javascript code" required autofocus>
+          <button type="submit" id="sub-btn" disabled>Run</button>
+        </form>
+    </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        $.fn.isValid = function() {
+            return this[0].checkValidity();
+        }
+        const chat = document.getElementById("chat");
+        $('.form').submit(function(e) {
+            e.preventDefault();
+            if (!$('.form').isValid()) return false;
+            const code = $("#code").val();
+            if (code == 'clear') {
+                $('#code').val('');
+                return $('.chat').html('');
+            }
+            chat.scrollTop = chat.scrollHeight;
+            $('#sub-btn').html('Running').prop("disabled", true);
+            $('.chat').append(`<p><strong style="color: #388dbc">Admin</strong>: ${code}</p>`);
+            $.ajax({
+                type: 'POST',
+                url: `/admin/console`,
+                data: {
+                    code
+                },
+                timeout: 30000,
+                success: function(result, textStatus, xhr) {
+                    $('.chat').append(`<p><strong style="color: green;">System</strong>: ${result}</p>`);
+                    $('#sub-btn').html('Run').prop("disabled", false);
+                    chat.scrollTop = chat.scrollHeight;
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    $('.chat').append(`<p><strong style="color: red;">System</strong>: ${xhr.responseText || 'error, no response'}</p>`);
+                    $('#sub-btn').html('Run').prop("disabled", false);
+                    chat.scrollTop = chat.scrollHeight;
+                },
+            });
+        });
+        $('#code').on('keyup', function () {
+            if ($("#code").val()) $('#sub-btn').prop("disabled", false);
+            else $('#sub-btn').prop("disabled", true);
+        });
+    </script>
+</body>
+</html>

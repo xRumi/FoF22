@@ -1,6 +1,6 @@
 {
   "name": "fof22",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Friends of Friends 2022",
   "main": "index.js",
   "scripts": {

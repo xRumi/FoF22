@@ -6,15 +6,12 @@ const router = require('express').Router(),
     settings = require('./settings'),
     password = require('./reset-password'),
     register = require('./register'),
-    admin = require('./admin');
+    debug = require('./debug');
 
 const account = require('./account');
 
 router.get('/', async (req, res) => {
-    if (req.user) {
-        let friends = await req.client.cache.functions.get_friends(req.user.friends);
-        res.render("index", { user: req.user, friends, route: 'home' });
-    } else res.status(403).redirect('/login');
+    res.render("index");
 });
 
 router.get('/spa', async (req, res) => {
@@ -43,12 +40,12 @@ router.use('/search', search);
 router.use('/settings', settings);
 router.use('/', password);
 router.use('/register', register);
-router.use('/admin', admin);
+router.use('/debug', debug);
 router.use('/account', account);
 
 router.get('/login', async (req, res) => {
     if (!req.user) res.render("login");
-    else res.redirect('/');
+    else res.redirect('/spa');
 });
 
 router.get('/logout', async (req, res) => {

@@ -4,7 +4,6 @@ import Search from "./views/search.js";
 
 // messages
 import Messages from "./views/messages.js";
-import Message from "./views/messages/message.js"
 
 // menu
 import Menu from "./views/menu.js";
@@ -32,10 +31,7 @@ const router = async () => {
     const routes = [
         { path: "/spa", view: Index },
         { path: "/spa/profile", view: Profile },
-
         { path: "/spa/messages", view: Messages },
-        { path: "/spa/messages/:id", view: Message },
-
         { path: "/spa/search", view: Search },
 
         { path: "/spa/menu", view: Menu },

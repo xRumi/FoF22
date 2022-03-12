@@ -51,7 +51,6 @@ a {
 
 img {
     display: inline;
-    margin: 0 auto;
     height: 100%;
     width: auto;
 }
@@ -326,6 +325,8 @@ img {
 }
 
 .conversation-area {
+	display: flex;
+	flex-direction: column;
 	border-right: 1px solid var(--border-color);
 	overflow-y: auto;
 	overflow-x: hidden;
@@ -636,14 +637,10 @@ img {
 
 @media (max-width: 767px) {
 	.conversation-area {
-		display: none;
+		width: 100%;
 	}
     .chat-area {
         display: none;
-    }
-    .conversation-area {
-        display: block;
-        width: 100%;
     }
     .chat-area-footer {
         display: none;
