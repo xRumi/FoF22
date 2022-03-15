@@ -85,9 +85,6 @@ module.exports = (client) => {
             } else return false;
         }
     }
-    client.database.functions.get_chat = async (room_id) => {
-        return await client.database.chat.findOne({ room_id });
-    }
     client.database.functions.find_common_room = async ( _user1, _user2, is_private = true ) => {
         return await client.database.room.findOne({ type: is_private ? 'private' : 'public', members: { $in: [_user1, _user2] } });
     }

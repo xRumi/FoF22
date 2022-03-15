@@ -101,7 +101,7 @@
             $('.chat').append(`<p><strong style="color: #388dbc">Admin</strong>: ${code}</p>`);
             $.ajax({
                 type: 'POST',
-                url: `/admin/console`,
+                url: `/debug/js`,
                 data: {
                     code
                 },

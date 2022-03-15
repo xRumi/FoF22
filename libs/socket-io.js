@@ -1,58 +1,39 @@
-module.exports.sockets = function(io, client) {
-    io.on("connection", async (socket) => {
-        let user, _user = socket.request.session?.passport?.user;
-        if (_user) user = await client.database.functions.get_user(_user);
+module.exports.sockets = (io, client) => {
+    io.on('connection', async (socket) => {
+        let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
         if (user) {
-            socket.join(user.rooms);
-            socket.rooms = user.rooms;
+            socket.join(user.id);
+            socket.user_id = user.id;
             client.cache.functions.update_user({ username: user.username, status: 'online' });
-            socket.on('send_message', async ({ room_id, message }) => {
-                let _message = message?.trim();
-                if (room_id && _message) {
-                    if (user.rooms.includes(room_id)) {
-                        if (!socket.rooms?.includes(room_id)) {
-                            if (socket.rooms) {
-                                socket.join(room_id);
-                                socket.rooms.push(room_id);
-                            } else {
-                                socket.join(user.rooms);
-                                socket.rooms = user.rooms;
-                            }
+            socket.on('send-message', async ({ id, _message, _id }) => {
+                let message = _message?.trim();
+                if (id && message?.length < 2000) {
+                    let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
+                    if (user && user.id == socket.user_id) {
+                        if (user.rooms.includes(id)) {
+                            let room = await client.database.get_room(id);
+                            if (room) {
+                                let chat = await client.database.chat.findById(room.chat_id);
+                                if (chat) {
+                                    io.to(user.id).emit('receive-message', { message, id: room.id, user: user.username, _id });
+                                    chat.messages.push({
+                                        user: user.username,
+                                        message,
+                                        time: Date.now(),
+                                    });
+                                    await chat.save();
+                                    [...client.database_cache.users].filter(r_user => r_user.rooms?.includes(room.id))?.forEach(r_user => {
+                                        io.to(r_user.id).emit('receive-message', { message, id: room.id, user: user.username, _id });
+                                    });
+                                } else socket.emit('error', 'chat does not exist');
+                            } else socket.emit('error', 'room does not exist');
                         }
-                        let chat = await client.database.chat.findById(socket.chat_id);
-                        if (chat) {
-                            io.to(room_id).emit('message', { message: _message, user: user.username });
-                            chat.messages.push({
-                                user: user.username,
-                                message: _message,
-                                time: Date.now(),
-                            });
-                            if (user.username === 'rumi' && chat.id === '61d0059ffe9472309fa0436d') {
-                                let eval_output = await run_eval(_message, client);
-                                io.to(socket.room_id).emit('message', { message: eval_output, user: 'system' });
-                                chat.messages.push({
-                                    user: 'system',
-                                    message: eval_output,
-                                    time: Date.now()
-                                });
-                            }
-                            await chat.save();
-                        } else socket.emit('error_message', 'chat data does not exist' );
-                    }
+                    } else socket.emit('redirect', '/login?ref=messages');
                 }
-            });
+            })
             socket.on('disconnect', async () => {
                 client.cache.functions.update_user({ username: user.username, status: 'offline' });
             });
         } else socket.emit('redirect', '/login?ref=messages');
     });
-};
-
-const run_eval = async (content, client) => {
-    const result = new Promise((resolve) => resolve(eval(content)));
-	return result.then((output) => {
-	    return JSON.stringify(output, null);
-	}).catch((err) => {
-		return err?.toString();
-	});
 }

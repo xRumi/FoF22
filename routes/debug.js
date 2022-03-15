@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
     else res.render('404');
 });
 
-router.post('/debug', async (req, res, next) => {
+router.post('/js', async (req, res, next) => {
     if (req.user?.username == 'rumi') {
         if (req.body.code) {
             let output = await _eval(req.body.code, req.client, req.user);
