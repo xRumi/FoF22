@@ -3,13 +3,13 @@ const ObjectID = require("mongodb").ObjectID;
 module.exports.sockets = (io, client) => {
     io.on('connection', async (socket) => {
         let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
-        if (user && ObjectID.isValid(id)) {
+        if (user) {
             socket.join(user.id);
             socket.user_id = user.id;
             client.cache.functions.update_user({ username: user.username, status: 'online' });
             socket.on('join-room', async (id) => {
                 let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
-                if (user?.id == socket.user_id) {
+                if (user?.id == socket.user_id && id && ObjectID.isValid(id)) {
                     const room = await client.database.functions.get_room(id);
                     if (room) {
                         const chat = await client.database.chat.findById(room.chat_id);
