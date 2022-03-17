@@ -8,7 +8,7 @@ module.exports.sockets = (io, client) => {
             socket.on('join-room', async (id) => {
                 let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
                 if (user?.id == socket.user_id) {
-                    const room = await client.database.get_room(id);
+                    const room = await client.database.functions.get_room(id);
                     if (room) {
                         const chat = await client.database.chat.findById(room.chat_id);
                         if (chat) {
