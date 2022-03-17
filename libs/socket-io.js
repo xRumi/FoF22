@@ -1,7 +1,9 @@
+const ObjectID = require("mongodb").ObjectID;
+
 module.exports.sockets = (io, client) => {
     io.on('connection', async (socket) => {
         let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
-        if (user) {
+        if (user && ObjectID.isValid(id)) {
             socket.join(user.id);
             socket.user_id = user.id;
             client.cache.functions.update_user({ username: user.username, status: 'online' });
