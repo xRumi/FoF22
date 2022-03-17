@@ -7,7 +7,8 @@ module.exports = mongoose.model("chat", new mongoose.Schema({
     messages: { type: Array, default: [{
         user: 'system',
         message: `room created`,
-        time: Date.now()
-    }]}
+        time: Date.now(),
+        seen_by: []
+    }]},
 
 }) );
