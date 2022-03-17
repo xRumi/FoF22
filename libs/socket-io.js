@@ -5,7 +5,7 @@ module.exports.sockets = (io, client) => {
             socket.join(user.id);
             socket.user_id = user.id;
             client.cache.functions.update_user({ username: user.username, status: 'online' });
-            socket.io('join-room', async (id) => {
+            socket.on('join-room', async (id) => {
                 let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
                 if (user?.id == socket.user_id) {
                     const room = await client.database.get_room(id);
