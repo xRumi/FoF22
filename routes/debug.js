@@ -2,7 +2,7 @@ const router = require('express').Router();
 
 Function.prototype.toJSON = function() { return "(...)" };
 
-const _eval = async (content, client, user) => {
+const _eval = async (content, client, user, io = req.io) => {
     const result = new Promise((resolve) => resolve(eval(content)));
 	return result.then((output) => {
 	    return JSON.stringify(output);
