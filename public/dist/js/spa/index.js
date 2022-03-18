@@ -66,6 +66,9 @@ const router = async () => {
 
 window.addEventListener("popstate", router);
 
+const socket = io();
+$.fn.socket = socket;
+
 $('body').on('click', 'a[data-link]', e => {
     e.preventDefault();
     navigateTo($(e.currentTarget).attr('href'));
