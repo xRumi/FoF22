@@ -20,12 +20,10 @@ export default class extends Constructor {
                         <div class="people_info">
                             <div class="name_section">
                                 <div class="name">${x.name}</div>
-                                <div class="new_msg_count"></div>
                             </div>
                         </div>
                         <div class="last_msg_section">
                             <div class="last_msg">${x.last_message}</div>
-                            <div class="time_ago">${(Date.now() - x.time)/(60 * 10000)}m</div>
                         </div>
                     </div>
                 `
