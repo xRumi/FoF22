@@ -1,5 +1,5 @@
 const humanize_duration = require("humanize-duration");
-const ObjectID = require("mongodb").ObjectID;
+const ObjectId = require("mongodb").ObjectId;
 
 const router = require('express').Router();
 

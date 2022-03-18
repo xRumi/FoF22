@@ -1,4 +1,4 @@
-const ObjectID = require("mongodb").ObjectID;
+const ObjectId = require("mongodb").ObjectId;
 
 module.exports.sockets = (io, client) => {
     io.on('connection', async (socket) => {
@@ -9,7 +9,7 @@ module.exports.sockets = (io, client) => {
             client.cache.functions.update_user({ username: user.username, status: 'online' });
             socket.on('join-room', async (id) => {
                 let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
-                if (user?.id == socket.user_id && id && ObjectID.isValid(id)) {
+                if (user?.id == socket.user_id && id && ObjectId.isValid(id)) {
                     const room = await client.database.functions.get_room(id);
                     if (room) {
                         const chat = await client.database.chat.findById(room.chat_id);
@@ -18,7 +18,7 @@ module.exports.sockets = (io, client) => {
                             socket.join(room.id);
                             socket.room_id = room.id;
                             socket.chat_id = room.chat_id;
-                            socket.emit('receive-messages', { messages: chat.messages.slice(-10), id });
+                            socket.emit('receive-messages', { user: user.username, messages: chat.messages.slice(-10), id });
                         }
                     }
                 } else socket.emit('redirect', '/login?ref=messages');
@@ -33,14 +33,15 @@ module.exports.sockets = (io, client) => {
                             if (room?.members?.includes(user.id)) {
                                 let chat = await client.database.chat.findById(room.chat_id);
                                 if (chat) {
-                                    chat.messages.push({
+                                    let chat_data = {
                                         user: user.username,
                                         message,
                                         time: Date.now(),
                                         seen_by: []
-                                    });
+                                    };
+                                    chat.messages.push(chat_data);
                                     await chat.save();
-                                    io.to(socket.room_id).emit('receive-message', { message, id: room.id, user: user.username, _id });
+                                    io.to(socket.room_id).emit('receive-message', { user: user.username, id: room.id, chat: chat_data, _id });
                                     [...client.database_cache.users].filter(r_user => r_user.rooms?.includes(room.id))?.forEach(r_user => {
                                         io.to(r_user.id).emit('new-message', { message, id: room.id, user: user.username, _id });
                                     });

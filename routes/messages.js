@@ -17,11 +17,13 @@ router.get('/fetch', async (req, res) => {
                     if (_name[0] == req.user.username) name = _name[1];
                     else name = _name[0];
                 } else name = room.name;
+                let last_message = chat.messages[chat.messages.length - 1];
                 room_data.push({
                     name,
                     id: room.id,
                     image: '/dist/img/profile/system.png',
-                    last_message: chat.messages[chat.messages.length - 1]?.message,
+                    last_message: last_message?.message,
+                    time: last_message?.time
                 });
             }
         }

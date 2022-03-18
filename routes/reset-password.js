@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const Session = require('../models/Session.js');
 const humanize_duration = require("humanize-duration");
-const ObjectID = require("mongodb").ObjectID;
+const ObjectId = require("mongodb").ObjectId;
 
 const rateLimit = require('express-rate-limit');
 
