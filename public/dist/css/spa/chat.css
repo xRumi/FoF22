@@ -1,9 +1,13 @@
+
 /*chat section/*/
 .chat {
 	width: 100%;
 	display: flex;
-	height: 92vh;
+	/*! height: 92vh; */
 	overflow: hidden;
+	flex-direction: row;
+	position: absolute;
+	/*! top: 100px; */
 }
 
 .people {
@@ -143,15 +147,17 @@
 }
 
 .message {
-	height: 94vh;
-	overflow: hidden;
+	/*! height: 88vh; */
+	overflow: auto;
 	overflow-y: scroll;
 
 	flex-grow: 1;
 	background: linear-gradient(white, lightblue, wheat);
+	display: flex;
+	flex-direction: column;
 }
 
-.chat_section {}
+.chat_section {flex-grow: 1;}
 
 .chat_list {
 	display: flex;
@@ -243,7 +249,7 @@
 .input_section {
 	display: flex;
 	width: 100%;
-	padding: 10px 20px;
+	padding: 5px 10px;
 	align-items: center;
 	background-color: #e7f0f4;
 	position: sticky;
@@ -251,6 +257,7 @@
 	justify-content: center;
 	left: 0;
 	box-shadow: 1px 1px 25px 2px #b6bbbd;
+	/*! top: 75vh; */
 }
 
 .input_section img {
@@ -259,18 +266,19 @@
 	cursor: pointer;
 	margin: 10px;
 	transition: 0.1s;
+	height: 20px;
 }
 
 #right_arrow {
 	display: none;
 }
 
-.input_section img:last-child {
-	margin-right: 37px;
+.input_section img:nth-last-child(2){
+	margin-left: 30px;
 }
 
 .input_section img:last-child:hover {
-	margin-right: 35px;
+	/*! margin-right: 35px; */
 }
 
 .input_section img:hover {
@@ -284,17 +292,33 @@
 	padding: 12px;
 	border-radius: 16px;
 	font-size: 15px;
-	margin: 4px 12px;
+	margin: 4px 10px;
 	width: 100%;
 	margin-bottom: 10px;
 	height: 10px;
+	/*! margin-right: 22px; */
 }
 
-@media (max-width: 780px) {
+@media (max-width: 766px) {
+/* 	.input_section{
+		bottom: 100px
+	}
+	.message{
+		height: 90vh
+	}
+	.top_bar{
+		top: 100px
+	} */
 	.people {
 		width: 310px;
+		flex-grow: 1;
+		display:none;
 	}
-
+	.message{
+		height: 90vh;
+/* 		display: none */
+		/*! margin-top: 100px */
+	}
 	.people_info {
 		width: 180px;
 	}

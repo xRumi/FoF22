@@ -21,10 +21,11 @@ export default class extends Constructor {
                             <div class="name_section">
                                 <div class="name">${x.name}</div>
                             </div>
-                        </div>
-                        <div class="last_msg_section">
+                            <div class="last_msg_section">
                             <div class="last_msg">${x.last_message}</div>
                         </div>
+                        </div>
+                        
                     </div>
                 `
             }).join(''));
