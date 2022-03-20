@@ -7,10 +7,12 @@ module.exports = {
     async init(client) {
 
         passport.serializeUser((user, done) => {
+            console.log('2');
             done(null, user.id);
         });
 
         passport.deserializeUser(async (id, done) => {
+            console.log('3');
             const user = await client.database.functions.get_user(id);
             if (user) done(null, user)
             else {
@@ -27,6 +29,7 @@ module.exports = {
 
         passport.use(
             new Local_strategy(async (username, password, done) => {
+                console.log('4');
                 try {
                     const user = await client.database.functions.get_user_by_username(username?.toLowerCase());
                     if (user && user.status !== 'deleted' && user.username !== 'system') {

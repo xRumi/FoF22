@@ -86,6 +86,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(async function(req, res, next) {
+    console.log('1');
     req.client = client;
     req.io = io;
     next();
