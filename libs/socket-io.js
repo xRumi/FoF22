@@ -16,10 +16,12 @@ module.exports.sockets = (io, client) => {
                     if (room) {
                         const chat = await client.database.chat.findById(room.chat_id);
                         if (chat) {
-                            socket.leave(socket.room_id);
-                            socket.join(room.id);
-                            socket.room_id = room.id;
-                            socket.chat_id = room.chat_id;
+                            if (socket.room_id != room.id) {
+                                socket.leave(socket.room_id);
+                                socket.join(room.id);
+                                socket.room_id = room.id;
+                                socket.chat_id = room.chat_id;
+                            }
                             socket.emit('debug', `user ${user?.username} joined room ${id}`);
                             socket.emit('receive-messages', { user: user.username, messages: chat.messages.slice(-10), id });
                         }
