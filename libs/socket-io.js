@@ -31,7 +31,9 @@ module.exports.sockets = (io, client) => {
             socket.on('send-message', async ({ id, _message, _id }) => {
                 let message = _message?.trim();
                 socket.emit('debug', `user ${user?.username} sending message in room ${id}`);
-                socket.emit('debug', (socket.room_id == id && message?.length < 2000));
+                socket.emit('debug', message);
+                socket.emit('debug', (socket.room_id == id));
+                socket.emit('debug', (message?.length < 2000));
                 if (socket.room_id == id && message?.length < 2000) {
                     let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
                     socket.emit('debug', `message from ${user?.username} in ${id} is being checked 1`);
