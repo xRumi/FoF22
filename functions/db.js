@@ -3,8 +3,6 @@ const ObjectId = require("mongodb").ObjectId;
 module.exports = (client) => {
     // user database function
     client.database.functions.get_user = async ( id ) => {
-        console.log('5');
-        console.log(id);
         if (!id && !ObjectId.isValid(id)) return false;
         let user = client.database_cache.users.get(id);
         if (user) return user;
@@ -17,7 +15,6 @@ module.exports = (client) => {
         }
     }
     client.database.functions.get_user_by_username = async ( username ) => {
-        console.log('6');
         if (username?.length < 3) return false;
         let user;
         for (const [key, value] of client.database_cache.users) if (value.elements?.username == username) user = client.database_cache.users.get(key);
