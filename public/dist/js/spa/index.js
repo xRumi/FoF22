@@ -70,7 +70,6 @@ const socket = io();
 $.fn.socket = socket;
 
 socket.on('redirect', url => window.location.replace(url));
-socket.on('debug', text => console.log(text));
 
 $.fn.cache = {};
 
