@@ -40,7 +40,7 @@ module.exports.sockets = (io, client) => {
                     if (user?.id == socket.user_id) {
                         if (user.rooms.includes(id)) {
                             socket.emit('debug', `message from ${user?.username} in ${id} is being checked 2`);
-                            let room = await client.database.get_room(socket.room_id);
+                            let room = await client.database.functions.get_room(socket.room_id);
                             if (room?.members?.includes(user.id)) {
                                 let chat = await client.database.chat.findById(room.chat_id);
                                 socket.emit('debug', `message from ${user?.username} in ${id} is being checked 3`);
