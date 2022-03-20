@@ -55,7 +55,6 @@ export default class extends Constructor {
                             <div class="chat_msg_section">
                                 <div class="chat_name_time">
                                     <div class="chat_name">${x.user}</div>
-                                    <div class="chat_time">${(Date.now() - x.time)/(60 * 1000)}m</div>
                                 </div>
                                 <div class="chat_message">${x.message}</div>
                             </div>
@@ -72,7 +71,6 @@ export default class extends Constructor {
                         <div class="chat_msg_section">
                             <div class="chat_name_time">
                                 <div class="chat_name">${chat.user}</div>
-                                <div class="chat_time">${(Date.now() - chat.time)/(60 * 1000)}m</div>
                             </div>
                             <div class="chat_message">${chat.message}</div>
                         </div>
