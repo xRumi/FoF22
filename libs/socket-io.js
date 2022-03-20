@@ -33,12 +33,16 @@ module.exports.sockets = (io, client) => {
                 socket.emit('debug', `user ${user?.username} sending message in room ${id}`);
                 if (socket.room_id == id && message?.length < 2000) {
                     let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
+                    socket.emit('debug', `message from ${user?.username} in ${id} is being checked 1`);
                     if (user?.id == socket.user_id) {
                         if (user.rooms.includes(id)) {
+                            socket.emit('debug', `message from ${user?.username} in ${id} is being checked 2`);
                             let room = await client.database.get_room(socket.room_id);
                             if (room?.members?.includes(user.id)) {
                                 let chat = await client.database.chat.findById(room.chat_id);
+                                socket.emit('debug', `message from ${user?.username} in ${id} is being checked 3`);
                                 if (chat) {
+                                    socket.emit('debug', `message from ${user?.username} in ${id} is being checked 4`);
                                     let chat_data = {
                                         user: user.username,
                                         message,
