@@ -25,7 +25,7 @@ const _limiter1 = rateLimit({
 router.post('/forgot-password/post', limiter1, _limiter1, async (req, res) => {
     const user = req.body.email ? await req.client.database.functions.get_user_by_email(req.body.email) : false;
     if (user) {
-        const token = await req.client.database.functions.create_token(user.username);
+        const token = await req.client.database.functions.create_token(user.id);
         req.client.transporter.sendMail({
             from: 'mehedihasanrumi@yahoo.com',
             to: user.email,
@@ -49,7 +49,7 @@ router.get('/reset-password', limiter2, async (req, res) => {
         if (req.query.token && ObjectID.isValid(req.query.token)) {
             let token = await req.client.database.token.findById(req.query.token);
             if (token && token.type == 'reset-token') {
-                let user = await req.client.database.functions.get_user(token.username);
+                let user = await req.client.database.functions.get_user(token.user_id);
                 if (user) res.render("reset-password", { expire: humanize_duration(token.expire_at - Date.now()) });
                 else {
                     await token.remove();
@@ -72,7 +72,7 @@ router.post('/reset-password/post', limiter3, async (req, res) => {
     if (_token && password?.length >= 8 && ObjectID.isValid(_token)) {
         let token = await req.client.database.token.findById(_token);
         if (token && token.expire_at > Date.now()) {
-            let user = await req.client.database.functions.get_user(token.username);
+            let user = await req.client.database.functions.get_user(token.user_id);
             if (user) {
                 if (user.status == 'deleted') res.status(400).send('You can\'t change password of a deleted account');
                 else {
