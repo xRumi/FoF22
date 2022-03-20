@@ -63,7 +63,7 @@ export default class extends Constructor {
                 }));
             }
         });
-        $.fn.socket.on('receive-message', ({ id, chat, _id }) => {
+        $.fn.socket.on('receive-message', ({ user, id, chat, _id }) => {
             if (data.room_id == id) {
                 $('.message .chat_section').append(`
                     <div class="chat_list ${user == chat.user ? 'me' : 'opposite'}">
