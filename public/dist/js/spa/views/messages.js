@@ -43,7 +43,7 @@ export default class extends Constructor {
             },
         });
         $.fn.join_room = (id) => {
-            $.fn.socket.emit('join_room', id);
+            $.fn.socket.emit('join-room', id);
             data.room_id = id;
         }
         $.fn.socket.on('receive-messages', ({ user, messages, id }) => {
