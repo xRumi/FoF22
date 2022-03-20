@@ -4,6 +4,7 @@ module.exports = (client) => {
     // user database function
     client.database.functions.get_user = async ( id ) => {
         console.log('5');
+        console.log(id);
         if (!id && !ObjectId.isValid(id)) return false;
         let user = client.database_cache.users.get(id);
         if (user) return user;
