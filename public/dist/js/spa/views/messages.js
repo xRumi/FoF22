@@ -6,7 +6,6 @@ var data = {
 };
 
 const people_list = () => {
-    console.log('1');
     if (data.cache.people_list?.length) $('.people-list').html(data.cache.people_list.map(x => {
         return `
             <div class="_people" onclick="$.fn.message('${x.id}');">
@@ -24,7 +23,6 @@ const people_list = () => {
 }
 
 const join_room = (id) => {
-    console.log('2');
     $.fn.socket.emit('join-room', id);
     data.room_id = id;
 }
@@ -39,7 +37,6 @@ export default class extends Constructor {
             $('#app').off('submit.message-submit-form');
             $.fn.join_room = null;
         }
-        console.log('3');
         $.ajax({
             type: 'GET',
             url: `/messages/fetch`,
@@ -54,7 +51,6 @@ export default class extends Constructor {
         });
 
         $.fn.message = (id) => {
-            console.log('4');
             join_room(id);
         }
 
@@ -67,10 +63,8 @@ export default class extends Constructor {
         });
 
         $.fn.socket.on('receive-messages', ({ user, messages, id }) => {
-            console.log('6');
             if (data.room_id == id) {
-                console.log('7');
-                $('messages-list').html(messages.map(x => {
+                $('.messages-list').html(messages.map(x => {
                     return `
                         <div class="message${user == x.user ? ' outgoing' : ''}">
                             <div class="message-img">
@@ -87,10 +81,8 @@ export default class extends Constructor {
         });
     
         $.fn.socket.on('receive-message', ({ user, id, chat, _id }) => {
-            console.log('8');
             if (data.room_id == id) {
-                console.log('9');
-                $('messages-list').append(`
+                $('.messages-list').append(`
                     <div class="message${user == chat.user ? ' outgoing' : ''}">
                         <div class="message-img">
                             <img src="/dist/img/profile/${chat.user}.png">
