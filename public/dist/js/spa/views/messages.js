@@ -8,7 +8,7 @@ var data = {
 const people_list = () => {
     if (data.cache.people_list?.length) $('.people-list').html(data.cache.people_list.map(x => {
         return `
-            <div class="_people" onclick="$.fn.join_room('${x.id}');">
+            <div class="_people" onclick="$.fn.message('${x.id}');">
                 <div class="_people-img">
                     <img src="${x.image}">
                 </div>
@@ -49,14 +49,50 @@ export default class extends Constructor {
                 /* do something */
             },
         });
+
         $.fn.message = (id) => {
             join_room(id);
         }
+
         $('#app').on('submit.message-submit-form', '#message-submit-form', (e) => {
             e.preventDefault();
             if (!$("#text_input").val() || !data.room_id) return false;
             $.fn.socket.emit('send-message', ({ id: data.room_id, _message: $("#text_input").val(), _id: Math.random().toString(36).substring(2, 15) }));
             $("#text_input").val('');
+        });
+
+        $.fn.socket.on('receive-messages', ({ user, messages, id }) => {
+            if (data.room_id == id) {
+                $('messages-list').html(messages.map(x => {
+                    return `
+                        <div class="message${user == x.user ? ' outgoing' : ''}">
+                            <div class="message-img">
+                                <img src="/dist/img/profile/${x.user}.png">
+                            </div>
+                            <div class="message-content">
+                                <p>${x.message}</p>
+                                <span class="message-info">12:43 PM</span>
+                            </div>
+                        </div>
+                    `
+                }));
+            }
+        });
+    
+        $.fn.socket.on('receive-message', ({ user, id, chat, _id }) => {
+            if (data.room_id == id) {
+                $('messages-list').append(`
+                    <div class="message${user == chat.user ? ' outgoing' : ''}">
+                        <div class="message-img">
+                            <img src="/dist/img/profile/${chat.user}.png">
+                        </div>
+                        <div class="message-content">
+                            <p>${chat.message}</p>
+                            <span class="message-info">12:43 PM</span>
+                        </div>
+                    </div>
+                `);
+            }
         });
     }
 
@@ -88,39 +124,3 @@ export default class extends Constructor {
         `;
     }
 }
-
-console.log('hello')
-
-$.fn.socket.on('receive-messages', ({ user, messages, id }) => {
-    if (data.room_id == id) {
-        $('messages-list').html(messages.map(x => {
-            return `
-                <div class="message${user == x.user ? ' outgoing' : ''}">
-                    <div class="message-img">
-                        <img src="/dist/img/profile/${x.user}.png">
-                    </div>
-                    <div class="message-content">
-                        <p>${x.message}</p>
-                        <span class="message-info">12:43 PM</span>
-                    </div>
-                </div>
-            `
-        }));
-    }
-});
-
-$.fn.socket.on('receive-message', ({ user, id, chat, _id }) => {
-    if (data.room_id == id) {
-        $('messages-list').append(`
-            <div class="message${user == chat.user ? ' outgoing' : ''}">
-                <div class="message-img">
-                    <img src="/dist/img/profile/${chat.user}.png">
-                </div>
-                <div class="message-content">
-                    <p>${chat.message}</p>
-                    <span class="message-info">12:43 PM</span>
-                </div>
-            </div>
-        `);
-    }
-});
