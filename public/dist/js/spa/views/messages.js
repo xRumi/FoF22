@@ -57,9 +57,9 @@ export default class extends Constructor {
         $('#app').on('submit.message-submit-form', '#message-submit-form', (e) => {
             console.log('5');
             e.preventDefault();
-            if (!$("#text_input").val() || !data.room_id) return false;
-            $.fn.socket.emit('send-message', ({ id: data.room_id, _message: $("#text_input").val(), _id: Math.random().toString(36).substring(2, 15) }));
-            $("#text_input").val('');
+            if (!$("#message-input").val() || !data.room_id) return false;
+            $.fn.socket.emit('send-message', ({ id: data.room_id, _message: $("#message-input").val(), _id: Math.random().toString(36).substring(2, 15) }));
+            $("#message-input").val('');
         });
 
         $.fn.socket.on('receive-messages', ({ user, messages, id }) => {
