@@ -78,25 +78,20 @@ $('body').on('click', 'a[data-link]', e => {
     navigateTo($(e.currentTarget).attr('href'));
 });
 
-$.fn.nav__back = (show, title, url) => {
-    if (title) $('.nav__back a span').text(title);
-    if (show) {
-        $('#nav').hide();
-        $('#nav__back').show();
-        $('.nav__back a').attr('href', url);
-    } else {
-        $('#nav__back').hide();
-        $('#nav').show();
+$.fn.nav = (id, show) => {
+    if (id) {
+        let nl = $(id);
+        if (nl && !nl.hasClass('nav__active')) {
+            $('.nav__active').removeClass('nav__active');
+            nl.addClass('nav__active');
+        }
     }
+    if (show) $('.navbar').show();
+    else if ($(window).width() < 767) $('.navbar').hide();
 }
 
-$.fn.nav = (id, show) => {
-    const nl = $(id);
-    if (nl && !nl.hasClass('nav__active')) {
-        $('.nav__active').removeClass('nav__active');
-        nl.addClass('nav__active');
-    }
-    if (show) $.fn.nav__back(false);
-}
+$(window).resize(() => {
+    if ($(window).width() > 767 && ($('.navbar').css('display') == 'none')) $('.navbar').show();
+});
 
 $(document).ready(() => router());

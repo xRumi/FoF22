@@ -4,7 +4,6 @@ export default class extends Constructor {
     constructor(params) {
         super(params);
         this.setTitle("Settings");
-        $.fn.nav__back(true, 'Settings', '/spa/menu');
     }
 
     async getHtml() {

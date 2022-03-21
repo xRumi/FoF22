@@ -11,59 +11,43 @@
     </head>
     <body>
         <header>
-            <nav id="nav" class="nav">
-                <a href="#" class="nav__logo">FoF22</a>
-                <div class="nav__menu" id="nav-menu">
-
-                    <ul class="nav__list">
-                        <li class="nav__item">
-                            <a id="nav__link__home" href="/spa" class="nav__link" data-link>
-                                <i class='bx bx-home-alt nav__icon'></i>
-                                <span class="nav__name">Home</span>
+            <div class="navbar" id="navbar">
+                <nav class="nav">
+                    <div class="_nav">
+                        <div class="nav__profile">
+                            <img src="/user.png">
+                        </div>
+                        <div class="nav__list">
+                            <a id="nav__link__home" href="/" class="nav__link nav__active" data-link>
+                                <i class="bx bx-home nav__icon"></i>
+                                <span class="nav__text">Home</span>
                             </a>
-                        </li>
-                        
-                        <li class="nav__item">
-                            <a id="nav__link__profile" href="/spa/profile" class="nav__link" data-link>
-                                <i class='bx bx-user nav__icon'></i>
-                                <span class="nav__name">Profile</span>
+                            <a id="nav__link__profile" href="/profile" class="nav__link" data-link>
+                                <i class="bx bx-user nav__icon"></i>
+                                <span class="nav__text">Profile</span>
                             </a>
-                        </li>
-
-                        <li class="nav__item">
-                            <a id="nav__link__messages" href="/spa/messages" class="nav__link" data-link>
-                                <i class='bx bx-chat nav__icon'></i>
-                                <span class="nav__name">Messages</span>
+        
+                            <a id="nav__link__messages" href="/messages" class="nav__link" data-link>
+                                <i class="bx bx-chat nav__icon"></i>
+                                <span class="nav__text">Messages</span>
                             </a>
-                        </li>
-
-                        <li class="nav__item">
-                            <a id="nav__link__search" href="/spa/search" class="nav__link" data-link>
-                                <i class='bx bx-search nav__icon'></i>
-                                <span class="nav__name">Search</span>
+        
+                            <a id="nav__link__search" href="/search" class="nav__link" data-link>
+                                <i class="bx bx-search nav__icon"></i>
+                                <span class="nav__text">Search</span>
                             </a>
-                        </li>
-
-                        <li class="nav__item">
-                            <a id="nav__link__menu" href="/spa/menu" class="nav__link" data-link>
-                                <i class='bx bx-cog nav__icon'></i>
-                                <span class="nav__name">Menu</span>
+                            <a id="nav__link__menu" href="/menu" class="nav__link" data-link>
+                                <i class="bx bx-cog nav__icon"></i>
+                                <span class="nav__text">Menu</span>
                             </a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="nav__img">
-                    <img src="/dist/img/profile/rumi.png" alt="">
-                </div>
-            </nav>
-            <nav id="nav__back" class="nav" style="display: none;">
-                <div class="nav__back">
-                    <a href="/spa" data-link>
-                        <i class="bx bx-arrow-back"></i>
-                        <span>Back</span>
+                        </div>
+                    </div>
+        
+                    <a href="/logout" class="nav__logout nav__link">
+                        <i class='bx bx-log-out nav__icon'></i>
                     </a>
-                </div>
-            </nav>
+                </nav>
+            </div>
         </header>
 
         <main id="app">

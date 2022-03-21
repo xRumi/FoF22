@@ -4,7 +4,6 @@ export default class extends Constructor {
     constructor(params) {
         super(params);
         this.setTitle("Change Password");
-        $.fn.nav__back(true, 'Change Password', '/spa/menu/settings');
         $.fn.cleanup = () => {
             $.fn.change_password = null;
             $('#app').off('keyup.change-password');

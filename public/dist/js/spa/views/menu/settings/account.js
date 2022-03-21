@@ -6,7 +6,6 @@ export default class extends Constructor {
     constructor(params) {
         super(params);
         this.setTitle("Account Settings");
-        $.fn.nav__back(true, 'Account Settings', '/spa/menu/settings');
         $.fn.cleanup = () => {
             $('#app').off('submit.account-settings');
         }
