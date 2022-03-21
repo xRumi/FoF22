@@ -89,6 +89,8 @@ export default class extends Constructor {
     }
 }
 
+console.log('hello')
+
 $.fn.socket.on('receive-messages', ({ user, messages, id }) => {
     if (data.room_id == id) {
         $('messages-list').html(messages.map(x => {

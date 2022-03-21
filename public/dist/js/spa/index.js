@@ -1,3 +1,6 @@
+const socket = io();
+$.fn.socket = socket;
+
 import Index from "./views/index.js";
 import Profile from "./views/profile.js";
 import Search from "./views/search.js";
@@ -65,9 +68,6 @@ const router = async () => {
 };
 
 window.addEventListener("popstate", router);
-
-const socket = io();
-$.fn.socket = socket;
 
 socket.on('redirect', url => window.location.replace(url));
 
