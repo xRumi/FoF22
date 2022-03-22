@@ -118,3 +118,13 @@ html {
 .nav__active {
 	color: #009578;
 }
+
+a {
+	text-decoration: none;
+}
+
+img {
+	display: inline;
+	height: 100%;
+	width: auto;
+}
