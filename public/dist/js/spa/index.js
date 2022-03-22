@@ -77,7 +77,7 @@ socket.on('redirect', url => window.location.replace(url));
 
 $.fn.data = {};
 $.fn.data.messages = {
-    room_id,
+    room_id: null,
     cache: {},
 };
 
