@@ -1,10 +1,5 @@
 import Constructor from "../constructor.js";
 
-$.fn.data.messages = {
-    room_id: null,
-    people_list: null
-}
-
 const people_list = () => {
     if ($.fn.data.messages.people_list?.length) $('.people').html($.fn.data.people_list.map(x => {
         return `
