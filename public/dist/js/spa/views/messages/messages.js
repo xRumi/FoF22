@@ -1,7 +1,12 @@
 import Constructor from "../constructor.js";
 
+$.fn.data.messages = {
+    room_id: null,
+    people_list: null
+}
+
 const people_list = () => {
-    if ($.fn.data.messages.cache.people_list?.length) $('.people').html($.fn.data.cache.people_list.map(x => {
+    if ($.fn.data.messages.people_list?.length) $('.people').html($.fn.data.people_list.map(x => {
         return `
             <div class="_people">
                 <a href="/spa/messages/${x.id}">
@@ -30,48 +35,12 @@ export default class extends Constructor {
             url: `/messages/fetch`,
             timeout: 30000,
             success: function(result, textStatus, xhr) {
-                $.fn.data.messages.cache.people_list = result;
+                $.fn.data.messages.people_list = result;
                 people_list();
             },
             error: function(xhr, textStatus, errorThrown) {
                 /* do something */
             },
-        });
-
-        console.log('hello');
-
-        if (!$.fn.socket.hasListeners('receive-messages')) $.fn.socket.on('receive-messages', ({ user, messages, id }) => {
-            if ($.fn.data.messages.room_id == id) {
-                $('.messages-list').html(messages.map(x => {
-                    return `
-                        <div class="message${user == x.user ? ' outgoing' : ''}">
-                            <div class="message-img">
-                                <img src="/dist/img/profile/${x.user}.png">
-                            </div>
-                            <div class="message-content">
-                                <p>${x.message}</p>
-                                <span class="message-info">12:43 PM</span>
-                            </div>
-                        </div>
-                    `
-                }));
-            }
-        });
-    
-        if (!!$.fn.socket.hasListeners('receive-message')) $.fn.socket.on('receive-message', ({ user, id, chat, _id }) => {
-            if ($.fn.data.messages.room_id == id) {
-                $('.messages-list').append(`
-                    <div class="message${user == chat.user ? ' outgoing' : ''}">
-                        <div class="message-img">
-                            <img src="/dist/img/profile/${chat.user}.png">
-                        </div>
-                        <div class="message-content">
-                            <p>${chat.message}</p>
-                            <span class="message-info">12:43 PM</span>
-                        </div>
-                    </div>
-                `);
-            }
         });
     }
 

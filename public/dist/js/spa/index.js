@@ -76,10 +76,6 @@ $.fn.socket = socket;
 socket.on('redirect', url => window.location.replace(url));
 
 $.fn.data = {};
-$.fn.data.messages = {
-    room_id: null,
-    cache: {},
-};
 
 $('body').on('click', 'a[data-link]', e => {
     e.preventDefault();
