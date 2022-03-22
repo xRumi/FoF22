@@ -17,6 +17,16 @@ html {
 	scroll-behavior: smooth;
 }
 
+a {
+	text-decoration: none;
+}
+
+img {
+	display: inline;
+	height: 100%;
+	width: auto;
+}
+
 @media screen and (max-width: 800px) {
 	.nav__logo, .nav__profile {
 		display: none;
@@ -117,14 +127,4 @@ html {
 
 .nav__active {
 	color: #009578;
-}
-
-a {
-	text-decoration: none;
-}
-
-img {
-	display: inline;
-	height: 100%;
-	width: auto;
 }
