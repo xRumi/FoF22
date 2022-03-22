@@ -1,4 +1,4 @@
-import Constructor from "./constructor.js";
+import Constructor from "../constructor.js";
 
 const people_list = () => {
     if ($.fn.data.messages.cache.people_list?.length) $('.people').html(data.cache.people_list.map(x => {
