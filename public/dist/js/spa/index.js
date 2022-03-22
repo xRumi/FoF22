@@ -3,8 +3,7 @@ import Profile from "./views/profile.js";
 import Search from "./views/search.js";
 
 // messages
-import Messages from "./views/messages/messages.js";
-import Message from "./views/messages/message.js";
+import Messages from "./views/messages.js";
 
 // menu
 import Menu from "./views/menu.js";
@@ -32,12 +31,8 @@ const router = async () => {
     const routes = [
         { path: "/spa", view: Index },
         { path: "/spa/profile", view: Profile },
-
         { path: "/spa/messages", view: Messages },
-        { path: "/spa/messages/:id", view: Message },
-
         { path: "/spa/search", view: Search },
-
         { path: "/spa/menu", view: Menu },
         { path: "/spa/menu/settings", view: Settings },
         { path: "/spa/menu/settings/account", view: AccountSettings },
@@ -69,9 +64,6 @@ const router = async () => {
 };
 
 window.addEventListener("popstate", router);
-
-const socket = io();
-$.fn.socket = socket;
 
 socket.on('redirect', url => window.location.replace(url));
 
