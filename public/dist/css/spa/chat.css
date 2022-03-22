@@ -143,7 +143,7 @@
 }
 
 .outgoing .message-img {
-	/*! display: none; */
+	display: none;
 }
 
 .message-bottom {
