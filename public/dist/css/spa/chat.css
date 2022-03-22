@@ -95,6 +95,8 @@
 .messages-list {
 	padding: 20px;
 	height: 84%;
+	overflow: hidden;
+	overflow-y: auto;
 }
 
 .message-img {
@@ -132,7 +134,7 @@
 }
 
 .outgoing .message-content {
-	float: right;
+	/*! float: right; */
 }
 
 .outgoing .message-content p {
@@ -141,7 +143,7 @@
 }
 
 .outgoing .message-img {
-	display: none;
+	/*! display: none; */
 }
 
 .message-bottom {
@@ -185,4 +187,13 @@
 	.messages-header-back {
 		display: none;
 	}
+}
+
+.message {
+  width: 100%;
+  display: block;
+}
+.outgoing {
+  display: flex;
+  flex-direction: row-reverse;
 }
