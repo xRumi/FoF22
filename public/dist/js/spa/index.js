@@ -3,7 +3,8 @@ import Profile from "./views/profile.js";
 import Search from "./views/search.js";
 
 // messages
-import Messages from "./views/messages.js";
+import Messages from "./views/messages/messages.js";
+import Message from "./views/messages/message.js";
 
 // menu
 import Menu from "./views/menu.js";
@@ -31,7 +32,10 @@ const router = async () => {
     const routes = [
         { path: "/spa", view: Index },
         { path: "/spa/profile", view: Profile },
+
         { path: "/spa/messages", view: Messages },
+        { path: "/spa/messages/:id", view: Message },
+
         { path: "/spa/search", view: Search },
 
         { path: "/spa/menu", view: Menu },
@@ -71,7 +75,11 @@ $.fn.socket = socket;
 
 socket.on('redirect', url => window.location.replace(url));
 
-$.fn.cache = {};
+$.fn.data = {};
+$.fn.data.messages = {
+    room_id,
+    cache: {},
+};
 
 $('body').on('click', 'a[data-link]', e => {
     e.preventDefault();
@@ -87,11 +95,11 @@ $.fn.nav = (id, show) => {
         }
     }
     if (show) $('.navbar').show();
-    else if ($(window).width() < 767) $('.navbar').hide();
+    else $('.navbar').hide();
 }
 
 $(window).resize(() => {
-    if ($(window).width() > 767 && ($('.navbar').css('display') == 'none')) $('.navbar').show();
+    if ($.fn.hide_nav_in_mobile && $(window).width() < 801) $('.navbar').hide();
 });
 
 $(document).ready(() => router());
