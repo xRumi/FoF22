@@ -13,7 +13,7 @@
 
 .people-search {
 	width: 100%;
-	height: 8%;
+	height: 55px;
 	border-bottom: none;
 	display: inline-block;
 	box-shadow: 1px 1px 25px 2px #b6bbbd;
@@ -133,10 +133,6 @@
 	margin: 8px 0 0;
 }
 
-.outgoing .message-content {
-	/*! float: right; */
-}
-
 .outgoing .message-content p {
 	background: #007bff none repeat scroll 0 0;
 	color: #fff;
@@ -154,7 +150,7 @@
 	overflow: hidden;
 }
 
-@media screen and (max-width: 767px) {
+@media screen and (max-width: 800px) {
 	.chat .people {
 		width: 100%;
 	}
@@ -165,7 +161,7 @@
 	}
 }
 
-@media screen and (min-width: 767px) {
+@media screen and (min-width: 801px) {
 	.people::-webkit-scrollbar {
 		display: none;
 	}
@@ -190,10 +186,11 @@
 }
 
 .message {
-  width: 100%;
-  display: block;
+	width: 100%;
+	display: block;
 }
+
 .outgoing {
-  display: flex;
-  flex-direction: row-reverse;
+	display: flex;
+	flex-direction: row-reverse;
 }
