@@ -10,6 +10,7 @@ const fetch_messages = (id) => {
 
 socket.on('receive-messages', ({ user, messages, id }) => {
     if (room_id == id) {
+        if ($(window).width() < 801) $('.messages').show();
         $('.messages-list').html(messages.map(x => {
             return `
                 <div class="message${user == x.user ? ' outgoing' : ''}">
