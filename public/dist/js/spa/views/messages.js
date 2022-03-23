@@ -47,7 +47,22 @@ export default class extends Constructor {
                     <div class="people-search"></div>
                     <div class="people-list"></div>
                 </div>
-                <div class="messages"></div>
+                <div class="messages">
+                    <div class="messages-header">
+                        <span class="messages-header-back">
+                            <i class='bx bx-chevron-left'></i>
+                        </span>
+                    </div>
+                    <div class="messages-list"></div>
+                    <div class="messages-bottom">
+                        <div class="messages-input">
+                            <form id="message-submit-form">
+                                <input type="text" name="message-input" id="message-input">
+                                <button type="submit" class="message-submit">Send</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
     }
