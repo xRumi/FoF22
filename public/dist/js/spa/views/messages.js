@@ -5,7 +5,7 @@ var _people_list = [];
 const people_list = () => {
     if (_people_list.length && Array.isArray(_people_list)) $('.people-list').html(_people_list.map(x => {
         return `
-            <div class="_people" onclick="$.fn.join_room('${x.id}');">
+            <div class="_people" onclick="fetch_messages('${x.id}');">
                 <div class="_people-img">
                     <img src="${x.image}">
                 </div>

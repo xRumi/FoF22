@@ -3,12 +3,13 @@ $.fn.socket = socket;
 
 var room_id;
 
-$.fn.join_room = (id) => {
+const fetch_messages = (id) => {
+    room_id = id;
     socket.emit('join-room', id);
 }
 
 socket.on('receive-messages', ({ user, messages, id }) => {
-    if ($.fn.data.messages.room_id == id) {
+    if (room_id == id) {
         $('.messages-list').html(messages.map(x => {
             return `
                 <div class="message${user == x.user ? ' outgoing' : ''}">
@@ -26,7 +27,7 @@ socket.on('receive-messages', ({ user, messages, id }) => {
 });
 
 socket.on('receive-message', ({ user, id, chat, _id }) => {
-    if ($.fn.data.messages.room_id == id) {
+    if (room_id == id) {
         $('.messages-list').append(`
             <div class="message${user == chat.user ? ' outgoing' : ''}">
                 <div class="message-img">
