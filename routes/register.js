@@ -62,7 +62,7 @@ const limiter2 = rateLimit({
 
 router.get('/confirm', limiter2, async (req, res) => {
     if (!req.user) {
-        if (req.query.token && ObjectID.isValid(req.query.token)) {
+        if (req.query.token && ObjectId.isValid(req.query.token)) {
             let _user = await req.client.database._user.findById(req.query.token);
             if (!_user) return res.redirect('/login');
             res.render("confirm-account", { alert: !_user.verified ? 'email address verified successfully, change the password to activate your account' : null });
@@ -86,7 +86,7 @@ router.post('/confirm/post', limiter3, async (req, res) => {
         name = req.body.name,
         _token = req.body.token,
         password = req.body.password;
-    if (_token && username?.length >= 4 && username.length <= 16 && name?.length >= 4 && name.length <= 32 && password?.length >= 8 && password.length <= 32 && ObjectID.isValid(_token)) {
+    if (_token && username?.length >= 4 && username.length <= 16 && name?.length >= 4 && name.length <= 32 && password?.length >= 8 && password.length <= 32 && ObjectId.isValid(_token)) {
         if (username.match(/[^A-Za-z0-9]/)) return res.status(400).send('Special character/space in username is not allowed');
         if (name.match(/[^A-Za-z0-9 ]/)) return res.status(400).send('Special character in full name is not allowed');
         let _user = await req.client.database._user.findById(_token);

@@ -4,19 +4,20 @@
 }
 
 .chat .people {
-	width: 20%;
+	width: 300px;
 	float: left;
 	height: 100vh;
 	overflow: auto;
 	box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
 }
 
-.people-search {
+.people-header {
 	width: 100%;
 	height: 55px;
 	border-bottom: none;
 	display: inline-block;
 	box-shadow: 1px 1px 25px 2px #b6bbbd;
+	display: none;
 }
 
 ._people {
@@ -70,7 +71,7 @@
 }
 
 .chat .messages {
-	width: 80%;
+	width: calc(100% - 300px);
 	float: right;
 	height: 100vh;
 	overflow: auto;
@@ -82,7 +83,7 @@
 	height: 55px;
 	border-bottom: none;
 	display: inline-block;
-	background-color: #eceff1;
+	background-color: #ffffff;
 	box-shadow: 1px 1px 25px 2px #b6bbbd;
 }
 
@@ -113,7 +114,7 @@
 	padding: 0 0 0 10px;
 	vertical-align: top;
 	width: auto;
-	max-width: 50%;
+	max-width: 95%;
 }
 
 .message-content p {
@@ -155,31 +156,54 @@
 		width: 100%;
 	}
 
-    .messages-header {
-        display: none;
-    }
-
 	.chat .messages {
 		width: 100%;
+		display: none;
+	}
+	.chat-active .people {
+		display: none;
+	}
+	.chat-active .messages {
+		display: block;
+	}
+	.chat-active.navbar {
 		display: none;
 	}
 }
 
 @media screen and (min-width: 801px) {
-	.people::-webkit-scrollbar {
-		display: none;
+
+	.scrollbar::-webkit-scrollbar {
+		background-color: #fff;
+		width: 16px;
 	}
 
-	.people {
-		-ms-overflow-style: none;
-		scrollbar-width: none;
+	.scrollbar::-webkit-scrollbar-track {
+		background-color: #fff
+	}
+	.scrollbar::-webkit-scrollbar-track:hover {
+		background-color: #f4f4f4
+	}
+
+	.scrollbar::-webkit-scrollbar-thumb {
+		background-color: #babac0;
+		border-radius: 16px;
+		border: 5px solid #fff
+	}
+	.scrollbar::-webkit-scrollbar-thumb:hover {
+		background-color: #a0a0a5;
+		border: 4px solid #f4f4f4
+	}
+
+	.scrollbar::-webkit-scrollbar-button {
+		display: none;
 	}
 
 	.messages::-webkit-scrollbar {
 		display: none;
 	}
 
-	.messages {
+	.messages, .messages-list {
 		-ms-overflow-style: none;
 		scrollbar-width: none;
 	}

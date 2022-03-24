@@ -4,9 +4,9 @@ export default class extends Constructor {
     constructor(params) {
         super(params);
         this.setTitle("Menu");
-        $.fn.nav('#nav__link__menu', true);
+        navbar('#nav__link__menu', true);
     }
-    async getHtml() {
+    async render() {
         return `
             <div>
                 <div class="card">

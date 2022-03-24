@@ -46,7 +46,7 @@ export default class extends Constructor {
         }
     }
 
-    async getHtml() {
+    async render() {
         return `
             <div class="col-sm-6 mb-4 p-3">
                 <div class="card">

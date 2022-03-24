@@ -6,7 +6,7 @@ export default class extends Constructor {
         this.setTitle("Settings");
     }
 
-    async getHtml() {
+    async render() {
         return `
             <div>
                 <div class="card">

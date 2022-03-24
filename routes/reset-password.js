@@ -46,7 +46,7 @@ const limiter2 = rateLimit({
 
 router.get('/reset-password', limiter2, async (req, res) => {
     if (!req.user) {
-        if (req.query.token && ObjectID.isValid(req.query.token)) {
+        if (req.query.token && ObjectId.isValid(req.query.token)) {
             let token = await req.client.database.token.findById(req.query.token);
             if (token && token.type == 'reset-token') {
                 let user = await req.client.database.functions.get_user(token.user_id);
@@ -69,7 +69,7 @@ const limiter3 = rateLimit({
 router.post('/reset-password/post', limiter3, async (req, res) => {
     let _token = req.body.token,
         password = req.body.password;
-    if (_token && password?.length >= 8 && ObjectID.isValid(_token)) {
+    if (_token && password?.length >= 8 && ObjectId.isValid(_token)) {
         let token = await req.client.database.token.findById(_token);
         if (token && token.expire_at > Date.now()) {
             let user = await req.client.database.functions.get_user(token.user_id);

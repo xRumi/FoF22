@@ -4,10 +4,10 @@ export default class extends Constructor {
     constructor(params) {
         super(params);
         this.setTitle("Search");
-        $.fn.nav('#nav__link__search', true);
+        navbar('#nav__link__search', true);
     }
 
-    async getHtml() {
+    async render() {
         return `this is search page`;
     }
 }

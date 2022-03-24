@@ -60,35 +60,16 @@ const router = async () => {
     }
     const view = new match.route.view(getParams(match));
 
-    document.querySelector(view.target || "#app").innerHTML = await view.getHtml();
+    document.querySelector(view.target || "#app").innerHTML = await view.render();
+    if (view.after_render) view.after_render();
 };
 
 window.addEventListener("popstate", router);
-
-socket.on('redirect', url => window.location.replace(url));
-
-$.fn.data = {};
-$.fn.data.messages = {
-    room_id: null,
-    people_list: []
-}
 
 $('body').on('click', 'a[data-link]', e => {
     e.preventDefault();
     navigateTo($(e.currentTarget).attr('href'));
 });
-
-$.fn.nav = (id, show) => {
-    if (id) {
-        let nl = $(id);
-        if (nl && !nl.hasClass('nav__active')) {
-            $('.nav__active').removeClass('nav__active');
-            nl.addClass('nav__active');
-        }
-    }
-    if (show) $('.navbar').show();
-    else $('.navbar').hide();
-}
 
 $(window).resize(() => {
     if ($.fn.hide_nav_in_mobile && $(window).width() < 801) $('.navbar').hide();
