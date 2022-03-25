@@ -13,9 +13,13 @@ router.get('/fetch', async (req, res) => {
             if (room) {
                 let name, chat = await req.client.database.chat.findById(room.chat_id);
                 if (room.type == 'private') {
-                    let _name = room.name.split('.');
-                    if (_name[0] == req.user.username) name = _name[1];
-                    else name = _name[0];
+                    if (room.members[0] == req.user.id) {
+                        let _friend = await req.client.database.functions.get_user(room.members[1]);
+                        if (_friend) name = _friend.name || _friend.username;
+                    } else {
+                        let _friend = await req.client.database.functions.get_user(room.members[0]);
+                        if (_friend) name = _friend.name || _friend.username;
+                    }
                 } else name = room.name;
                 let last_message = chat.messages[chat.messages.length - 1];
                 room_data.push({

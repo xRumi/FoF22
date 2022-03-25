@@ -5,6 +5,8 @@ const client = {
     }
 };
 
+var before_new_render = null;
+
 const navbar = (id, show) => {
     if (id) {
         let nl = $(id);

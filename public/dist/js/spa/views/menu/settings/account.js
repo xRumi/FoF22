@@ -6,9 +6,6 @@ export default class extends Constructor {
     constructor(params) {
         super(params);
         this.setTitle("Account Settings");
-        $.fn.cleanup = () => {
-            $('#app').off('submit.account-settings');
-        }
         $('#app').on('submit.account-settings', '#form1', (e) => {
             e.preventDefault();
             if (!($("#username").val() || $('#full_name').val() || $('#email').val())) return false;

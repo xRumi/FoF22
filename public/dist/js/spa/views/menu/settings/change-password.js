@@ -4,10 +4,6 @@ export default class extends Constructor {
     constructor(params) {
         super(params);
         this.setTitle("Change Password");
-        $.fn.cleanup = () => {
-            $.fn.change_password = null;
-            $('#app').off('keyup.change-password');
-        }
         $('#app').on('keyup.change-password', '#password, #password-confirm', function () {
             if ($("#password").val() && $("#password").val().length >= 8) $('#password').removeClass('is-invalid').addClass('is-valid');
             else $('#password').removeClass('is-valid').addClass('is-invalid');

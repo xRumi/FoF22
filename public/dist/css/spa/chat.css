@@ -16,7 +16,7 @@
 	height: 55px;
 	border-bottom: none;
 	display: inline-block;
-	box-shadow: 1px 1px 25px 2px #b6bbbd;
+	box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
 	display: none;
 }
 
@@ -25,7 +25,6 @@
 	width: 100%;
 	height: 70px;
 	border-bottom: 0.1px solid green;
-	box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
 }
 
 ._people:hover {
@@ -75,7 +74,7 @@
 	float: right;
 	height: 100vh;
 	overflow: auto;
-	position: relative;
+	display: none;
 }
 
 .messages-header {
@@ -84,7 +83,7 @@
 	border-bottom: none;
 	display: inline-block;
 	background-color: #ffffff;
-	box-shadow: 1px 1px 25px 2px #b6bbbd;
+	box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
 }
 
 .messages-header-back {
@@ -93,11 +92,23 @@
 	position: relative;
 }
 
+.messages-header-text {
+	text-align: center;
+    font-size: 16px;
+    font-weight: lighter;
+    margin-left: 115px;
+    margin-right: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .messages-list {
 	padding: 20px;
-	height: 84%;
+	height: auto;
 	overflow: hidden;
 	overflow-y: auto;
+	margin-bottom: 100px;
 }
 
 .message-img {
@@ -143,19 +154,36 @@
 	display: none;
 }
 
-.message-bottom {
-	position: relative;
-	width: 100%;
+.messages-bottom {
+	position: absolute;
+	width: inherit;
 	bottom: 0;
-	height: 8%;
+	height: 50px;
 	overflow: hidden;
+	background-color: #007bff;
+	box-shadow: 1px 1px 25px 2px #b6bbbd
+}
+
+#message-input {
+	width: 100%;
+	height: 50px;
+	border: 0;
+	outline: none;
+	font-size: 18px;
+	padding-left: 10px;
+}
+
+.message-submit {
+	width: 5%;
+	height: 50px;
+	position: absolute;
+	display: none;
 }
 
 @media screen and (max-width: 800px) {
 	.chat .people {
 		width: 100%;
 	}
-
 	.chat .messages {
 		width: 100%;
 		display: none;
@@ -163,12 +191,16 @@
 	.chat-active .people {
 		display: none;
 	}
-	.chat-active .messages {
-		display: block;
-	}
 	.chat-active.navbar {
 		display: none;
 	}
+	.messages-list {
+		margin-bottom: 40px;
+	}
+}
+
+.chat-active .messages {
+	display: block;
 }
 
 @media screen and (min-width: 801px) {

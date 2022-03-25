@@ -2,12 +2,12 @@ import Constructor from "./constructor.js";
 
 class People_List extends HTMLElement {
     static get observedAttributes() {
-        return ['room_id'];
+        return ['rid'];
     }
     attributeChangedCallback(attrName, oldVal, newVal) {
         if (oldVal !== newVal) {
             this.innerHtml = '';
-            this.room_id = newVal;
+            this.rid = newVal;
         }
     }
     constructor() {
@@ -16,8 +16,14 @@ class People_List extends HTMLElement {
         this.onclick = () => {
             $('.chat').addClass('chat-active');
             $('.navbar').addClass('chat-active');
-            client.messages.room_id = this.room_id;
-            socket.emit('join-room', client.messages.room_id);
+            client.messages.room_id = this.rid;
+            socket.emit('join-room', this.rid);
+            history.pushState(null, null, `/spa/messages/${this.rid}`);
+            let name = this.querySelector('._people-name');
+            if (name && name.innerHTML) {
+                document.title = name.innerHTML;
+                $('.messages-header-text').text(name.innerHTML);
+            }
         };
     }
 }
@@ -40,6 +46,8 @@ class Messages_Header_Back extends HTMLElement {
     constructor() {
         super();
         this.onclick = () => {
+            history.pushState(null, null, `/spa/messages`);
+            document.title = 'Messages';
             $('.chat').removeClass('chat-active');
             $('.navbar').removeClass('chat-active');
         };
@@ -57,7 +65,7 @@ const people_list = (new_people_list) => {
     if (new_people_list) old_people_list = new_people_list;
     if (old_people_list && old_people_list.length && Array.isArray(old_people_list)) $('.people-list').html(old_people_list.map(x => {
         return `
-            <people-list room_id="${x.id}">
+            <people-list rid="${x.id}">
                 <div class="_people-img">
                     <img src="${x.image}">
                 </div>
@@ -75,7 +83,7 @@ export default class extends Constructor {
     constructor(params) {
         super(params);
         this.id = params.id;
-        this.setTitle("Messages");
+        this.setTitle('Messages');
         navbar('#nav__link__messages', true);
         $.ajax({
             type: 'GET',
@@ -99,22 +107,17 @@ export default class extends Constructor {
                 </div>
                 <div class="messages">
                     <div class="messages-header">
-                        <messages-header-back>
-                            <span class="messages-header-back">
-                                <i class='bx bx-chevron-left'></i>
-                            </span>
+                        <messages-header-back class="messages-header-back">
+                            <i class='bx bx-chevron-left'></i>
                         </messages-header-back>
+                        <p class="messages-header-text"></p>
                     </div>
                     <div class="messages-list scrollbar"></div>
-                    <messages-bottom>
-                        <div class="messages-bottom">
-                            <div class="messages-input">
-                                <form id="message-submit-form">
-                                    <input type="text" name="message-input" id="message-input">
-                                    <button type="submit" class="message-submit">Send</button>
-                                </form>
-                            </div>
-                        </div>
+                    <messages-bottom class="messages-bottom">
+                        <form autocomplete="off">
+                            <input type="text" name="message-input" id="message-input" placeholder="type your message...">
+                            <button type="submit" class="message-submit">Send</button>
+                        </form>
                     </messages-bottom>
                 </div>
             </div>
@@ -123,11 +126,19 @@ export default class extends Constructor {
 
     async after_render() {
         people_list();
+        if (this.id) {
+            $('.chat').addClass('chat-active');
+            $('.navbar').addClass('chat-active');
+            client.messages.room_id = this.id;
+            socket.emit('join-room', this.id);
+        }
     }
 }
 
-socket.on('receive-messages', ({ user, messages, id }) => {
+socket.on('receive-messages', ({ user, messages, id, name }) => {
     if (client.messages.room_id == id) {
+        document.title = name;
+        $('.messages-header-text').text(name);
         $('.messages-list').html(messages.map(x => {
             return `
                 <div class="message${user == x.user ? ' outgoing' : ''}">
@@ -158,4 +169,8 @@ socket.on('receive-message', ({ user, id, chat, _id }) => {
             </div>
         `);
     }
+});
+
+socket.on('join-room-error', ({ id, message }) => {
+    if (client.messages.room_id == id) $('.messages-list').append(message);
 });

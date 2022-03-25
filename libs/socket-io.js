@@ -9,21 +9,33 @@ module.exports.sockets = (io, client) => {
             client.cache.functions.update_user({ username: user.username, status: 'online' });
             socket.on('join-room', async (id) => {
                 let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
-                if (user?.id == socket.user_id && id && ObjectId.isValid(id)) {
-                    const room = await client.database.functions.get_room(id);
-                    if (room) {
-                        const chat = await client.database.chat.findById(room.chat_id);
-                        if (chat) {
-                            if (socket.room_id != room.id) {
-                                socket.leave(socket.room_id);
-                                socket.join(room.id);
-                                socket.room_id = room.id;
-                                socket.chat_id = room.chat_id;
+                if (user?.id == socket.user_id && id) {
+                    if (ObjectId.isValid(id)) {
+                        const room = await client.database.functions.get_room(id);
+                        if (room) {
+                            const chat = await client.database.chat.findById(room.chat_id);
+                            if (chat) {
+                                if (socket.room_id != room.id) {
+                                    socket.leave(socket.room_id);
+                                    socket.join(room.id);
+                                    socket.room_id = room.id;
+                                    socket.chat_id = room.chat_id;
+                                }
+                                let name;
+                                if (room.type == 'private') {
+                                    if (room.members[0] == user.id) {
+                                        let _friend = await client.database.functions.get_user(room.members[1]);
+                                        if (_friend) name = _friend.name || _friend.username;
+                                    } else {
+                                        let _friend = await client.database.functions.get_user(room.members[0]);
+                                        if (_friend) name = _friend.name || _friend.username;
+                                    }
+                                } else name = room.name;
+                                socket.emit('receive-messages', { user: user.username, messages: chat.messages.slice(-10), id, name: name ? name : 'unknown' });
                             }
-                            socket.emit('receive-messages', { user: user.username, messages: chat.messages.slice(-10), id });
-                        }
-                    }
-                } else socket.emit('redirect', '/login?ref=messages');
+                        } else socket.emit('join-room-error', { id, message: '<p>Oops! Chat Not Be Found</p><p>Sorry but the chat room you are looking for does not exist, have been removed. id changed or is temporarily unavailable</p>' });
+                    } else socket.emit('join-room-error', { id, message: '<p>Oops! Chat Not Be Found</p><p>Sorry but the chat room you are looking for does not exist, have been removed. id changed or is temporarily unavailable</p>' });
+                }
             });
             socket.on('send-message', async ({ id, _message, _id }) => {
                 let message = _message?.trim();

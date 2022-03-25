@@ -32,6 +32,7 @@ const router = async () => {
         { path: "/spa", view: Index },
         { path: "/spa/profile", view: Profile },
         { path: "/spa/messages", view: Messages },
+        { path: "/spa/messages/:id", view: Messages },
         { path: "/spa/search", view: Search },
         { path: "/spa/menu", view: Menu },
         { path: "/spa/menu/settings", view: Settings },
@@ -42,26 +43,33 @@ const router = async () => {
     const potentialMatches = routes.map(route => {
         return {
             route: route,
-            result: location.pathname.match(pathToRegex(route.path))
+            result: location.pathname.replace(/\/$/, "").match(pathToRegex(route.path))
         };
     });
 
     let match = potentialMatches.find(potentialMatch => potentialMatch.result !== null);
 
     if (!match) {
-        match = {
-            route: routes[0],
-            result: [location.pathname]
-        };
+        document.querySelector("#app").innerHTML = `
+            <div class="_404">
+                <h1>404</h1>
+                <h2>Oops! Page Not Be Found</h2>
+                <p>Sorry but the page you are looking for does not exist, have been removed. name changed or is temporarily unavailable</p>
+                <a href="/spa" data-link>Back to homepage</a>
+            </div>`;
+        return false;
     }
-    if ($.fn.cleanup) {
-        $.fn.cleanup();
-        $.fn.cleanup = null;
+    if (before_new_render) {
+        await before_new_render();
+        before_new_render = null;
     }
+
     const view = new match.route.view(getParams(match));
 
     document.querySelector(view.target || "#app").innerHTML = await view.render();
-    if (view.after_render) view.after_render();
+
+    if (view.after_render) await view.after_render();
+    if (view.before_new_render) before_new_render = view.before_new_render;
 };
 
 window.addEventListener("popstate", router);
