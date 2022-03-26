@@ -31,11 +31,27 @@ class People_List extends HTMLElement {
 class Messages_Bottom extends HTMLElement {
     constructor() {
         super();
+        document.onkeyup = (e) => {
+            let input = this.querySelector('#message-input');
+            if (e.key >= 'a' && e.key <= 'z' && input && document.activeElement != input) {
+                input.focus();
+                input.value += e.key;
+            }
+        };
         this.onsubmit = () => {
             let input = this.querySelector('#message-input');
             let _message = input ? input.value : false;
             if (!_message || !client.messages.room_id) return false;
-            socket.emit('send-message', ({ id: client.messages.room_id, _message, _id: Math.random().toString(36).substring(2, 15) }));
+            let _id = Math.random().toString(36).substring(2, 15);
+            socket.emit('send-message', ({ id: client.messages.room_id, _message, _id }));
+            $('.messages-list').append(`
+                <div class="message outgoing">
+                    <div class="message-content">
+                        <p id="${_id}" style="background-color: lightblue;">${_message}</p>
+                        <span class="message-info">12:43 PM</span>
+                    </div>
+                </div>
+            `);
             input.value = '';
             return false;
         };
@@ -79,23 +95,30 @@ const people_list = (new_people_list) => {
     }).join(''));
 }
 
+var fpip = false;
+
 export default class extends Constructor {
     constructor(params) {
         super(params);
         this.id = params.id;
         this.setTitle('Messages');
         navbar('#nav__link__messages', true);
-        $.ajax({
-            type: 'GET',
-            url: `/messages/fetch`,
-            timeout: 30000,
-            success: function(result, textStatus, xhr) {
-                people_list(result);
-            },
-            error: function(xhr, textStatus, errorThrown) {
-                /* do something */
-            },
-        });
+        if (!fpip) {
+            fpip = true;
+            $.ajax({
+                type: 'GET',
+                url: `/messages/fetch`,
+                timeout: 30000,
+                success: function(result, textStatus, xhr) {
+                    people_list(result);
+                    fpip = false;
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    /* do something */
+                    fpip = false;
+                },
+            });
+        }
     }
 
     async render() {
@@ -103,7 +126,9 @@ export default class extends Constructor {
             <div class="chat">
                 <div class="people">
                     <div class="people-header"></div>
-                    <div class="people-list scrollbar"></div>
+                    <div class="people-list scrollbar">
+                        <div class="lds-dual-ring"></div>
+                    </div>
                 </div>
                 <div class="messages">
                     <div class="messages-header">
@@ -112,7 +137,9 @@ export default class extends Constructor {
                         </messages-header-back>
                         <p class="messages-header-text"></p>
                     </div>
-                    <div class="messages-list scrollbar"></div>
+                    <div class="messages-list scrollbar">
+                        <div class="lds-dual-ring"></div>
+                    </div>
                     <messages-bottom class="messages-bottom">
                         <form autocomplete="off">
                             <input type="text" name="message-input" id="message-input" placeholder="type your message...">
@@ -157,7 +184,8 @@ socket.on('receive-messages', ({ user, messages, id, name }) => {
 
 socket.on('receive-message', ({ user, id, chat, _id }) => {
     if (client.messages.room_id == id) {
-        $('.messages-list').append(`
+        if ($(`#${_id}`).length) $(`#${_id}`).css('background-color', '#007bff');
+        else $('.messages-list').append(`
             <div class="message${user == chat.user ? ' outgoing' : ''}">
                 <div class="message-img">
                     <img src="/dist/img/profile/${chat.user}.png">
