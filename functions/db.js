@@ -74,7 +74,7 @@ module.exports = (client) => {
         await room.save();
         await chat.save();
         for (var i = 0; i < members.length; i++) {
-            let member = await client.database.functions.get_user(x);
+            let member = await client.database.functions.get_user(i);
             if (memebr) {
                 member.rooms.push(room.id);
                 await member.save();
