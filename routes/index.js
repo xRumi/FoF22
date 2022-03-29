@@ -16,13 +16,13 @@ router.get('/', async (req, res) => {
 
 router.get('/spa', async (req, res) => {
     if (req.user) {
-        res.render("spa");
+        res.render("spa", { user_id: req.user.id, username: req.user.username });
     } else res.status(403).redirect('/login');
 });
 
 router.get('/spa/*', async (req, res) => {
     if (req.user) {
-        res.render("spa");
+        res.render("spa", { user_id: req.user.id, username: req.user.username });
     } else res.status(403).redirect('/login');
 });
 

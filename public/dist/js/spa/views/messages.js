@@ -48,10 +48,15 @@ class Messages_Bottom extends HTMLElement {
                 <div class="message outgoing">
                     <div class="message-content">
                         <p id="${_id}" style="background-color: lightblue;">${_message}</p>
-                        <span class="message-info">12:43 PM</span>
+                        <p class="message-time">12:43 PM</p>
+                    </div>
+                    <div class="message-info" style="display: none">
+                        <span>${client.username}</span>
                     </div>
                 </div>
             `);
+            const ml = document.querySelector(".messages");
+            ml.scrollTop = ml.scrollHeight;
             input.value = '';
             return false;
         };
@@ -162,40 +167,57 @@ export default class extends Constructor {
     }
 }
 
-socket.on('receive-messages', ({ user, messages, id, name }) => {
+socket.on('receive-messages', ({ messages, id, name }) => {
     if (client.messages.room_id == id) {
         document.title = name;
         $('.messages-header-text').text(name);
-        $('.messages-list').html(messages.map(x => {
-            return `
-                <div class="message${user == x.user ? ' outgoing' : ''}">
+        let html = [], lmu;
+        for (var i = 0; i < messages.length; i++) {
+            let m = messages[i];
+            html.push(`
+                <div class="message${client.id == m.user ? ' outgoing' : lmu == m.user ? ' stack-messages' : ''}${m.user == '61d001de9b64b8c435985da9' ? 'system-message' : ''}">
                     <div class="message-img">
-                        <img src="/dist/img/profile/${x.user}.png">
+                        <img src="/dist/img/profile/${m.user}.png">
                     </div>
                     <div class="message-content">
-                        <p>${x.message}</p>
-                        <span class="message-info">12:43 PM</span>
+                        <p>${m.message}</p>
+                        <p class="message-time">12:43 PM</p>
+                    </div>
+                    <div class="message-info" style="display: none">
+                        <span>${m.username}</span>
                     </div>
                 </div>
-            `
-        }));
+            `);
+            lmu = m.user;
+        }
+        $('.messages-list').html(html.join(''));
+        const ml = document.querySelector(".messages");
+        ml.scrollTop = ml.scrollHeight;
     }
 });
 
-socket.on('receive-message', ({ user, id, chat, _id }) => {
+socket.on('receive-message', ({ id, chat, _id }) => {
+    let m = $('.message'),
+        lm = m[m.length - 1],
+        lu = lm.querySelector('span').innerText;
     if (client.messages.room_id == id) {
         if ($(`#${_id}`).length) $(`#${_id}`).css('background-color', '#007bff');
         else $('.messages-list').append(`
-            <div class="message${user == chat.user ? ' outgoing' : ''}">
+            <div id="user_${chat.user}" class="message${client.id == chat.user ? ' outgoing' : lu == chat.username ? ' stack-messages' : ''}">
                 <div class="message-img">
                     <img src="/dist/img/profile/${chat.user}.png">
                 </div>
                 <div class="message-content">
                     <p>${chat.message}</p>
-                    <span class="message-info">12:43 PM</span>
+                    <p class="message-time">12:43 PM</p>
+                </div>
+                <div class="message-info" style="display: none">
+                    <span>${chat.username}</span>
                 </div>
             </div>
         `);
+        const ml = document.querySelector(".messages");
+        ml.scrollTop = ml.scrollHeight;
     }
 });
 

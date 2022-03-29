@@ -2,7 +2,9 @@ const socket = io();
 const client = {
     messages: {
         room_id: null,
-    }
+    },
+    id: null,
+    username: null,
 };
 
 var before_new_render = null;
@@ -20,3 +22,8 @@ const navbar = (id, show) => {
 }
 
 socket.on('redirect', url => window.location.replace(url));
+
+function init(id, username) {
+    client.id = id;
+    client.username = username;
+}

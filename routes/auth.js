@@ -16,7 +16,6 @@ const _limiter = rateLimit({
 });
 
 router.post('/local', limiter, _limiter, async (req, res, next) => {
-    console.log('auth');
     const returnTo = req.query.ref ? req.query.ref : '/';
     if (req.user) res.status(200).json({ message: 'user already logged in', returnTo });
     else passport.authenticate('local', (err, user, info) => {

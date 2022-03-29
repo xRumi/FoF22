@@ -31,7 +31,12 @@ module.exports.sockets = (io, client) => {
                                         if (_friend) name = _friend.name || _friend.username;
                                     }
                                 } else name = room.name;
-                                socket.emit('receive-messages', { user: user.id, messages: chat.messages.slice(-10), id, name: name ? name : 'unknown' });
+                                let messages = chat.messages.slice(-20);
+                                for (var i = 0; i < messages.length; i++) {
+                                    let user = await client.database.functions.get_user(messages[i].user);
+                                    messages[i].username = user.username;
+                                }
+                                socket.emit('receive-messages', { user: user.id, messages, id, name: name ? name : 'unknown' });
                             }
                         } else socket.emit('join-room-error', { id, message: '<p>Oops! Chat Not Be Found</p><p>Sorry but the chat room you are looking for does not exist, have been removed. id changed or is temporarily unavailable</p>' });
                     } else socket.emit('join-room-error', { id, message: '<p>Oops! Chat Not Be Found</p><p>Sorry but the chat room you are looking for does not exist, have been removed. id changed or is temporarily unavailable</p>' });
@@ -55,6 +60,7 @@ module.exports.sockets = (io, client) => {
                                     };
                                     chat.messages.push(chat_data);
                                     await chat.save();
+                                    chat_data.username = user.username;
                                     io.to(socket.room_id).emit('receive-message', { user: user.id, id: room.id, chat: chat_data, _id });
                                     [...client.database_cache.users].filter(r_user => r_user.rooms?.includes(room.id))?.forEach(r_user => {
                                         io.to(r_user.id).emit('new-message', { message, id: room.id, user: user.username, _id });

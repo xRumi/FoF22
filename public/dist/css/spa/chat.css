@@ -134,15 +134,13 @@
 	color: #646464;
 	font-size: 14px;
 	padding: 10px;
-	width: 100%;
 	margin-left: 8px;
 }
 
-.message-info {
+.message-time {
 	color: #777;
 	display: none;
 	font-size: 12px;
-	margin: 8px 0 0;
 }
 
 .outgoing .message-content p {
@@ -296,3 +294,12 @@
 @media screen and (max-width: 800px) {
 
 }
+
+.stack-messages .message-img {
+	display: none;
+}
+
+.stack-messages .message-content p {
+	margin-left: 48px;
+}
+
