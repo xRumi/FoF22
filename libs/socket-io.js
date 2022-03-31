@@ -36,7 +36,17 @@ module.exports.sockets = (io, client) => {
                                     let user = await client.database.functions.get_user(messages[i].user);
                                     messages[i].username = user.username;
                                 }
-                                socket.emit('receive-messages', { user: user.id, messages, id, name: name ? name : 'unknown' });
+                                socket.emit('receive-messages', { user: user.id, messages, id, name: name ? name : 'unknown', mm: chat.messages.length > 20 ? true : false });
+                                socket.on('load-more-messages', async num => {
+                                    let messages = [];
+                                    if (num && num > 1) messages = chat.messages.slice(-20 * num, -20 * (num - 1));
+                                    else messages = chat.messages.slice(-20);
+                                    for (var i = 0; i < messages.length; i++) {
+                                        let user = await client.database.functions.get_user(messages[i].user);
+                                        messages[i].username = user.username;
+                                    }
+                                    socket.emit('receive-more-messages', { id, messages, num, mm: chat.messages.length > 20 * num ? true : false });
+                                });
                             }
                         } else socket.emit('join-room-error', { id, message: '<p>Oops! Chat Not Be Found</p><p>Sorry but the chat room you are looking for does not exist, have been removed. id changed or is temporarily unavailable</p>' });
                     } else socket.emit('join-room-error', { id, message: '<p>Oops! Chat Not Be Found</p><p>Sorry but the chat room you are looking for does not exist, have been removed. id changed or is temporarily unavailable</p>' });
@@ -70,7 +80,7 @@ module.exports.sockets = (io, client) => {
                         }
                     } else socket.emit('redirect', '/login?ref=messages');
                 }
-            })
+            });
             socket.on('disconnect', async () => {
                 client.cache.functions.update_user({ username: user.username, status: 'offline' });
             });

@@ -96,19 +96,19 @@
 	text-align: center;
 	font-size: 16px;
 	font-weight: lighter;
-	margin-left: 115px;
-	margin-right: 110px;
+	margin-left: 65px;
+	margin-right: 50px;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
 .messages-list {
+	margin-top: 10px;
 	padding: 10px;
 	height: auto;
 	overflow: hidden;
 	overflow-y: auto;
-	margin-bottom: 100px;
 }
 
 .message-img {
@@ -150,34 +150,6 @@
 }
 
 .outgoing .message-img {
-	display: none;
-}
-
-.messages-bottom {
-	position: absolute;
-	width: inherit;
-	bottom: 0;
-	height: 45px;
-	overflow: hidden;
-	background-color: #007bff;
-	box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
-}
-
-#message-input {
-	background-color: aliceblue;
-	width: 100%;
-	height: 45px;
-	border: 0;
-	outline: none;
-	font-size: 16px;
-	padding-left: 10px;
-	letter-spacing: 2px;
-}
-
-.message-submit {
-	width: 5%;
-	height: 50px;
-	position: absolute;
 	display: none;
 }
 
@@ -291,8 +263,16 @@
 	}
 }
 
-@media screen and (max-width: 800px) {
+.load-more-messages .lds-dual-ring {
+	margin-top: unset;
+	display: inline-block;
+}
 
+.load-more-messages .lds-dual-ring::after {
+	width: 15px;
+	height: 15px;
+	border-width: 0.1px;
+	margin: 0 10px -2px 20px;
 }
 
 .stack-messages .message-img {
@@ -303,3 +283,33 @@
 	margin-left: 48px;
 }
 
+#message-input {
+	margin-left: 20px;
+    padding: 10px;
+    width: 60%;
+    letter-spacing: 1.5px;
+    outline: 0;
+    font-size: 16px;
+}
+
+@media screen and (min-width: 801px) {
+	#message-input {
+		margin-bottom: 80px;
+	}
+}
+
+@media screen and (max-width: 800px) {
+	#message-input {
+		margin-bottom: 40px;
+	}
+}
+
+.load-more-messages {
+	position: relative;
+    top: 15px;
+    left: 15px;
+    font-size: 16px;
+    cursor: pointer;
+	background-color: beige;
+	padding: 5px;
+}

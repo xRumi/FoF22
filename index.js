@@ -19,14 +19,14 @@ app.set('trust proxy', true);
 app.use(logger("dev"));
 
 mongoose.connect('mongodb+srv://main:iVAFZ0z5YDcHf5jm@cluster0.pcm42.mongodb.net/main?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
-    console.log('database is connected connected');
+    console.log('database is connected');
 }).catch((err) => {
     return console.log(`MongoDB database error: ${err}`);
 });
 
 const session_store = session({
     secret: '1p@d20&f#JtceK0jso,!h9&,7N@7@?',
-    cookie: { maxAge: 60000 * 60 * 24 },
+    cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 },
     resave: false,
     saveUninitialized: false,
     store: mongo_store.create({ mongoUrl: 'mongodb+srv://main:iVAFZ0z5YDcHf5jm@cluster0.pcm42.mongodb.net/main?retryWrites=true&w=majority' }),
@@ -34,7 +34,6 @@ const session_store = session({
 });
 
 const nodemailer = require('nodemailer');
-const { chownSync } = require('fs');
 
 io.use(function(socket, next) {
     session_store(socket.request, socket.request.res || {}, next);

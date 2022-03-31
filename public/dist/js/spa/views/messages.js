@@ -1,5 +1,7 @@
 import Constructor from "./constructor.js";
 
+var lmm = 1;
+
 class People_List extends HTMLElement {
     static get observedAttributes() {
         return ['rid'];
@@ -14,6 +16,10 @@ class People_List extends HTMLElement {
         super();
         this.innerHTML = `<div class="_people">${this.innerHTML}</div>`;
         this.onclick = () => {
+            lmm = 1;
+            $('.load-more-messages .lds-dual-ring').hide();
+            $('.load-more-messages').hide();
+            $('.messages-list').html('');
             $('.chat').addClass('chat-active');
             $('.navbar').addClass('chat-active');
             client.messages.room_id = this.rid;
@@ -55,8 +61,6 @@ class Messages_Bottom extends HTMLElement {
                     </div>
                 </div>
             `);
-            const ml = document.querySelector(".messages");
-            ml.scrollTop = ml.scrollHeight;
             input.value = '';
             return false;
         };
@@ -75,9 +79,20 @@ class Messages_Header_Back extends HTMLElement {
     }
 }
 
+class Load_More_Messages extends HTMLElement {
+    constructor() {
+        super();
+        this.onclick = () => {
+            this.querySelector('.lds-dual-ring').style.display = "inline-block";
+            socket.emit('load-more-messages', lmm + 1);
+        };
+    }
+}
+
 customElements.define('people-list', People_List);
 customElements.define('messages-bottom', Messages_Bottom);
 customElements.define('messages-header-back', Messages_Header_Back);
+customElements.define('load-more-messages', Load_More_Messages);
 
 var old_people_list = [];
 
@@ -142,13 +157,14 @@ export default class extends Constructor {
                         </messages-header-back>
                         <p class="messages-header-text"></p>
                     </div>
+                    <load-more-messages class="load-more-messages" style="display: none;">load more messages...<div class="lds-dual-ring" style="display: none;"></div></load-more-messages>
                     <div class="messages-list scrollbar">
                         <div class="lds-dual-ring"></div>
                     </div>
                     <messages-bottom class="messages-bottom">
                         <form autocomplete="off">
                             <input type="text" name="message-input" id="message-input" placeholder="type your message...">
-                            <button type="submit" class="message-submit">Send</button>
+                            <button type="submit" class="message-submit" style="display: none;">Send</button>
                         </form>
                     </messages-bottom>
                 </div>
@@ -167,7 +183,7 @@ export default class extends Constructor {
     }
 }
 
-socket.on('receive-messages', ({ messages, id, name }) => {
+socket.on('receive-messages', ({ messages, id, name, mm }) => {
     if (client.messages.room_id == id) {
         document.title = name;
         $('.messages-header-text').text(name);
@@ -191,8 +207,7 @@ socket.on('receive-messages', ({ messages, id, name }) => {
             lmu = m.user;
         }
         $('.messages-list').html(html.join(''));
-        const ml = document.querySelector(".messages");
-        ml.scrollTop = ml.scrollHeight;
+        if (mm) $('.load-more-messages').show();
     }
 });
 
@@ -216,9 +231,35 @@ socket.on('receive-message', ({ id, chat, _id }) => {
                 </div>
             </div>
         `);
-        const ml = document.querySelector(".messages");
-        ml.scrollTop = ml.scrollHeight;
     }
+});
+
+socket.on('receive-more-messages', ({ id, num, messages, mm }) => {
+    if (client.messages.room_id == id && messages.length && num == (lmm + 1)) {
+        let html = [], lmu;
+        for (var i = 0; i < messages.length; i++) {
+            let m = messages[i];
+            html.push(`
+                <div class="message${client.id == m.user ? ' outgoing' : lmu == m.user ? ' stack-messages' : ''}${m.user == '61d001de9b64b8c435985da9' ? 'system-message' : ''}">
+                    <div class="message-img">
+                        <img src="/dist/img/profile/${m.user}.png">
+                    </div>
+                    <div class="message-content">
+                        <p>${m.message}</p>
+                        <p class="message-time">12:43 PM</p>
+                    </div>
+                    <div class="message-info" style="display: none">
+                        <span>${m.username}</span>
+                    </div>
+                </div>
+            `);
+            lmu = m.user;
+        }
+        $('.messages-list').prepend(html.join(''));
+        lmm++;
+        $('.load-more-messages .lds-dual-ring').hide();
+    } else $('.load-more-messages .lds-dual-ring').hide();
+    if (!mm) $('.load-more-messages').hide();
 });
 
 socket.on('join-room-error', ({ id, message }) => {
