@@ -6,8 +6,8 @@
 .chat .people {
 	width: 300px;
 	float: left;
-	height: 100vh;
-	overflow: auto;
+	height: calc(100vh - 50px);
+	overflow: hidden;
 	box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
 }
 
@@ -58,6 +58,7 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	width: 70%;
+	font-style: italic;
 }
 
 ._people-img {
@@ -72,7 +73,7 @@
 .chat .messages {
 	width: calc(100% - 300px);
 	float: right;
-	height: 100vh;
+	height: calc(100vh - 50px);
 	overflow: auto;
 	display: none;
 }
@@ -104,11 +105,11 @@
 }
 
 .messages-list {
-	margin-top: 10px;
+	margin-top: 25px;
 	padding: 10px;
 	height: auto;
-	overflow: hidden;
-	overflow-y: auto;
+	overflow: auto;
+	margin-bottom: 60px;
 }
 
 .message-img {
@@ -161,6 +162,7 @@
 	.chat .messages {
 		width: 100%;
 		display: none;
+		height: 100%;
 	}
 
 	.chat-active .people {
@@ -169,10 +171,6 @@
 
 	.chat-active.navbar {
 		display: none;
-	}
-
-	.messages-list {
-		margin-bottom: 40px;
 	}
 }
 
@@ -212,12 +210,6 @@
 
 	.messages::-webkit-scrollbar {
 		display: none;
-	}
-
-	.messages,
-	.messages-list {
-		-ms-overflow-style: none;
-		scrollbar-width: none;
 	}
 
 	.messages-header {
@@ -272,7 +264,7 @@
 	width: 15px;
 	height: 15px;
 	border-width: 0.1px;
-	margin: 0 10px -2px 20px;
+	margin: 0 8px -2px 10px;
 }
 
 .stack-messages .message-img {
@@ -283,33 +275,76 @@
 	margin-left: 48px;
 }
 
-#message-input {
-	margin-left: 20px;
-    padding: 10px;
-    width: 60%;
-    letter-spacing: 1.5px;
-    outline: 0;
-    font-size: 16px;
+.load-more-messages {
+	position: relative;
+	top: 15px;
+	left: 15px;
+	font-size: 15px;
+	cursor: pointer;
+	background-color: beige;
+	padding: 5px;
 }
 
-@media screen and (min-width: 801px) {
-	#message-input {
-		margin-bottom: 80px;
-	}
+.system-message {
+	display: flex;
+	justify-content: center;
+	margin-bottom: 30px;
+}
+
+.messages-bottom {
+	position: fixed;
+    width: inherit;
+    bottom: 0;
+    background: #fff;
+    height: 60px;
+	box-shadow: 2px 0 3px rgba(0, 0, 0, 0.2);
+}
+
+#message-input {
+	position: absolute;
+	top: 16px;
+    padding: 6px;
+    width: 55%;
+    letter-spacing: 1.2px;
+    outline: 0;
+    font-size: 16px;
+	margin-left: 10px;
 }
 
 @media screen and (max-width: 800px) {
 	#message-input {
-		margin-bottom: 40px;
+		width: 80%;
 	}
 }
 
-.load-more-messages {
-	position: relative;
-    top: 15px;
-    left: 15px;
-    font-size: 16px;
-    cursor: pointer;
-	background-color: beige;
-	padding: 5px;
+.context-menu-item {
+	font-size: 14px;
+}
+
+.message-deleted p {
+	background-color: #fff;
+	border: solid 0.1px;
+	color: gray;
+	font-style: italic;
+}
+
+.message-deleted.outgoing p {
+	color: gray;
+	background-color: #fff;
+	border: solid 0.1px;
+	font-style: italic;
+}
+
+.message-input-note span {
+	color: black;
+    position: absolute;
+    right: 42%;
+    top: 12px;
+    font-size: 28px;
+}
+
+@media screen and (max-width: 800px) {
+	.message-input-note span {
+		right: 8%;
+	}
 }

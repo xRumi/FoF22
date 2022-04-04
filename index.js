@@ -5,6 +5,8 @@ const compression = require('compression'),
     http = require('http').Server(app),
     io = require('socket.io')(http);
 
+if (process.env.PRODUCTION) require('newrelic');
+
 const passport = require('passport'),
     mongoose = require("mongoose"),
     mongo_store = require('connect-mongo'),
@@ -103,5 +105,5 @@ const server = http.listen(process.env.PORT || 80, () => {
     console.log('server is running on port', server.address().port);
 });
 
-local_strategy.init(client);
+local_strategy.init(client, app);
 client.database.functions.schedule();

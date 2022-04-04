@@ -4,8 +4,11 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js@latest/pace-theme-default.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/pace-js@latest/pace.min.js"></script>
         <link rel="stylesheet" href="/dist/css/spa/index.css">
         <link rel="stylesheet" href="/dist/css/spa/chat.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.css">
         <title>FoF22</title>
     </head>
     <body onload="init('<%=user_id%>', '<%=username%>')">
@@ -13,28 +16,11 @@
             <nav class="navbar">
                 <div class="nav__logo">FoF22</div>
                 <div class="nav__list">
-                    <a id="nav__link__home" href="/spa" class="nav__link" data-link>
-                        <i class="bx bx-home-alt nav__icon"></i>
-                        <span class="nav__text">Home</span>
-                    </a>
-                    <a id="nav__link__profile" href="/spa/profile" class="nav__link" data-link>
-                        <i class="bx bx-user nav__icon"></i>
-                        <span class="nav__text">Profile</span>
-                    </a>
-
-                    <a id="nav__link__messages" href="/spa/messages" class="nav__link" data-link>
-                        <i class="bx bx-chat nav__icon"></i>
-                        <span class="nav__text">Messages</span>
-                    </a>
-
-                    <a id="nav__link__search" href="/spa/search" class="nav__link" data-link>
-                        <i class="bx bx-search nav__icon"></i>
-                        <span class="nav__text">Search</span>
-                    </a>
-                    <a id="nav__link__menu" href="/spa/menu" class="nav__link" data-link>
-                        <i class="bx bx-cog nav__icon"></i>
-                        <span class="nav__text">Menu</span>
-                    </a>
+                    <a id="nav__link__home" href="/spa" class="nav__link" data-link><i class="bx bx-home-alt nav__icon"></i></a>
+                    <a id="nav__link__profile" href="/spa/profile" class="nav__link" data-link><i class="bx bx-user nav__icon"></i></a>
+                    <a id="nav__link__messages" href="/spa/messages" class="nav__link" data-link><i class="bx bx-chat nav__icon"></i></a>
+                    <a id="nav__link__search" href="/spa/search" class="nav__link" data-link><i class="bx bx-search nav__icon"></i></a>
+                    <a id="nav__link__menu" href="/spa/menu" class="nav__link" data-link><i class="bx bx-cog nav__icon"></i></a>
                 </div>
                 <div class="nav__profile">
                     <img src="/dist/img/profile/61d001de9b64b8c435985da5.png">
@@ -46,6 +32,8 @@
 
         </main>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.ui.position.js"></script>
         <script src="/socket.io/socket.io.js"></script>
         <script src="/dist/js/spa/script.js"></script>
         <script type="module" src="/dist/js/spa/index.js"></script>

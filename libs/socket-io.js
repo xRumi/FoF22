@@ -37,19 +37,30 @@ module.exports.sockets = (io, client) => {
                                     messages[i].username = user.username;
                                 }
                                 socket.emit('receive-messages', { user: user.id, messages, id, name: name ? name : 'unknown', mm: chat.messages.length > 20 ? true : false });
-                                socket.on('load-more-messages', async num => {
-                                    let messages = [];
-                                    if (num && num > 1) messages = chat.messages.slice(-20 * num, -20 * (num - 1));
-                                    else messages = chat.messages.slice(-20);
-                                    for (var i = 0; i < messages.length; i++) {
-                                        let user = await client.database.functions.get_user(messages[i].user);
-                                        messages[i].username = user.username;
-                                    }
-                                    socket.emit('receive-more-messages', { id, messages, num, mm: chat.messages.length > 20 * num ? true : false });
-                                });
                             }
                         } else socket.emit('join-room-error', { id, message: '<p>Oops! Chat Not Be Found</p><p>Sorry but the chat room you are looking for does not exist, have been removed. id changed or is temporarily unavailable</p>' });
                     } else socket.emit('join-room-error', { id, message: '<p>Oops! Chat Not Be Found</p><p>Sorry but the chat room you are looking for does not exist, have been removed. id changed or is temporarily unavailable</p>' });
+                }
+            });
+            socket.on('load-more-messages', async id => {
+                if (id && id.length > 8 && socket.chat_id) {
+                    let chat = await client.database.chat.findById(socket.chat_id);
+                    if (chat && chat.room_id == socket.room_id) {
+                        let a = chat.messages.length;
+                        while(a--) {
+                            if (chat.messages[a]?.id == id) {
+                                let messages = [];
+                                if (a && a > 20) messages = chat.messages.slice(a - 20, a);
+                                else messages = chat.messages.slice(0, a);
+                                for (var i = 0; i < messages.length; i++) {
+                                    let user = await client.database.functions.get_user(messages[i].user);
+                                    messages[i].username = user.username;
+                                }
+                                socket.emit('receive-more-messages', { id: socket.room_id, messages, mm: a - 20 > 20 ? true : false });
+                                break;
+                            }
+                        }
+                    }
                 }
             });
             socket.on('send-message', async ({ id, _message, _id }) => {
@@ -63,6 +74,7 @@ module.exports.sockets = (io, client) => {
                                 let chat = await client.database.chat.findById(room.chat_id);
                                 if (chat) {
                                     let chat_data = {
+                                        id: Math.random().toString(36).substring(2, 15),
                                         user: user.id,
                                         message,
                                         time: Date.now(),
@@ -79,6 +91,21 @@ module.exports.sockets = (io, client) => {
                             } else socket.emit('error', 'room does not exist');
                         }
                     } else socket.emit('redirect', '/login?ref=messages');
+                }
+            });
+            socket.on('delete-message', async ({ id, _id }) => {
+                if (_id && id?.length > 8 && _id === socket.room_id) {
+                    let chat = await client.database.chat.findById(socket.chat_id);
+                    if (chat.room_id == socket.room_id) {
+                        let a = chat.messages.find(x => x.id == id);
+                        if (a) {
+                            a.message = null;
+                            chat.markModified('messages');
+                            await chat.save();
+                            socket.emit('delete-message-response', { id, done: true });
+                            socket.broadcast.to(socket.room_id).emit('update-message', { id: socket.room_id, chat: a });
+                        } else socket.emit('delete-message-response', { id, done: false });
+                    }
                 }
             });
             socket.on('disconnect', async () => {

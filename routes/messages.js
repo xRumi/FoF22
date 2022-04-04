@@ -26,7 +26,7 @@ router.get('/fetch', async (req, res) => {
                     name,
                     id: room.id,
                     image: `/dist/img/profile/61d001de9b64b8c435985da9.png`,
-                    last_message: last_message?.message,
+                    last_message: last_message?.message || 'This message was deleted',
                     time: last_message?.time
                 });
             }
