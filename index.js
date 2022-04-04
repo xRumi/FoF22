@@ -5,8 +5,6 @@ const compression = require('compression'),
     http = require('http').Server(app),
     io = require('socket.io')(http);
 
-if (process.env.PRODUCTION) require('newrelic');
-
 const passport = require('passport'),
     mongoose = require("mongoose"),
     mongo_store = require('connect-mongo'),
