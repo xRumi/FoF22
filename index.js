@@ -11,12 +11,8 @@ const passport = require('passport'),
     local_strategy = require('./strategies/local'),
     routes = require('./routes/');
 
-const path = require('path'),
-    logger = require("morgan");
-
+const path = require('path');
 app.set('trust proxy', true);
-
-app.use(logger("dev"));
 
 mongoose.connect('mongodb+srv://main:iVAFZ0z5YDcHf5jm@cluster0.pcm42.mongodb.net/main?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
     console.log('database is connected');
@@ -99,7 +95,7 @@ app.get('*', (req, res) => {
     res.render('404');
 });
 
-const server = http.listen(process.env.PORT || 80, () => {
+const server = http.listen(process.env.PORT || 3000, () => {
     console.log('server is running on port', server.address().port);
 });
 
