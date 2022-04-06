@@ -75,7 +75,6 @@ app.use(express.urlencoded({ extended: true }));
 
 app.engine("html", require("ejs").renderFile);
 app.set("view engine", "ejs");
-app.use(express.static(path.join(__dirname, "/public")/*, { maxAge: process.env.NODE_ENV === 'production' ? 60000 * 60 * 24 : 0 } */));
 app.set("views", path.join(__dirname, "/views"));
 
 app.use(session_store);

@@ -7,31 +7,31 @@ router.get('/', async (req, res) => {
 
 router.get('/fetch', async (req, res) => {
     if (req.user) {
-        const room_data = [];
-        for (const x of req.user.rooms) {
-            let room = await req.client.database.functions.get_room(x);
-            if (room) {
-                let name, chat = await req.client.database.chat.findById(room.chat_id);
-                if (room.type == 'private') {
-                    if (room.members[0] == req.user.id) {
-                        let _friend = await req.client.database.functions.get_user(room.members[1]);
-                        if (_friend) name = _friend.name || _friend.username;
-                    } else {
-                        let _friend = await req.client.database.functions.get_user(room.members[0]);
-                        if (_friend) name = _friend.name || _friend.username;
+        Promise.all(req.user.rooms.map(x => req.client.database.functions.get_room(x))).then(rooms => {
+            Promise.all(rooms.map(room => req.client.database.chat.findById(room.chat_id))).then(async chats => {
+                let data = [];
+                for (let i = 0; i < rooms.length; i++) {
+                    let room = rooms[i];
+                    let chat = chats[i];
+                    if (room && chat && room.chat_id === chat.id) {
+                        let last_message = chat.messages[chat.messages.length - 1], name, _name;
+                        if (room.type == 'private') {
+                            _name = room.members[0] === req.user.id ? await req.client.database.functions.get_user(room.members[1]) : await req.client.database.functions.get_user(room.members[0]);
+                            if (_name) name = _name.username;
+                            else name = 'Not Found';
+                        } else name = room.name;
+                        data.push({
+                            id: room.id,
+                            name,
+                            image: `/dist/img/profile/61d001de9b64b8c435985da9.png`,
+                            time: last_message?.time,
+                            last_message: last_message?.message || 'This message was deleted',
+                        });
                     }
-                } else name = room.name;
-                let last_message = chat.messages[chat.messages.length - 1];
-                room_data.push({
-                    name,
-                    id: room.id,
-                    image: `/dist/img/profile/61d001de9b64b8c435985da9.png`,
-                    last_message: last_message?.message || 'This message was deleted',
-                    time: last_message?.time
-                });
-            }
-        }
-        res.status(200).send(room_data);
+                }
+                res.status(200).send(data);
+            });
+        });
     } else res.status(403).send('forbidden');
 });
 
@@ -41,9 +41,8 @@ router.get('/private/:room_id', async (req, res) => {
         if (req.user.rooms.includes(room_id)) {
             let room = await req.client.database.functions.get_room(room_id);
             if (room) {
-                let name, _name = room.name.split('.');
-                if (_name[0] == req.user.username) name = _name[1];
-                else name = _name[0];
+                let _name = room.name.split('.'),
+                    name = _name[0] == req.user.username ? _name[1] : _name[0];
                 res.render("index", { user: req.user, page: name, route: 'messages.private', args: `{room_id:'${room_id}',name:'${name}'}` });
             }
         }
