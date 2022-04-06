@@ -77,6 +77,11 @@ app.engine("html", require("ejs").renderFile);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "/views"));
 
+if (process.env.EXPRESS_STATIC) {
+    app.use(express.static(path.join(__dirname, "/public")));
+    console.log('serving static files through express');
+}
+
 app.use(session_store);
 
 app.use(passport.initialize());
