@@ -13,7 +13,7 @@ router.get('/info', async (req, res) => {
 
 router.post('/update/info', async (req, res) => {
     if (req.user) {
-        var save = false;
+        let save = false;
         const messages = [],
             name = req.body.name,
             email = req.body.email?.toLowerCase(),
@@ -56,8 +56,7 @@ router.post('/update/info', async (req, res) => {
 
 router.post('/update/password', async (req, res) => {
     if (req.user) {
-        const messages = [],
-            new_pass = req.body.new_pass,
+        const new_pass = req.body.new_pass,
             old_pass = req.body.old_pass;
         if (!new_pass || !old_pass) res.status(406).send( 'not enough information provided' );
         else if (old_pass === req.user.password) {
@@ -65,10 +64,8 @@ router.post('/update/password', async (req, res) => {
                 req.user.password = new_pass;
                 await req.user.save();
                 await req.session.destroy();
-                var filter = {'session':{'$regex': '.*"user":"'+req.user.username+'".*'}};
-                Session.deleteMany(filter, function(err, data) {
-                    if (err) console.log(err);
-                });
+                let filter = {'session':{'$regex': '.*"user":"'+req.user.username+'".*'}};
+                Session.deleteMany(filter);
                 res.status(200).send('password successfully changed');
             } else res.status(400).send ('invalid data');
         } else res.status(401).send('password is incorrect');
@@ -80,10 +77,8 @@ router.post('/force_logout', async (req, res) => {
         if (req.body.password === req.user.password) {
             await req.session.destroy();
             res.status(200).send( 'force logout success' );
-            var filter = {'session':{'$regex': '.*"user":"'+req.user.username+'".*'}};
-            Session.deleteMany(filter, function(err, data) {
-                if (err) console.log(err);
-            });
+            let filter = {'session':{'$regex': '.*"user":"'+req.user.username+'".*'}};
+            Session.deleteMany(filter);
         } else res.status(401).send( 'password is incorrect' );
     } else res.status(403).send( 'forbidden' );
 });
@@ -96,10 +91,8 @@ router.post('/deactive', async (req, res) => {
             console.log(req.user)
             await req.session.destroy();
             res.status(200).send( 'account deactivated, re-login to cancel' );
-            var filter = {'session':{'$regex': '.*"user":"'+req.user.username+'".*'}};
-            Session.deleteMany(filter, function(err, data) {
-                if (err) console.log(err);
-            });
+            let filter = {'session':{'$regex': '.*"user":"'+req.user.username+'".*'}};
+            Session.deleteMany(filter);
         } else res.status(401).send( 'password is incorrect' );
     } else res.status(403).send( 'forbidden' );
 });
@@ -113,10 +106,8 @@ router.post('/delete', async (req, res) => {
             console.log(req.user)
             await req.session.destroy();
             res.status(200).send( 'account will be deleted in 24 hours, re-login to cancel' );
-            var filter = {'session':{'$regex': '.*"user":"'+req.user.username+'".*'}};
-            Session.deleteMany(filter, function(err, data) {
-                if (err) console.log(err);
-            });
+            let filter = {'session':{'$regex': '.*"user":"'+req.user.username+'".*'}};
+            Session.deleteMany(filter);
         } else res.status(401).send( 'password is incorrect' );
     } else res.status(403).send( 'forbidden' );
 });

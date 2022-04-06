@@ -32,7 +32,7 @@ module.exports.sockets = (io, client) => {
                                     }
                                 } else name = room.name;
                                 let messages = chat.messages.slice(-20);
-                                for (var i = 0; i < messages.length; i++) {
+                                for (let i = 0; i < messages.length; i++) {
                                     let user = await client.database.functions.get_user(messages[i].user);
                                     messages[i].username = user.username;
                                 }
@@ -49,10 +49,8 @@ module.exports.sockets = (io, client) => {
                         let a = chat.messages.length;
                         while(a--) {
                             if (chat.messages[a]?.id == id) {
-                                let messages = [];
-                                if (a && a > 20) messages = chat.messages.slice(a - 20, a);
-                                else messages = chat.messages.slice(0, a);
-                                for (var i = 0; i < messages.length; i++) {
+                                let messages = (a && a > 20) ? chat.messages.slice(a - 20, a) : messages = chat.messages.slice(0, a);
+                                for (let i = 0; i < messages.length; i++) {
                                     let user = await client.database.functions.get_user(messages[i].user);
                                     messages[i].username = user.username;
                                 }

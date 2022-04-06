@@ -1,8 +1,5 @@
-const humanize_duration = require("humanize-duration");
 const ObjectId = require("mongodb").ObjectId;
-
 const router = require('express').Router();
-
 const rateLimit = require('express-rate-limit');
 
 router.get('/', async (req, res) => {
@@ -36,7 +33,7 @@ router.post('/post', limiter1, _limiter1, async (req, res) => {
                 to: email,
                 subject: 'Verify Your Email',
                 html: `<p>Visit <a href="http://88.99.83.158/register/confirm/?token=${_user.id}">here</a> to confirm this email address and change the password.</p><br><hr><p>You're receiving this email because you have registered with this address in <a href="http://88.99.83.158">88.99.83.158</a>.</p>`,
-            }, function(error, info) {
+            }, function(error) {
                 if (error) console.log(error);
             });
             await _user.save();
@@ -46,7 +43,7 @@ router.post('/post', limiter1, _limiter1, async (req, res) => {
                 to: email,
                 subject: 'Verify Your Email',
                 html: `<p>Visit <a href="http://88.99.83.158/register/confirm/?token=${_user.id}">here</a> to confirm this email address and change the password.</p><br><hr><p>You're receiving this email because you have registered with this address in <a href="http://88.99.83.158">88.99.83.158</a>.</p>`,
-            }, function(error, info) {
+            }, function(error) {
                 if (error) console.log(error);
             });
             res.status(200).send('Resending account confirmation email');
@@ -81,7 +78,6 @@ const limiter3 = rateLimit({
 });
 
 router.post('/confirm/post', limiter3, async (req, res) => {
-    console.log
     let username = req.body.username?.toLowerCase(),
         name = req.body.name,
         _token = req.body.token,

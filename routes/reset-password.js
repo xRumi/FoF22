@@ -31,7 +31,7 @@ router.post('/forgot-password/post', limiter1, _limiter1, async (req, res) => {
             to: user.email,
             subject: 'reset password',
             html: `<p>You requested for reset password, kindly use this <a href="http://88.99.83.158/reset-password/?token=${token.id}">link</a> to reset your password.</p><br><hr><p>This link will expire in <b>${humanize_duration((token.expire_at) - Date.now())}</b></p><p>You're receiving this email because a password reset was requested for your account.</p>`,
-        }, function(error, info) {
+        }, function(error) {
             if (error) console.log(error);
         });
     }
@@ -80,7 +80,7 @@ router.post('/reset-password/post', limiter3, async (req, res) => {
                     user.password = password;
                     await req.session.destroy();
                     let filter = {'session':{'$regex': '.*"user":"'+user.username+'".*'}};
-                    Session.deleteMany(filter, function(err, data) { if (err) console.log(err); });
+                    Session.deleteMany(filter);
                     await user.save();
                     res.status(200).send('Password changed successfully, redirecting to login page in 5 seconds');
                 }

@@ -8,7 +8,7 @@ module.exports = (client) => {
     }
     client.cache.functions.get_friends = async ( friends ) => {
         let data = [];
-        for (var i = 0; i < friends.length; i++) {
+        for (let i = 0; i < friends.length; i++) {
             let _data = client.cache.users.get(friends[i]);
             if (!_data) {
                 client.cache.users.set(friends[i], { username: friends[i], status: 'offline' });

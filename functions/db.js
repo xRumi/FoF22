@@ -73,9 +73,9 @@ module.exports = (client) => {
         room.chat_id = chat.id;
         await room.save();
         await chat.save();
-        for (var i = 0; i < members.length; i++) {
+        for (let i = 0; i < members.length; i++) {
             let member = await client.database.functions.get_user(i);
-            if (memebr) {
+            if (member) {
                 member.rooms.push(room.id);
                 await member.save();
             }
@@ -95,7 +95,8 @@ module.exports = (client) => {
         }
     }
     client.database.functions.find_common_room = async ( _user1, _user2, is_private = true ) => {
-        return await client.database.room.findOne({ type: is_private ? 'private' : 'public', members: { $in: [_user1, _user2] } });
+        let room = await client.database.room.findOne({ type: is_private ? 'private' : 'public', members: { $in: [_user1, _user2] } });
+        return room;
     }
     client.database.functions.delete_messages = async (chat_id) => {
         let chat = await client.database.chat.findById(chat_id);

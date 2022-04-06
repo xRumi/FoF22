@@ -196,7 +196,7 @@ socket.on('receive-messages', ({ messages, id, name, mm }) => {
         document.title = name;
         $('.messages-header-text').text(name);
         let html = [], lm = {};
-        for (var i = 0; i < messages.length; i++) {
+        for (let i = 0; i < messages.length; i++) {
             let m = messages[i];
             html.push(m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}">${m.message}</div>` : `
                 <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-messages' : ''}${!m.message ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}">
@@ -240,7 +240,7 @@ socket.on('receive-message', ({ id, chat, _id }) => {
 socket.on('receive-more-messages', ({ id, messages, mm }) => {
     if (client.messages.room_id == id && messages.length) {
         let html = [], lm = {};
-        for (var i = 0; i < messages.length; i++) {
+        for (let i = 0; i < messages.length; i++) {
             let m = messages[i];
             html.push(m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user} data-id="${m.id}">${m.message}</div>` : `
                 <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-messages' : ''}${!m.message ? ' message-deleted' : ''}" data-id="${m.id}">

@@ -27,7 +27,7 @@ $('#refresh_friends').click(() => {
     ajax('home', '/friends/fetch').then(x => {
         let html = ['<ul class="list-group list-group-flush">'];
         if (x.data.length) {
-            for (var i = 0; i < x.data.length; i++) {
+            for (let i = 0; i < x.data.length; i++) {
                 let friend = x.data[i];
                 html.push(`
                     <li class="list-group-item d-flex justify-content-between align-items-center">${friend.username}
