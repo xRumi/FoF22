@@ -51,7 +51,6 @@ class Messages_Bottom extends HTMLElement {
                 <div class="message outgoing" data-username="${client.username}">
                     <div class="message-content">
                         <p id="${_id}" style="background-color: lightblue;">${_message.replace(/[&<>]/g, (t) => ttr[t] || t)}</p>
-                        <span class="message-time">12:43 PM</span>
                     </div>
                 </div>
             `);
@@ -91,17 +90,35 @@ customElements.define('load-more-messages', Load_More_Messages);
 
 var old_people_list = [];
 
+const periods = {
+    month: 30 * 24 * 60 * 60 * 1000,
+    week: 7 * 24 * 60 * 60 * 1000,
+    day: 24 * 60 * 60 * 1000,
+    hour: 60 * 60 * 1000,
+    minute: 60 * 1000,
+    second: 1000
+};
+
+const days = ["Sunday", "Monday", "Tuesday", "Wednesday ", "Thursday", "Friday", "Saturday"];
+
 const people_list = (new_people_list) => {
     if (new_people_list && JSON.stringify(new_people_list) == JSON.stringify(old_people_list)) return false;
     if (new_people_list) old_people_list = new_people_list;
     if (old_people_list && old_people_list.length && Array.isArray(old_people_list)) $('.people-list').html(old_people_list.map(x => {
+        let diff = Date.now() - x.time, time;
+        if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
+        else {
+            let _time = new Date(x.time);
+            if (diff < periods.week) time = days[_time.getDay()];
+            else time = _time.toLocaleDateString();
+        }
         return `
             <people-list rid="${x.id}">
                 <div class="_people-img">
                     <img src="${x.image}">
                 </div>
                 <div class="_people-content">
-                    <span class="_people-time">1 day</span>
+                    <span class="_people-time">${time}</span>
                     <span class="_people-name">${x.name}</span>
                     <p>${x.last_message}</p>
                 </div>
@@ -198,42 +215,63 @@ socket.on('receive-messages', ({ messages, id, name, mm }) => {
         let html = [], lm = {};
         for (let i = 0; i < messages.length; i++) {
             let m = messages[i];
-            html.push(m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}">${m.message}</div>` : `
-                <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-messages' : ''}${!m.message ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}">
+            html.push(m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
+                <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${!m.message ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
                     <div class="message-img">
                         <img src="/dist/img/profile/${m.user}.png">
                     </div>
                     <div class="message-content">
                         <p>${m.message ? m.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
-                        <span class="message-time">12:43 PM</span>
                     </div>
                 </div>
             `);
             lm = m;
         }
-        $('.messages-list').html(html.join(''));
+        message_time(html, (_html) => {
+            $('.messages-list').html(_html);
+            if ($(".message:last-child")[0]) $(".message:last-child")[0].scrollIntoView();
+        });
         if (mm) $('.load-more-messages').show();
-        if ($(".message:last-child")[0]) $(".message:last-child")[0].scrollIntoView();
     }
 });
 
 socket.on('receive-message', ({ id, chat, _id }) => {
     if (client.messages.room_id == id) {
-        let ep = $(`#${_id}`);
-        if (ep.length) {
-            ep.css('background-color', '#007bff');
-            ep.parent().parent().attr({ 'data-username': chat.username, 'data-user-id': chat.user, 'data-id': chat.id });
-        } else $('.messages-list').append(`
-            <div class="message${client.id == chat.user ? ' outgoing' : $('.message:last-child').data('user-id') == chat.user ? ' stack-messages' : ''}${!chat.message ? ' message-deleted' : ''}" data-username="${chat.username}" data-user-id="${chat.user}" data-id="${chat.id}">
-                <div class="message-img">
-                    <img src="/dist/img/profile/${chat.user}.png">
+        let message_content = $(`#${_id}`);
+        if (message_content.length) {
+            message_content.css('background-color', '#007bff');
+            let message = message_content.parent().parent();
+            message.attr({ 'data-username': chat.username, 'data-user-id': chat.user, 'data-id': chat.id, 'data-time': chat.time });
+            let prev_message = message.prev()[0];
+            let prev_message_time = prev_message.querySelector('.outgoing .message-time');
+            console.log(prev_message_time.innerText);
+            if (prev_message_time.innerText && (parseInt(prev_message.dataset.time) - parseInt(chat.time)) < 2 * 60 * 1000) {
+                prev_message_time.remove();
+                let diff = Date.now() - chat.time, time;
+                time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
+                message[0].querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
+            }
+        } else {
+            /*
+            let prev_message = message.prev()[0];
+            let prev_message_time = prev_message.querySelector('.outgoing .message-time');
+            if (prev_message_time.innerTEXT && (parseInt(prev_message.dataset.time) - parseInt(message.dataset.time)) < 2 * 60 * 1000) {
+                prev_message_time.remove();
+                let diff = Date.now() - chat.time, time;
+                time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
+                message[0].querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
+            }*/
+            $('.messages-list').append(`
+                <div class="message${client.id == chat.user ? ' outgoing' : $('.message:last-child').data('user-id') == chat.user ? ' stack-message' : ''}${!chat.message ? ' message-deleted' : ''}" data-username="${chat.username}" data-user-id="${chat.user}" data-id="${chat.id}" data-time="${chat.time}">
+                    <div class="message-img">
+                        <img src="/dist/img/profile/${chat.user}.png">
+                    </div>
+                    <div class="message-content">
+                        <p>${chat.message ? chat.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
+                    </div>
                 </div>
-                <div class="message-content">
-                    <p>${chat.message ? chat.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
-                    <span class="message-time">12:43 PM</span>
-                </div>
-            </div>
-        `);
+            `)
+        }
     }
 });
 
@@ -242,14 +280,13 @@ socket.on('receive-more-messages', ({ id, messages, mm }) => {
         let html = [], lm = {};
         for (let i = 0; i < messages.length; i++) {
             let m = messages[i];
-            html.push(m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user} data-id="${m.id}">${m.message}</div>` : `
-                <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-messages' : ''}${!m.message ? ' message-deleted' : ''}" data-id="${m.id}">
+            html.push(m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user} data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
+                <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${!m.message ? ' message-deleted' : ''}" data-id="${m.id}">
                     <div class="message-img">
                         <img src="/dist/img/profile/${m.user}.png">
                     </div>
                     <div class="message-content">
                         <p>${m.message ? m.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
-                        <span class="message-time">12:43 PM</span>
                     </div>
                 </div>
             `);
@@ -264,13 +301,6 @@ socket.on('receive-more-messages', ({ id, messages, mm }) => {
 socket.on('join-room-error', ({ id, message }) => {
     if (client.messages.room_id == id) $('.messages-list').append(message);
 });
-
-function get_date(sd1, sd2) {
-    let d1 = new Date(sd1),
-        d2 = new Date(sd2);
-    console.log(d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate());
-    return d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
-}
 
 $.contextMenu({
     selector: '.message:not(.outgoing, .message-deleted) p', 
@@ -330,3 +360,50 @@ socket.on('update-message', ({ id, chat }) => {
         }
     }
 });
+
+function message_time (html, callback) {
+
+    let messages = $(html.join('')).filter('.message, .system-message').toArray();
+
+    let messages_group = messages.reduce((p, c, i, a) => {
+        if (c.classList.contains('system-message')) p.push(c);
+        else if (a[i - 1] && c.classList.contains('outgoing') === a[i - 1].classList.contains('outgoing')) p[p.length - 1].constructor === Array ? p[p.length - 1].push(c) : p.push([c]);
+        else p.push(a[i + 1] && c.classList.contains('outgoing') === a[i + 1].classList.contains('outgoing') ? [c] : [c]);
+        return p;
+    }, []);
+
+    for (let i = 0; i < messages_group.length; i++) {
+        if (messages_group[i].constructor !== Array) continue;
+        else if (messages_group[i].length == 1) {
+            let message = messages_group[i][0],
+                message_time = parseInt(message.dataset.time),
+                diff = Date.now() - message_time, time;
+            if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
+            else {
+                let _time = new Date(message_time);
+                if (diff < periods.week) time = `${days[_time.getDay()]} at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`;
+                else time = `${_time.toLocaleDateString()} at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
+            }
+            message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
+        } else {
+            let p;
+            for (let j = 0; j < messages_group[i].length; j++) {
+                let message = messages_group[i][j];
+                if ((p && Math.abs(parseInt(message.dataset.time) - parseInt(p.dataset.time)) > 60 * 1000) || !messages_group[i][j + 1]) {
+                    let message_time = parseInt(message.dataset.time),
+                        diff = Date.now() - message_time, time;
+                    if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
+                    else {
+                        let _time = new Date(message_time);
+                        if (diff < periods.week) time = `${days[_time.getDay()]} at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`;
+                        else time = `${_time.toLocaleDateString()} at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
+                    }
+                    message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
+                }
+                p = messages_group[i][j];
+            }
+        }
+    }
+
+    callback(Array.prototype.concat.apply([], messages_group));
+}

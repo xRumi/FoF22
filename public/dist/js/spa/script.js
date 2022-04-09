@@ -27,3 +27,23 @@ function init(id, username) {
     client.id = id;
     client.username = username;
 }
+
+let n_time = new Date();
+
+const periods = {
+    month: 30 * 24 * 60 * 60 * 1000,
+    week: 7 * 24 * 60 * 60 * 1000,
+    day: 24 * 60 * 60 * 1000,
+    hour: 60 * 60 * 1000,
+    minute: 60 * 1000,
+    second: 1000
+};
+
+setTimeout(() => setInterval(() => {
+    if (client.messages.room_id) $('.message .message-time').toArray().forEach(x => {
+        let message = x.parentNode.parentNode,
+            diff = Date.now() - parseInt(message.dataset.time), time;
+        if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
+        x.innerText = time;
+    });
+}, 60000), (60 - n_time.getSeconds()) * 1000);
