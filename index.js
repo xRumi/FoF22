@@ -15,7 +15,7 @@ const path = require('path');
 app.set('trust proxy', true);
 
 mongoose.connect('mongodb+srv://main:iVAFZ0z5YDcHf5jm@cluster0.pcm42.mongodb.net/main?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
-    console.log('database is connected');
+    console.log('MongoDB database connected');
 }).catch((err) => {
     return console.log(`MongoDB database error: ${err}`);
 });
@@ -79,7 +79,7 @@ app.set("views", path.join(__dirname, "/views"));
 
 if (process.env.EXPRESS_STATIC) {
     app.use(express.static(path.join(__dirname, "/public")));
-    console.log('serving static files through express');
+    console.log('Serving static files through express route');
 }
 
 app.use(session_store);
