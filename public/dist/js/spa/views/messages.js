@@ -243,24 +243,23 @@ socket.on('receive-message', ({ id, chat, _id }) => {
             let message = message_content.parent().parent();
             message.attr({ 'data-username': chat.username, 'data-user-id': chat.user, 'data-id': chat.id, 'data-time': chat.time });
             let prev_message = message.prev()[0];
-            let prev_message_time = prev_message.querySelector('.outgoing .message-time');
-            console.log(prev_message_time.innerText);
-            if (prev_message_time.innerText && (parseInt(prev_message.dataset.time) - parseInt(chat.time)) < 2 * 60 * 1000) {
+            let prev_message_time = prev_message ? prev_message.querySelector('.outgoing .message-time') : false;
+            if (prev_message_time && prev_message_time.innerText && (parseInt(prev_message.dataset.time) - parseInt(chat.time)) < 2 * 60 * 1000) {
                 prev_message_time.remove();
                 let diff = Date.now() - chat.time, time;
                 time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
                 message[0].querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
             }
         } else {
-            /*
-            let prev_message = message.prev()[0];
-            let prev_message_time = prev_message.querySelector('.outgoing .message-time');
-            if (prev_message_time.innerTEXT && (parseInt(prev_message.dataset.time) - parseInt(message.dataset.time)) < 2 * 60 * 1000) {
+            // not tested
+            let prev_message = $('.message:last-child:not(.outgoing)')[0], time;
+            let prev_message_time = prev_message ? prev_message.querySelector('.message-time') : false;
+            if (prev_message_time && prev_message_time.innerText && (parseInt(prev_message.dataset.time) - parseInt(chat.time)) < 2 * 60 * 1000) {
                 prev_message_time.remove();
-                let diff = Date.now() - chat.time, time;
+                let diff = Date.now() - chat.time;
                 time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
-                message[0].querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
-            }*/
+            }
+            // not tested
             $('.messages-list').append(`
                 <div class="message${client.id == chat.user ? ' outgoing' : $('.message:last-child').data('user-id') == chat.user ? ' stack-message' : ''}${!chat.message ? ' message-deleted' : ''}" data-username="${chat.username}" data-user-id="${chat.user}" data-id="${chat.id}" data-time="${chat.time}">
                     <div class="message-img">
@@ -268,6 +267,7 @@ socket.on('receive-message', ({ id, chat, _id }) => {
                     </div>
                     <div class="message-content">
                         <p>${chat.message ? chat.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
+                        ${time ? `<div class="message-time">${time}</div>` : ''}
                     </div>
                 </div>
             `)
