@@ -50,8 +50,8 @@ module.exports.sockets = (io, client) => {
                                 } else name = room.name;
                                 let messages = chat.messages.slice(-20);
                                 for (let i = 0; i < messages.length; i++) {
-                                    let user = await client.database.functions.get_user(messages[i].user);
-                                    messages[i].username = user.username;
+                                    let _user = await client.database.functions.get_user(messages[i].user);
+                                    messages[i].username = _user.username;
                                 }
                                 socket.emit('receive-messages', { user: user.id, messages, id, name: name ? name : 'unknown', mm: chat.messages.length > 20 ? true : false });
                             }
