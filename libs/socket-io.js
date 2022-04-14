@@ -7,6 +7,23 @@ module.exports.sockets = (io, client) => {
             socket.join(user.id);
             socket.user_id = user.id;
             client.cache.functions.update_user({ username: user.username, status: 'online' });
+            socket.on('autocomplete', async (term) => {
+                console.log(term);
+                if (term) {
+                    let result = {
+                        names: null,
+                    };
+                    let name_regex = new RegExp(term, 'i');
+                    const [names] = await Promise.all([ client.database.user.find({ name: name_regex }).sort({ 'updated_at': -1, 'created_at': -1 }).limit(10) ]);
+            
+                    if (names && names.length) result.names = names.map(x => ({
+                        id: x.id,
+                        username: x.username,
+                        name: x.name
+                    }));
+                    socket.emit('autocomplete-response', result);
+                }
+            })
             socket.on('join-room', async (id) => {
                 let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
                 if (user?.id == socket.user_id && id) {

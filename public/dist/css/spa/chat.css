@@ -78,32 +78,6 @@
 	display: none;
 }
 
-.messages-header {
-	width: 100%;
-	height: 50px;
-	border-bottom: none;
-	display: inline-block;
-	background-color: #ffffff;
-	box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
-}
-
-.messages-header-back {
-	font-size: 45px;
-	float: left;
-	position: relative;
-}
-
-.messages-header-text {
-	text-align: center;
-	font-size: 16px;
-	font-weight: lighter;
-	margin-left: 65px;
-	margin-right: 50px;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-
 .messages-list {
 	margin-top: 25px;
 	padding: 10px;
@@ -313,12 +287,12 @@
 
 #message-input {
 	position: absolute;
-	top: 16px;
+	top: 12px;
     padding: 6px;
     width: 55%;
     letter-spacing: 1.2px;
     outline: 0;
-    font-size: 16px;
+    font-size: 14px;
 	margin-left: 10px;
 }
 

@@ -18,7 +18,7 @@ export default class extends Constructor {
                     old_pass = $('#current_password').val();
                 $.ajax({
                     type: 'POST',
-                    url: `/account/update/password`,
+                    url: `/me/password/edit`,
                     data: {
                         old_pass,
                         new_pass,

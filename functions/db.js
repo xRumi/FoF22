@@ -3,7 +3,7 @@ const ObjectId = require("mongodb").ObjectId;
 module.exports = (client) => {
     // user database function
     client.database.functions.get_user = async ( id ) => {
-        if (!id && !ObjectId.isValid(id)) return false;
+        if (!id || !ObjectId.isValid(id)) return false;
         let user = client.database_cache.users.get(id);
         if (user) return user;
         else {

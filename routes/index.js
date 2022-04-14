@@ -8,7 +8,7 @@ const router = require('express').Router(),
     register = require('./register'),
     debug = require('./debug');
 
-const account = require('./account');
+const me = require('./me');
 
 router.get('/', async (req, res) => {
     res.render("index");
@@ -41,7 +41,7 @@ router.use('/settings', settings);
 router.use('/', password);
 router.use('/register', register);
 router.use('/debug', debug);
-router.use('/account', account);
+router.use('/me', me);
 
 router.get('/login', async (req, res) => {
     if (!req.user) res.render("login");

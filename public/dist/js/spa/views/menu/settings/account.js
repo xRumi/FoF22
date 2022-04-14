@@ -12,7 +12,7 @@ export default class extends Constructor {
             $('#sub-btn').prop("disabled", true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
             $.ajax({
                 type: 'POST',
-                url: `/account/update/password`,
+                url: `/me/edit`,
                 data: {
                     username: $('#username').val(),
                     name: $('#full_name').val(),
@@ -34,7 +34,7 @@ export default class extends Constructor {
         });
         $.ajax({
             type: 'GET',
-            url: `/account/info`,
+            url: `/me/fetch`,
             timeout: 30000,
             success: function(result, textStatus, xhr) {
                 data = result;

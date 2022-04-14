@@ -31,6 +31,7 @@ const router = async () => {
     const routes = [
         { path: "/spa", view: Index },
         { path: "/spa/profile", view: Profile },
+        { path: "/spa/profile/:id", view: Profile },
         { path: "/spa/messages", view: Messages },
         { path: "/spa/messages/:id", view: Messages },
         { path: "/spa/search", view: Search },

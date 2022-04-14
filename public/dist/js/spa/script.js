@@ -1,4 +1,6 @@
-const socket = io();
+const nanobar = new Nanobar(),
+    socket = io();
+    
 const client = {
     messages: {
         room_id: null,
@@ -44,6 +46,6 @@ setTimeout(() => setInterval(() => {
         let message = x.parentNode.parentNode,
             diff = Date.now() - parseInt(message.dataset.time), time;
         if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
-        x.innerText = time;
+        if (time) x.innerText = time;
     });
 }, 60000), (60 - n_time.getSeconds()) * 1000);

@@ -25,8 +25,9 @@ class People_List extends HTMLElement {
             let name = this.querySelector('._people-name');
             if (name && name.innerHTML) {
                 document.title = name.innerHTML;
-                $('.messages-header-text').text(name.innerHTML);
+                $('.messages-header-back-text').text(name.innerHTML);
             }
+            nanobar.go(40);
         };
     }
 }
@@ -127,7 +128,7 @@ const people_list = (new_people_list) => {
     }).join(''));
 }
 
-var fpip = false;
+var _ajax0 = false;
 
 export default class extends Constructor {
     constructor(params) {
@@ -135,19 +136,21 @@ export default class extends Constructor {
         this.id = params.id;
         this.setTitle('Messages');
         navbar('#nav__link__messages', true);
-        if (!fpip) {
-            fpip = true;
+        if (!_ajax0) {
+            _ajax0 = true;
+            nanobar.go(30);
             $.ajax({
                 type: 'GET',
                 url: `/messages/fetch`,
                 timeout: 30000,
                 success: function(result, textStatus, xhr) {
                     people_list(result);
-                    fpip = false;
+                    _ajax0 = false;
+                    nanobar.go(100);
                 },
                 error: function(xhr, textStatus, errorThrown) {
                     /* do something */
-                    fpip = false;
+                    _ajax0 = false;
                 },
             });
         }
@@ -164,10 +167,10 @@ export default class extends Constructor {
                 </div>
                 <div class="messages">
                     <div class="messages-header">
-                        <messages-header-back class="messages-header-back">
+                        <messages-header-back class="header-back-icon">
                             <i class='bx bx-chevron-left'></i>
                         </messages-header-back>
-                        <p class="messages-header-text"></p>
+                        <p class="messages-header-back-text header-back-text"></p>
                     </div>
                     <load-more-messages class="load-more-messages" style="display: none;">load more messages...<div class="lds-dual-ring" style="display: none;"></div></load-more-messages>
                     <div class="messages-list scrollbar">
@@ -211,14 +214,14 @@ const ttr = {
 socket.on('receive-messages', ({ messages, id, name, mm }) => {
     if (client.messages.room_id == id) {
         document.title = name;
-        $('.messages-header-text').text(name);
+        $('.messages-header-back-text').text(name);
         let html = [], lm = {};
         for (let i = 0; i < messages.length; i++) {
             let m = messages[i];
             html.push(m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
                 <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${!m.message ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
                     <div class="message-img">
-                        <img src="/dist/img/profile/${m.user}.png">
+                        <img src="/dist/img/users/${m.user}/profile.png">
                     </div>
                     <div class="message-content">
                         <p>${m.message ? m.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
@@ -232,6 +235,7 @@ socket.on('receive-messages', ({ messages, id, name, mm }) => {
             if ($(".message:last-child")[0]) $(".message:last-child")[0].scrollIntoView();
         });
         if (mm) $('.load-more-messages').show();
+        nanobar.go(100);
     }
 });
 
@@ -263,7 +267,7 @@ socket.on('receive-message', ({ id, chat, _id }) => {
             $('.messages-list').append(`
                 <div class="message${client.id == chat.user ? ' outgoing' : $('.message:last-child').data('user-id') == chat.user ? ' stack-message' : ''}${!chat.message ? ' message-deleted' : ''}" data-username="${chat.username}" data-user-id="${chat.user}" data-id="${chat.id}" data-time="${chat.time}">
                     <div class="message-img">
-                        <img src="/dist/img/profile/${chat.user}.png">
+                        <img src="/dist/img/users/${chat.user}/profile.png">
                     </div>
                     <div class="message-content">
                         <p>${chat.message ? chat.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
@@ -283,7 +287,7 @@ socket.on('receive-more-messages', ({ id, messages, mm }) => {
             html.push(m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user} data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
                 <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${!m.message ? ' message-deleted' : ''}" data-id="${m.id}">
                     <div class="message-img">
-                        <img src="/dist/img/profile/${m.user}.png">
+                        <img src="/dist/img/users/${m.user}/profile.png">
                     </div>
                     <div class="message-content">
                         <p>${m.message ? m.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
@@ -300,6 +304,7 @@ socket.on('receive-more-messages', ({ id, messages, mm }) => {
 
 socket.on('join-room-error', ({ id, message }) => {
     if (client.messages.room_id == id) $('.messages-list').append(message);
+    $('.messages-list .lds-dual-ring').hide();
 });
 
 $.contextMenu({
