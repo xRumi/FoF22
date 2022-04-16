@@ -396,8 +396,9 @@ function message_time (html, callback) {
                 let message = messages_group[i][j];
                 if ((p && Math.abs(parseInt(message.dataset.time) - parseInt(p.dataset.time)) > 60 * 1000) || !messages_group[i][j + 1]) {
                     let message_time = parseInt(message.dataset.time),
-                        diff = Date.now() - message_time, time;
+                        diff = Date.now() - message_time, time, _time = new Date(message_time);
                     if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
+                    else if (diff < periods.day && Date.now().getDate() == _time.getDate()) time = `Today at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
                     else {
                         let _time = new Date(message_time);
                         if (diff < periods.week) time = `${days[_time.getDay()]} at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`;
