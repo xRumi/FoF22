@@ -1,6 +1,7 @@
 const router = require('express').Router(),
     auth = require('./auth'),
     profile = require('./profile'),
+    friends = require('./friends'),
     messages = require('./messages'),
     search = require('./search'),
     settings = require('./settings'),
@@ -35,6 +36,7 @@ router.get('/friends/fetch', async (req, res) => {
 
 router.use('/auth', auth);
 router.use('/profile', profile);
+router.use('/friends', profile);
 router.use('/messages', messages);
 router.use('/search', search);
 router.use('/settings', settings);

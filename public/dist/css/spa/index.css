@@ -39,7 +39,7 @@ img {
 @media screen and (max-width: 800px) {
 
 	.nav__logo,
-	.nav__profile {
+	.nav__img {
 		display: none;
 	}
 
@@ -98,7 +98,7 @@ img {
 		margin-top: 14px;
 	}
 
-	.nav__profile {
+	.nav__img {
 		margin-right: 10px;
 		margin-top: 7px;
 		width: 35px;
@@ -173,7 +173,8 @@ img {
 	}
 }
 
-/* search */
+/* search start */
+
 ::selection {
     color: #fff;
     background: #664AFF;
@@ -277,6 +278,10 @@ img {
     cursor: pointer;
 }
 
+/* search end */
+
+/* nanobar start */
+
 .nanobar {
 	height: 2px;
 	top: 0;
@@ -288,6 +293,8 @@ img {
 	transition: .2s;
 	background-color: #3498db;
 }
+
+/* nanobar end */
 
 .header-back {
 	width: 100%;
@@ -318,121 +325,85 @@ img {
 
 /* profile start */
 
+
 .profile-content {
-    padding: 25px;
-    height: 100%;
+    padding-left: 10px;
+    padding-top: 5px;
+    padding-right: 10px;
     width: 100%;
 }
 
-.profile-content:after {
-    content: '';
-    display: block;
-    clear: both;
+.pc-user-cover {
+    background-image: url(https://images.unsplash.com/photo-1530305408560-82d13781b33a?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1352&q=80);
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 180px;
 }
 
-.pc-item {
-    float: left;
-}
-
-.pc-cover {
-    width: 100%;
-    height: 350px;
+.pc-main {
+    margin: auto;
+    width: 780px;
+    height: auto;
     box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
-    margin-bottom: 15px;
-}
-
-.pc-cover img {
-    width: 100%;
-    object-fit: cover;
-    height: 100%;
-    object-position: 50% 50%;
 }
 
 .pc-user {
-    float: right;
-    width: 100%;
-    height: 80px;
-    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
-    margin-bottom: 30px;
+    transform: translateY(9.5rem);
+    padding-left: 35px;
 }
 
 .pc-user-img {
-    width: 50px;
-    height: 50px;
-    overflow: hidden;
-    border-radius: 50%;
-    margin-left: 10px;
-    margin-top: 10px;
     float: left;
-    margin-right: 15px;
 }
 
-.pc-user-content {
-	float: left;
+.pc-user-img img {
+    object-fit: cover;
+    object-position: 50% 50%;
+    padding: .25rem;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: .20rem;
+    width: 130px;
+    height: 130px;
 }
 
-.pc-user-content div {
-    margin-top: 15px;
-    font-size: 20px;
+.pc-user-name {
+    float: left;
+    transform: translateY(2.2rem);
+    margin-left: 15px;
 }
 
-.pc-user-content span {
+.pc-user-name div {
+    font-size: 22px;
+}
+
+.pc-user-name span {
     color: gray;
 }
 
-.pc-bio {
-    width: 50%;
-    height: 250px;
-    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
-}
-
-.pc-about {
-    float: right;
-    width: 48%;
-    height: 250px;
-    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
-}
-
-.pc-other {
-    margin-top: 30px;
+.pc-user-actions {
     width: 100%;
-    height: 100px;
-    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
-}
-
-@media screen and (max-width: 800px) {
-    .pc-bio {
-        width: 100%;
-        margin-bottom: 15px;
-    }
-
-    .pc-about {
-        width: 100%;
-    }
+    height: 130px;
+    background: #f8f9fa;
 }
 
 .pc-user-btn-group {
-    float: right;
-    margin-right: 15px;
-	margin-top: 16px;
+    transform: translate(175px, 70px);
 }
 
 .pc-user-btn-group button {
+    margin-left: 5px;
     border: 1px solid transparent;
     border-radius: 3px;
     box-sizing: border-box;
-    color: #fff;
     cursor: pointer;
     display: inline-block;
-    margin: 0;
     outline: none;
-    padding: 8px .8em;
+    padding: 4px 0.4em;
     position: relative;
     text-align: center;
     user-select: none;
     -webkit-user-select: none;
-    margin-top: 6px;
-    margin-left: 10px;
 }
 
 .pc-user-add-friend:hover {
@@ -440,12 +411,13 @@ img {
 }
 
 .pc-user-add-friend {
+    color: #fff;
     background-color: #0095ff;
 }
 
 .pc-user-message {
     background-color: #e4e6eb;
-    color: black !important;
+    color: black;
 }
 
 .pc-user-message:hover {
@@ -457,6 +429,7 @@ img {
 }
 
 .pc-user-edit {
+    color: #fff;
     background-color: #0095ff;
 }
 
@@ -465,7 +438,84 @@ img {
 }
 
 .pc-user-remove-friend {
+    color: wheat;
     background-color: #d60d0d;
 }
 
+@media screen and (max-width: 800px) {
+    .pc-main {
+        width: 100%;
+    }
+}
+
+.pc-user-info {
+    width: 100%;
+}
+
+.pc-user-info .pc-user-info-header {
+    background: #f5f5f5;
+    padding: 10px;
+    display: flex;
+}
+
+.pc-user-info .pc-user-info-header > div {
+    position: relative;
+    width: 25%;
+    text-align: center;
+    padding: 10px;
+    z-index: 2;
+    font-weight: 600;
+    color: #888;
+    cursor: pointer;
+    transition: all 300ms ease-in-out;
+}
+
+.pc-user-info .pc-user-info-header > div.pc-user-info-header-active {
+    color: #387be2;
+}
+
+.pc-user-info .pc-user-info-header-indicator {
+    position: relative;
+    width: calc(25% - 5px);
+    height: 40px;
+    background: #d9e5f9;
+    top: -48px;
+    margin-bottom: -40px;
+    left: 10px;
+    border-radius: 20px;
+    transition: all 300ms ease-in-out;
+}
+
+.pc-user-info-body {
+    background: #f8f9fa;
+    height: auto;
+    min-height: 150px;
+    padding: 8px;
+    padding-left: 15px;
+    padding-bottom: 20px;
+}
+
+.pc-user-about-bio-content {
+    padding-left: 15px;
+}
+
+.pc-user-about-bio-content div div {
+    float: left;
+    width: 110px;
+}
+
+.pc-user-about-bio-content div span {
+    color: gray;
+}
+
+.pc-user-about-myself-content {
+    padding-left: 15px;
+    background-color: #f3f3f3;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
 /* profile end */
+
+
+/* other start */

@@ -166,7 +166,7 @@ export default class extends Constructor {
                     </div>
                 </div>
                 <div class="messages">
-                    <div class="messages-header">
+                    <div class="messages-header header-back">
                         <messages-header-back class="header-back-icon">
                             <i class='bx bx-chevron-left'></i>
                         </messages-header-back>

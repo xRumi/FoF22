@@ -1,5 +1,6 @@
 import Index from "./views/index.js";
 import Profile from "./views/profile.js";
+import Friends from "./views/friends.js";
 import Search from "./views/search.js";
 
 // messages
@@ -30,15 +31,18 @@ const navigateTo = url => {
 const router = async () => {
     const routes = [
         { path: "/spa", view: Index },
-        { path: "/spa/profile", view: Profile },
-        { path: "/spa/profile/:id", view: Profile },
+        { path: "/spa/friends", view: Friends },
         { path: "/spa/messages", view: Messages },
         { path: "/spa/messages/:id", view: Messages },
         { path: "/spa/search", view: Search },
         { path: "/spa/menu", view: Menu },
         { path: "/spa/menu/settings", view: Settings },
         { path: "/spa/menu/settings/account", view: AccountSettings },
-        { path: "/spa/menu/settings/change-password", view: ChangePassword }
+        { path: "/spa/menu/settings/change-password", view: ChangePassword },
+
+        { path: "/spa/profile", view: Profile },
+        { path: "/spa/profile/:id", view: Profile },
+
     ];
 
     const potentialMatches = routes.map(route => {
@@ -67,6 +71,8 @@ const router = async () => {
 
     const view = new match.route.view(getParams(match));
 
+    if (view.before_render) await view.before_render();
+
     document.querySelector(view.target || "#app").innerHTML = await view.render();
 
     if (view.after_render) await view.after_render();
@@ -79,6 +85,9 @@ $('body').on('click', 'a[data-link]', e => {
     e.preventDefault();
     navigateTo($(e.currentTarget).attr('href'));
 });
+
+$.fn.navigateTo = navigateTo;
+$.fn.router = router;
 
 $(window).resize(() => {
     if ($.fn.hide_nav_in_mobile && $(window).width() < 801) $('.navbar').hide();

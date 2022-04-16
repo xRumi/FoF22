@@ -19,14 +19,47 @@ export default class extends Constructor {
                     user_data = result;
                     _ajax0 = false;
                     $('.profile-header p').text(user_data.name);
-                    if (user_data.has_cover) $('.pc-cover img').attr('src', `/dist/img/users/${user_data.id}/cover.png`);
-                    $('.pc-user img').attr('src', `/dist/img/users/${user_data.id}/profile.png`);
-                    $('.pc-user-content div').text(user_data.name);
-                    $('.pc-user-content span').text(`@${user_data.username}`);
-                    if (user_data.id == client.id) $('.pc-user-btn-group').html(`<button class="pc-user-edit" type="submit" role="button">Edit</button>`);
-                    else $('.pc-user-btn-group').html(`${user_data.is_my_friend ? `<button class="pc-user-remove-friend" type="submit" role="button">Remove Friend</button>` : `<button class="pc-user-add-friend" type="submit" role="button">Add Friend</button>`}
-                        <button class="pc-user-message" type="submit" role="button">Send Message</button>
-                    `);
+                    if (user_data.has_cover) $('.pc-user-cover').css('background-image', `/dist/img/users/${user_data.id}/cover.png`);
+                    if (user_data.has_profile_picture) $('.pc-user-img img').attr('src', `/dist/img/users/${user_data.id}/profile.png`);
+                    $('.pc-user-name div').text(user_data.name);
+                    $('.pc-user-name span').text(`@${user_data.username}`);
+                    let pc_user_btn_group = '';
+                    if (user_data.id == client.id) pc_user_btn_group += `<button class="pc-user-edit" type="submit" role="button">Edit Profile</button>`;
+                    else {
+                        pc_user_btn_group += user_data.is_my_friend ? `<button class="pc-user-remove-friend" type="submit" role="button">Remove Friend</button>` : `<button class="pc-user-add-friend" type="submit" role="button">Add Friend</button>`
+                        pc_user_btn_group += `<button class="pc-user-message" type="submit" role="button">Message</button>`;
+                    }
+                    $('.pc-user-btn-group').html(pc_user_btn_group);
+                    let pc_user_about_bio = '', user_about_bio = user_data.user_info.about.bio;
+                    for (let key in user_about_bio) {
+                        if (user_about_bio[key]) {
+                            pc_user_about_bio += `
+                                <div>
+                                    <div>${key}:</div>
+                                    <span>${user_about_bio[key]}</span>
+                                </div>
+                            `
+                        }
+                    }
+                    let pc_user_about_myself = user_data.user_info.about["About Myself"] || "";
+                    let pc_user_about = '';
+                    if (pc_user_about_bio) pc_user_about += `
+                        <div class="pc-user-about-bio">
+                            <h3>Biological Information</h3>
+                            <div class="pc-user-about-bio-content">
+                                ${pc_user_about_bio}
+                            </div>
+                        </div>
+                    `;
+                    if (pc_user_about_myself) pc_user_about += `
+                        <div class="pc-user-about-myself">
+                            <h3>About Myself</h3>
+                            <div class="pc-user-about-myself-content">
+                                ${pc_user_about_myself}
+                            </div>
+                        </div>
+                    `;
+                    $('.pc-user-about').html(pc_user_about || 'Nothing to show');
                     $('.profile .lds-dual-ring').hide();
                     $('.profile-content').show();
                     nanobar.go(100);
@@ -43,36 +76,67 @@ export default class extends Constructor {
         }
     }
 
+    async before_render() {
+        $('.navbar').hide();
+    }
+
     async render() {
         return `
             <div class="profile">
-                <div class="profile-header header-back" style="display: none;">
-                    <div class="header-back-icon">
+                <div class="profile-header header-back">
+                    <div class="header-back-icon" onclick="history.back();">
                         <i class='bx bx-chevron-left'></i>
                     </div>
-                    <p class="header-back-text">FoF22 User Profile</p>
+                    <p class="header-back-text">FoF22 User</p>
                 </div>
                 <div class="lds-dual-ring"></div>
                 <div class="profile-content" style="display: none;">
-                    <div class="pc-item pc-cover">
-                        <img src="/dist/img/no-cover-image.svg" alt="" srcset="">
-                    </div>
-                    <div class="pc-item pc-user">
-                        <div class="pc-user-img">
-                            <img src="/dist/img/users/61d001de9b64b8c435985da5/profile.png" alt="" srcset="">
+                    <div class="pc-main">
+                        <div class="pc-user-cover">
+                            <div class="pc-user">
+                                <div class="pc-user-img">
+                                    <img src="/dist/img/default-profile.png" alt="not found">
+                                </div>
+                                <div class="pc-user-name">
+                                    <div>User</div>
+                                    <span>@user</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="pc-user-content"><div>FoF22 User</div><span>@user</span></div>
-                        <div class="pc-user-btn-group">
+                        <div class="pc-user-actions">
+                            <div class="pc-user-btn-group"></div>
+                        </div>
+                        <div class="pc-user-info">
+                            <div class="pc-user-info-header">
+                                <div class="pc-user-info-header-active">About</div>
+                                <div>Friends</div>
+                                <div>Timeline</div>
+                                <div>Contact</div>
+                            </div>
+                            <div class="pc-user-info-header-indicator"></div>
+                            <div class="pc-user-info-body">
+                                <div class="pc-user-about"></div>
+                            </div>
                         </div>
                     </div>
-                    <div class="pc-item pc-bio"></div>
-                    <div class="pc-item pc-about"></div>
-                    <div class="pc-item pc-other"></div>
                 </div>
             </div>
+            
         `;
     }
 
     async after_render() {
+        let pc_user_info_header = $(".pc-user-info-header");
+        let pc_user_info_headers = $(".pc-user-info-header div");
+        for (let i = 0; i < pc_user_info_headers.length; i++) {
+            pc_user_info_headers[i].addEventListener("click", () => {
+                $('.pc-user-info-header-indicator').css('left', `calc(calc(calc(25% - 5px) * ${i}) + 10px)`);
+                pc_user_info_header[0].querySelector(".pc-user-info-header-active").classList.remove("pc-user-info-header-active");
+                pc_user_info_headers[i].classList.add("pc-user-info-header-active");
+            });
+        }
+    }
+    async before_new_render() {
+        $('.navbar').show();
     }
 }
