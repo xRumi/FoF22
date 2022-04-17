@@ -23,11 +23,48 @@ export default class extends Constructor {
                     if (user_data.has_profile_picture) $('.pc-user-img img').attr('src', `/dist/img/users/${user_data.id}/profile.png`);
                     $('.pc-user-name div').text(user_data.name);
                     $('.pc-user-name span').text(`@${user_data.username}`);
-                    let pc_user_btn_group = '';
-                    if (user_data.id == client.id) pc_user_btn_group += `<button class="pc-user-edit" type="submit" role="button">Edit Profile</button>`;
+                    let pc_user_btn_group = [];
+                    if (user_data.id == client.id) pc_user_btn_group.push($(`<button class="pc-user-edit" type="submit" role="button">Edit Profile</button>`).on('click', () => {
+                        console.log('edit profile');
+                    }));
                     else {
-                        pc_user_btn_group += user_data.is_my_friend ? `<button class="pc-user-remove-friend" type="submit" role="button">Remove Friend</button>` : `<button class="pc-user-add-friend" type="submit" role="button">Add Friend</button>`
-                        pc_user_btn_group += `<button class="pc-user-message" type="submit" role="button">Message</button>`;
+                        if (user_data.is_my_friend) pc_user_btn_group.push($(`<button class="pc-user-remove-friend" type="submit" role="button">Remove Friend</button>`).on('click', () => {
+                            console.log('remove friend')
+                        }));
+                        else if (user_data.is_friend_requested) pc_user_btn_group.push($(`<button class="pc-user-friend-request" type="submit" role="button">Cancel Request</button>`).on('click', () => {
+                            console.log('cancel friend request');
+                        }));
+                        else if (user_data.is_friend_await_accept) pc_user_btn_group.push($(`<button class="pc-user-friend-accept" type="submit" role="button">Accept Request</button>`).on('click', () => {
+                            console.log('accept friend request');
+                        }));
+                        else pc_user_btn_group.push($(`<button class="pc-user-add-friend" type="submit" role="button">Add Friend</button>`).on('click', (e) => {
+                            console.log('request add friend');
+                            /*
+                            $.ajax({
+                                type: 'POST',
+                                url: `/friends/${e.target.innerText == 'Add Friend' ? 'request' : ''}`,
+                                date: {
+                                    user: user_data.id
+                                },
+                                timeout: 30000,
+                                success: function(result, textStatus, xhr) {
+                                    let btn = e.target;
+                                    btn.innerText = 'Cancel'
+                                },
+                                error: function(xhr, textStatus, errorThrown) {
+                                    if (xhr.status == 404) {
+                                        $('.profile').html(xhr.responseText);
+                                        $('.profile .lds-dual-ring').hide();
+                                    }
+                                    _ajax0 = false;
+                                    nanobar.go(100);
+                                },
+                            });
+                            */
+                        }));
+                        pc_user_btn_group.push($(`<button class="pc-user-message" type="submit" role="button">Message</button>`).on('click', (e) => {
+                            console.log('message');
+                        }));
                     }
                     $('.pc-user-btn-group').html(pc_user_btn_group);
                     let pc_user_about_bio = '', user_about_bio = user_data.user_info.about.bio;

@@ -25,6 +25,8 @@ router.get('/fetch/:id', async (req, res) => {
                 has_cover: fs.existsSync(`../public/dist/img/users/${user.id}/cover.png`),
                 has_profile_picture: fs.existsSync(`../public/dist/img/users/${user.id}/profile.png`),
                 is_my_friend: user.friends.includes(req.user.id),
+                is_friend_requested: req.user.friend_request.some(x => x.target == user.id && x.type == 'request'),
+                is_friend_await_accept: req.user.friend_request.some(x => x.target == user.id && x.type == 'await_accept'),
                 user_info: {
                     about: {
                         bio: {

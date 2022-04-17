@@ -36,7 +36,7 @@ router.get('/friends/fetch', async (req, res) => {
 
 router.use('/auth', auth);
 router.use('/profile', profile);
-router.use('/friends', profile);
+router.use('/friends', friends);
 router.use('/messages', messages);
 router.use('/search', search);
 router.use('/settings', settings);

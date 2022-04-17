@@ -73,7 +73,9 @@ const router = async () => {
 
     if (view.before_render) await view.before_render();
 
-    document.querySelector(view.target || "#app").innerHTML = await view.render();
+    let html = await view.render();
+
+    $(view.target || "#app").html(html);
 
     if (view.after_render) await view.after_render();
     if (view.before_new_render) before_new_render = view.before_new_render;
