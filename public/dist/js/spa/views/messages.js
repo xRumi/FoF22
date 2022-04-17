@@ -35,13 +35,6 @@ class People_List extends HTMLElement {
 class Messages_Bottom extends HTMLElement {
     constructor() {
         super();
-        document.onkeyup = (e) => {
-            let input = this.querySelector('#message-input');
-            if (e.key >= 'a' && e.key <= 'z' && input && document.activeElement != input) {
-                input.focus();
-                input.value += e.key;
-            }
-        };
         this.onsubmit = () => {
             let input = this.querySelector('#message-input');
             let _message = input ? input.value : false;
@@ -366,6 +359,8 @@ socket.on('update-message', ({ id, chat }) => {
     }
 });
 
+let today = new Date();
+
 function message_time (html, callback) {
 
     let messages = $(html.join('')).filter('.message, .system-message').toArray();
@@ -382,31 +377,44 @@ function message_time (html, callback) {
         else if (messages_group[i].length == 1) {
             let message = messages_group[i][0],
                 message_time = parseInt(message.dataset.time),
+                _time = new Date(message_time),
                 diff = Date.now() - message_time, time;
             if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
+            else if (diff < periods.day && _time.getDate() === today.getDate()) time = `Today at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
             else {
-                let _time = new Date(message_time);
                 if (diff < periods.week) time = `${days[_time.getDay()]} at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`;
                 else time = `${_time.toLocaleDateString()} at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
             }
             message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
         } else {
-            let p;
             for (let j = 0; j < messages_group[i].length; j++) {
                 let message = messages_group[i][j];
-                if ((p && Math.abs(parseInt(message.dataset.time) - parseInt(p.dataset.time)) > 60 * 1000) || !messages_group[i][j + 1]) {
+                let next_message = messages_group[i][j + 1] ? messages_group[i][j + 1] : false;
+                if (next_message) {
+                    if (Math.abs(parseInt(message.dataset.time) - parseInt(next_message.dataset.time)) > 60 * 1000) {
+                        let message_time = parseInt(message.dataset.time),
+                            _time = new Date(message_time),
+                            diff = Date.now() - message_time, time;
+                        if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
+                        else if (diff < periods.day && _time.getDate() === today.getDate()) time = `Today at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
+                        else {
+                            if (diff < periods.week) time = `${days[_time.getDay()]} at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`;
+                            else time = `${_time.toLocaleDateString()} at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
+                        }
+                        message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
+                    }
+                } else {
                     let message_time = parseInt(message.dataset.time),
-                        diff = Date.now() - message_time, time, _time = new Date(message_time);
+                        _time = new Date(message_time),
+                        diff = Date.now() - message_time, time;
                     if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
-                    else if (diff < periods.day && Date.now().getDate() == _time.getDate()) time = `Today at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
+                    else if (diff < periods.day && _time.getDate() === today.getDate()) time = `Today at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
                     else {
-                        let _time = new Date(message_time);
                         if (diff < periods.week) time = `${days[_time.getDay()]} at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`;
                         else time = `${_time.toLocaleDateString()} at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
                     }
                     message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
                 }
-                p = messages_group[i][j];
             }
         }
     }

@@ -369,8 +369,9 @@ img {
 
 .pc-user-name {
     float: left;
-    transform: translateY(2.2rem);
-    margin-left: 15px;
+	position: absolute;
+	top: 35px;
+	left: 180px;
 }
 
 .pc-user-name div {
@@ -388,7 +389,9 @@ img {
 }
 
 .pc-user-btn-group {
-    transform: translate(175px, 70px);
+	position: relative;
+	top: 70px;
+	left: 175px;
 }
 
 .pc-user-btn-group button {
@@ -440,6 +443,24 @@ img {
 .pc-user-remove-friend {
     color: wheat;
     background-color: #d60d0d;
+}
+
+.pc-user-friend-request {
+	color: #fff;
+	background-color: #ef8a16;
+}
+
+.pc-user-friend-request:hover {
+	background-color: #b26813;
+}
+
+.pc-user-friend-accept {
+	color: #fff;
+	background-color: #25b625;
+}
+
+.pc-user-friend-accept:hover {
+	background-color: #189b18;
 }
 
 @media screen and (max-width: 800px) {
