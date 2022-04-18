@@ -383,7 +383,7 @@ img {
 }
 
 .pc-user-actions {
-    width: 100%;
+    width: fit-content;
     height: 130px;
     background: #f8f9fa;
 }
