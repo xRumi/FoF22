@@ -9,7 +9,7 @@ const passport = require('passport'),
     mongoose = require("mongoose"),
     mongo_store = require('connect-mongo'),
     local_strategy = require('./strategies/local'),
-    routes = require('./routes/');
+    routes = require('./routes');
 
 const path = require('path');
 app.set('trust proxy', true);

@@ -383,7 +383,7 @@ img {
 }
 
 .pc-user-actions {
-    width: fit-content;
+    width: 100%;
     height: 130px;
     background: #f8f9fa;
 }
@@ -392,6 +392,7 @@ img {
 	position: relative;
 	top: 70px;
 	left: 175px;
+	width: fit-content;
 }
 
 .pc-user-btn-group button {
@@ -480,31 +481,18 @@ img {
 }
 
 .pc-user-info .pc-user-info-header > div {
-    position: relative;
     width: 25%;
     text-align: center;
     padding: 10px;
-    z-index: 2;
     font-weight: 600;
     color: #888;
     cursor: pointer;
-    transition: all 300ms ease-in-out;
 }
 
 .pc-user-info .pc-user-info-header > div.pc-user-info-header-active {
-    color: #387be2;
-}
-
-.pc-user-info .pc-user-info-header-indicator {
-    position: relative;
-    width: calc(25% - 5px);
-    height: 40px;
-    background: #d9e5f9;
-    top: -48px;
-    margin-bottom: -40px;
-    left: 10px;
+	color: #fff;
+    background: #5986cc;
     border-radius: 20px;
-    transition: all 300ms ease-in-out;
 }
 
 .pc-user-info-body {
