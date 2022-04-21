@@ -27,8 +27,8 @@
 	border-bottom: 0.1px solid lightgray;
 }
 
-._people:hover {
-	background: #bbe6e6;
+._people-active {
+	background-color: #bbe6e6;
 }
 
 ._people-name {

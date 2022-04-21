@@ -36,20 +36,18 @@ export default class extends Constructor {
                     icon.onclick = ()=>{
                         console.log(`search for ${text}`);
                     }
-                    socket.emit('autocomplete', text);
+                    socket.emit('autocomplete', text, (result) => {
+                        let names = result.names ? result.names.map(x => x = `<a href="/spa/profile/${x.id == client.id ? 'me' : x.id}" data-link><li><div><img src="/dist/img/users/${x.id}/profile.png"></div><p>${x.name}</p></li></a>`) : false;
+                        if (names) {
+                            $('.search-input').addClass("active-search");
+                            $('.search-input .autocom-box').html(names);
+                        } else {
+                            $('.search-input').removeClass("active-search");
+                            $('.search-input .autocom-box').html('');
+                        }
+                    });
                 } else $('.search-input').removeClass("active-search");
             }, 500);
         }
     }
 }
-
-socket.on('autocomplete-response', (result) => {
-    let names = result.names ? result.names.map(x => x = `<a href="/spa/profile/${x.id == client.id ? 'me' : x.id}" data-link><li><div><img src="/dist/img/users/${x.id}/profile.png"></div><p>${x.name}</p></li></a>`) : false;
-    if (names) {
-        $('.search-input').addClass("active-search");
-        $('.search-input .autocom-box').html(names);
-    } else {
-        $('.search-input').removeClass("active-search");
-        $('.search-input .autocom-box').html('');
-    }
-});

@@ -67,18 +67,24 @@ module.exports = (client) => {
         } else return false;
     }
     // room database functions
-    client.database.functions.create_room = async ( name, members, type = 'private' ) => {
+    client.database.functions.create_room = async ( name, members, _u, type = 'private' ) => {
         const room = new client.database.room({ name, members, type });
         const chat = new client.database.chat({ room_id: room.id });
         room.chat_id = chat.id;
         await room.save();
         await chat.save();
-        for (let i = 0; i < members.length; i++) {
-            let member = await client.database.functions.get_user(i);
-            if (member) {
-                member.rooms.push(room.id);
-                await member.save();
-            }
+        if (_u) {
+            let user = await client.database.functions.get_user(_u);
+            user.rooms.push(room.id);
+            await user.save();
+
+        } else {
+            Promise.all(members.map(id => client.database.users.get_user(id))).then(users => {
+                Promise.all(users.map(user => {
+                    user.rooms.push(room.id);
+                    return user.save();
+                }));
+            });
         }
         client.database_cache.rooms.set(room.id, room);
         return room;

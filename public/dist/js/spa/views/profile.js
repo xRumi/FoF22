@@ -127,40 +127,45 @@ export default class extends Constructor {
                             pc_user_btn_group.push($(`<button class="pc-user-friend-request" type="submit" role="button">Cancel Friend Request</button>`).on('click', (e) => cancel_friend_request(e, user_data)));
                         } else pc_user_btn_group.push($(`<button class="pc-user-add-friend" type="submit" role="button">Add Friend</button>`).click((e) => add_friend(e, user_data)));
                         pc_user_btn_group.push($(`<button class="pc-user-message" type="submit" role="button">Message</button>`).on('click', (e) => {
-                            console.log('send message');
+                            let that = $(e.target);
+                            that.prop('disabled', true).text('Messaging').css('opacity', '0.5');
+                            socket.emit('create-or-join-room', user_data.id, id => {
+                                if (id) $.fn.navigateTo(`/spa/messages/${id}`);
+                                else that.prop('disabled', false).text('Message').css('opacity', '1');
+                            });
                         }));
                     }
                     $('.pc-user-btn-group').html(pc_user_btn_group);
-                    let pc_user_about_bio = '', user_about_bio = user_data.user_info.about.bio;
-                    for (let key in user_about_bio) {
-                        if (user_about_bio[key]) {
-                            pc_user_about_bio += `
+                    let pc_user_info_bio = '', user_info_bio = user_data.user_info.about.bio;
+                    for (let key in user_info_bio) {
+                        if (user_info_bio[key]) {
+                            pc_user_info_bio += `
                                 <div>
                                     <div>${key}:</div>
-                                    <span>${user_about_bio[key]}</span>
+                                    <span>${user_info_bio[key]}</span>
                                 </div>
                             `
                         }
                     }
-                    let pc_user_about_myself = user_data.user_info.about["About Myself"] || "";
+                    let pc_user_info_myself = user_data.user_info.about["About Myself"] || "";
                     let pc_user_about = '';
-                    if (pc_user_about_bio) pc_user_about += `
-                        <div class="pc-user-about-bio">
-                            <h3>Biological Information</h3>
-                            <div class="pc-user-about-bio-content">
-                                ${pc_user_about_bio}
+                    if (pc_user_info_bio) pc_user_about += `
+                        <div class="pc-user-info-bio">
+                            <div class="pc-user-info-header">Biological Information</div>
+                            <div class="pc-user-info-content">
+                                ${pc_user_info_bio}
                             </div>
                         </div>
                     `;
-                    if (pc_user_about_myself) pc_user_about += `
-                        <div class="pc-user-about-myself">
-                            <h3>About Myself</h3>
-                            <div class="pc-user-about-myself-content">
-                                ${pc_user_about_myself}
+                    if (pc_user_info_myself) pc_user_about += `
+                        <div class="pc-user-info-myself">
+                            <div class="pc-user-info-header">About Myself</div>
+                            <div class="pc-user-info-content">
+                                ${pc_user_info_myself}
                             </div>
                         </div>
                     `;
-                    $('.pc-user-about').html(pc_user_about || 'Nothing to show');
+                    $('.pc-user-info-body').html(pc_user_about || 'Nothing to show');
                     $('.profile .lds-dual-ring').hide();
                     $('.profile-content').show();
                     nanobar.go(100);
@@ -207,16 +212,7 @@ export default class extends Constructor {
                         <div class="pc-user-actions">
                             <div class="pc-user-btn-group"></div>
                         </div>
-                        <div class="pc-user-info">
-                            <div class="pc-user-info-header">
-                                <div class="pc-user-info-header-active">About</div>
-                                <div>Friends</div>
-                                <div>Timeline</div>
-                                <div>Contact</div>
-                            </div>
-                            <div class="pc-user-info-body">
-                                <div class="pc-user-about"></div>
-                            </div>
+                        <div class="pc-user-info-body">
                         </div>
                     </div>
                 </div>
