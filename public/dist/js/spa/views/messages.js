@@ -134,7 +134,6 @@ const periods = {
 const days = ["Sunday", "Monday", "Tuesday", "Wednesday ", "Thursday", "Friday", "Saturday"];
 
 const people_list = (new_people_list) => {
-    if (!new_people_list || !new_people_list.length) return $('.people-list').html(`<span style="position: absolute; margin: 25px; color: red;">Empty</span>`);
     if (new_people_list && JSON.stringify(new_people_list) == JSON.stringify(old_people_list)) return false;
     if (new_people_list) old_people_list = new_people_list;
     if (old_people_list && old_people_list.length && Array.isArray(old_people_list)) $('.people-list').html(old_people_list.map(x => {
@@ -176,7 +175,8 @@ export default class extends Constructor {
                 url: `/messages/fetch`,
                 timeout: 30000,
                 success: function(result, textStatus, xhr) {
-                    people_list(result);
+                    if (!result.length) $('.people-list').html(`<span style="position: absolute; margin: 25px; color: red;">Empty</span>`);
+                    else people_list(result);
                     _ajax0 = false;
                     nanobar.go(100);
                 },
