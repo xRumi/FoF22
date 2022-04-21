@@ -8,6 +8,7 @@ module.exports.sockets = (io, client) => {
             socket.user_id = user.id;
             client.cache.functions.update_user({ username: user.username, status: 'online' });
             socket.on('autocomplete', async (term, callback) => {
+                if (!callback && typeof callback !== 'function') return false;
                 if (term) {
                     let result = {
                         names: null,
