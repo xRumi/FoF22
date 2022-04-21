@@ -134,9 +134,8 @@ const periods = {
 const days = ["Sunday", "Monday", "Tuesday", "Wednesday ", "Thursday", "Friday", "Saturday"];
 
 const people_list = (new_people_list) => {
-    if (new_people_list && JSON.stringify(new_people_list) == JSON.stringify(old_people_list)) {
-        return $('.people-list').html(`<span style="position: absolute; margin: 25px; color: red;">Empty</span>`);
-    }
+    if (!new_people_list || new_people_list.length) return $('.people-list').html(`<span style="position: absolute; margin: 25px; color: red;">Empty</span>`);
+    if (new_people_list && JSON.stringify(new_people_list) == JSON.stringify(old_people_list)) return false;
     if (new_people_list) old_people_list = new_people_list;
     if (old_people_list && old_people_list.length && Array.isArray(old_people_list)) $('.people-list').html(old_people_list.map(x => {
         let diff = Date.now() - x.time, time;
