@@ -138,6 +138,19 @@ img {
 	color: #009578;
 }
 
+.nav__alart {
+	position: absolute;
+    font-size: 14px;
+    color: white;
+    border-radius: 50%;
+    height: 17px;
+    width: 18px;
+    text-align: center;
+    background-color: orangered;
+    margin-left: 32px;
+    top: 3px;
+}
+
 ._404 {
 	width: 100%;
 	padding: 100px;
@@ -493,7 +506,7 @@ img {
 
 .pc-user-info-header {
     background-color: lightgray;
-    padding: 10px;
+    padding: 5px 5px 5px 10px;
     font-weight: 600;
     font-size: 14px;
 }
@@ -501,7 +514,7 @@ img {
 .pc-user-info-content {
 	padding: 10px;
     background-color: #f8f9fa;
-    border: solid 1px lightgray;
+	border: solid 2px lightgray;
 }
 
 .pc-user-info-content div div {
