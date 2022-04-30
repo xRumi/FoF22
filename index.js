@@ -53,6 +53,8 @@ client.cache = {};
 client.cache.functions = {};
 client.cache.users = new Map();
 
+client.io = io;
+
 client.transporter = nodemailer.createTransport({
     host: 'smtp.mail.yahoo.com',
     port: 465,
@@ -87,13 +89,7 @@ app.use(session_store);
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use(async function(req, res, next) {
-    req.client = client;
-    req.io = io;
-    next();
-});
-
-app.use('/', routes);
+app.use('/', routes(client));
 
 app.get('*', (req, res) => {
     res.render('404');

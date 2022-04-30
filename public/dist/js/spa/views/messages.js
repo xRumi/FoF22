@@ -17,6 +17,7 @@ class People_List extends HTMLElement {
         super();
         this.innerHTML = `<div class="_people">${this.innerHTML}</div>`;
         this.onclick = () => {
+            $('#message-input').prop('disabled', true);
             $('.load-more-messages .lds-dual-ring').hide();
             $('.load-more-messages').hide();
             $('.messages-list').html('');
@@ -52,6 +53,7 @@ class People_List extends HTMLElement {
                         }
                         message_time(html, (_html) => {
                             $('.messages-list').html(_html);
+                            $('#message-input').prop('disabled', false);
                             if ($(".message:last-child")[0]) $(".message:last-child")[0].scrollIntoView();
                         });
                         if (mm) $('.load-more-messages').show();
@@ -209,9 +211,8 @@ export default class extends Constructor {
                         <div class="lds-dual-ring"></div>
                     </div>
                     <messages-bottom class="messages-bottom">
-                        <div class="message-input-note" style="margin-left: 10px; display: none;"><div style="color: orangered;">Reply to</div><span onclick="$('.message-input-note').hide()">x</span></div>
                         <form autocomplete="off">
-                            <input type="text" name="message-input" id="message-input" placeholder="type your message...">
+                            <input type="text" name="message-input" id="message-input" placeholder="type your message..." disabled>
                             <button type="submit" class="message-submit" style="display: none;">Send</button>
                         </form>
                     </messages-bottom>
@@ -253,6 +254,7 @@ export default class extends Constructor {
                         }
                         message_time(html, (_html) => {
                             $('.messages-list').html(_html);
+                            $('#message-input').prop('disabled', false);
                             if ($(".message:last-child")[0]) $(".message:last-child")[0].scrollIntoView();
                         });
                         if (mm) $('.load-more-messages').show();
@@ -339,47 +341,19 @@ socket.on('receive-more-messages', ({ id, messages, mm }) => {
     if (!mm) $('.load-more-messages').hide();
 });
 
-$.contextMenu({
-    selector: '.message:not(.outgoing, .message-deleted) p', 
-    callback: function(key, options) {
-        let message_content = options.$trigger.parent();
-        let message = message_content.parent();
-        if (key == 'reply') {
-            $('.message-input-note div').html(`You are replying to a <a href="#">message</a> from ${message.data('username')}`);
-            $('.message-input-note').show();
-        }
-    },
-    items: {
-        "reply": { name: "Reply", icon: "add" },
-    }
-});
+/*
+    *** deletes a message ***
+    
+    socket.emit('delete-message', { id: message.data('id'), _id: client.messages.room_id}, ({ id, done }) => {
+        let message = $(`[data-id="${id}"]`);
+        let message_content_p = message.find('.message-content p');
+        if (done) {
+            message.addClass('message-deleted');
+            message_content_p.css('background-color', '').text('This message was deleted');
+        } else message.find('.message-content p').css('background-color', '');
+    });
 
-$.contextMenu({
-    selector: '.message.outgoing:not(.message-deleted) p', 
-    callback: function(key, options) {
-        let message_content = options.$trigger.parent();
-        let message = message_content.parent();
-        if (key == 'reply') {
-            $('.message-input-note div').html(`You are replying to a <a href="#">message</a> from ${message.data('username')}`);
-            $('.message-input-note').show();
-        } else if (key == 'delete') {
-            if (!message.data('id')) return false;
-            options.$trigger.css('background-color', 'lightblue');
-            socket.emit('delete-message', { id: message.data('id'), _id: client.messages.room_id}, ({ id, done }) => {
-                let message = $(`[data-id="${id}"]`);
-                let message_content_p = message.find('.message-content p');
-                if (done) {
-                    message.addClass('message-deleted');
-                    message_content_p.css('background-color', '').text('This message was deleted');
-                } else message.find('.message-content p').css('background-color', '');
-            });
-        }
-    },
-    items: {
-        "reply": { name: "Reply", icon: "add" },
-        "delete": { name: "Delete", icon: "delete" },
-    }
-});
+*/
 
 socket.on('update-message', ({ id, chat }) => {
     if (client.messages.room_id == id) {

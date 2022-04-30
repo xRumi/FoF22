@@ -2,98 +2,6 @@ import Constructor from "./constructor.js";
 
 let _ajax0 = false, user_data;
 
-function add_friend(e, user_data) {
-    let that = $(e.target);
-    that.prop('disabled', true).text('Sending friend Request').css('opacity', '0.5');
-    $.ajax({
-        type: 'POST',
-        url: `/friends/add`,
-        data: {
-            user: user_data.id
-        },
-        timeout: 30000,
-        success: function(result, textStatus, xhr) {
-            that.prop('disabled', false).text('Cancel Friend Request').css('opacity', '1').attr('class', 'pc-user-friend-request');
-            that.off('click');
-            that.on('click', (e) => cancel_friend_request(e, user_data));
-        },
-        error: function(xhr, textStatus, errorThrown) {
-            that.prop('disabled', false).text('Add Friend').css('opacity', '1');
-        },
-    });
-}
-
-function cancel_friend_request(e) {
-    let that = $(e.target);
-    that.prop('disabled', true).text('Cancelling Friend Request').css('opacity', '0.5');
-    $('.pc-user-friend-accept').prop('disabled', true).css('opacity', '0.5');
-    $('.pc-user-friend-request').prop('disabled', true).css('opacity', '0.5');
-    $.ajax({
-        type: 'POST',
-        url: `/friends/cancel`,
-        data: {
-            user: user_data.id
-        },
-        timeout: 30000,
-        success: function(result, textStatus, xhr) {
-            that.prop('disabled', false).text('Add Friend').css('opacity', '1').attr('class', 'pc-user-add-friend');
-            $('.pc-user-friend-accept').remove();
-            $('.pc-user-friend-request').remove();
-            that.off('click');
-            that.on('click', (e) => add_friend(e, user_data));
-        },
-        error: function(xhr, textStatus, errorThrown) {
-            that.prop('disabled', false).text('Cancel Friend Request').css('opacity', '1');
-        },
-    });
-}
-
-function accept_friend_request(e, user_data) {
-    let that = $(e.target);
-    that.prop('disabled', true).text('Accepting Friend Request').css('opacity', '0.5');
-    $('.pc-user-friend-accept').prop('disabled', true).css('opacity', '0.5');
-    $('.pc-user-friend-request').prop('disabled', true).css('opacity', '0.5');
-    $.ajax({
-        type: 'POST',
-        url: `/friends/accept`,
-        data: {
-            user: user_data.id
-        },
-        timeout: 30000,
-        success: function(result, textStatus, xhr) {
-            that.prop('disabled', false).text('Remove Friend').css('opacity', '1').attr('class', 'pc-user-remove-friend');
-            $('.pc-user-friend-accept').remove();
-            $('.pc-user-friend-request').remove();
-            that.off('click');
-            that.on('click', (e) => remove_friend(e, user_data));
-        },
-        error: function(xhr, textStatus, errorThrown) {
-            that.prop('disabled', false).text('Accept Friend Request').css('opacity', '1');
-        },
-    });
-}
-
-function remove_friend(e, user_data) {
-    let that = $(e.target);
-    that.prop('disabled', true).text('Removing Friend').css('opacity', '0.5');
-    $.ajax({
-        type: 'POST',
-        url: `/friends/remove`,
-        data: {
-            user: user_data.id
-        },
-        timeout: 30000,
-        success: function(result, textStatus, xhr) {
-            that.prop('disabled', false).text('Add Friend').css('opacity', '1').attr('class', 'pc-user-add-friend');
-            that.off('click');
-            that.on('click', (e) => add_friend(e, user_data));
-        },
-        error: function(xhr, textStatus, errorThrown) {
-            that.prop('disabled', false).text('Remove Friend').css('opacity', '1');
-        },
-    });
-}
-
 export default class extends Constructor {
     constructor(params) {
         super(params);
@@ -121,10 +29,10 @@ export default class extends Constructor {
                     }));
                     else {
                         if (user_data.is_my_friend) pc_user_btn_group.push($(`<button class="pc-user-remove-friend" type="submit" role="button">Remove Friend</button>`).on('click', (e) => remove_friend(e, user_data)));
-                        else if (user_data.is_friend_requested) pc_user_btn_group.push($(`<button class="pc-user-friend-request" type="submit" role="button">Cancel Friend Request</button>`).on('click', (e) => cancel_friend_request(e, user_data)));
+                        else if (user_data.is_friend_requested) pc_user_btn_group.push($(`<button class="pc-user-friend-request" type="submit" role="button">Cancel Request</button>`).on('click', (e) => cancel_friend_request(e, user_data)));
                         else if (user_data.is_friend_await_accept) {
-                            pc_user_btn_group.push($(`<button class="pc-user-friend-accept" type="submit" role="button">Accept Friend Request</button>`).on('click', (e) => accept_friend_request(e, user_data)));
-                            pc_user_btn_group.push($(`<button class="pc-user-friend-request" type="submit" role="button">Cancel Friend Request</button>`).on('click', (e) => cancel_friend_request(e, user_data)));
+                            pc_user_btn_group.push($(`<button class="pc-user-friend-accept" type="submit" role="button">Accept Friend</button>`).on('click', (e) => accept_friend_request(e, user_data)));
+                            pc_user_btn_group.push($(`<button class="pc-user-friend-request" type="submit" role="button">Reject</button>`).on('click', (e) => cancel_friend_request(e, user_data)));
                         } else pc_user_btn_group.push($(`<button class="pc-user-add-friend" type="submit" role="button">Add Friend</button>`).click((e) => add_friend(e, user_data)));
                         pc_user_btn_group.push($(`<button class="pc-user-message" type="submit" role="button">Message</button>`).on('click', (e) => {
                             let that = $(e.target);
@@ -234,4 +142,96 @@ export default class extends Constructor {
     async before_new_render() {
         $('.navbar').show();
     }
+}
+
+function add_friend(e, user_data) {
+    let that = $(e.target);
+    that.prop('disabled', true).text('Sending').css('opacity', '0.5');
+    $.ajax({
+        type: 'POST',
+        url: `/friends/add`,
+        data: {
+            user: user_data.id
+        },
+        timeout: 30000,
+        success: function(result, textStatus, xhr) {
+            that.prop('disabled', false).text('Cancel Request').css('opacity', '1').attr('class', 'pc-user-friend-request');
+            that.off('click');
+            that.on('click', (e) => cancel_friend_request(e, user_data));
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            that.prop('disabled', false).text('Add Friend').css('opacity', '1');
+        },
+    });
+}
+
+function cancel_friend_request(e) {
+    let that = $(e.target), reject = that.text() == 'Reject';
+    that.prop('disabled', true).text(reject ? 'Rejecting' : 'Cancelling').css('opacity', '0.5');
+    $('.pc-user-friend-accept').prop('disabled', true).css('opacity', '0.5');
+    $('.pc-user-friend-request').prop('disabled', true).css('opacity', '0.5');
+    $.ajax({
+        type: 'POST',
+        url: `/friends/cancel`,
+        data: {
+            user: user_data.id
+        },
+        timeout: 30000,
+        success: function(result, textStatus, xhr) {
+            that.prop('disabled', false).text('Add Friend').css('opacity', '1').attr('class', 'pc-user-add-friend');
+            $('.pc-user-friend-accept').remove();
+            $('.pc-user-friend-request').remove();
+            that.off('click');
+            that.on('click', (e) => add_friend(e, user_data));
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            that.prop('disabled', false).text(reject ? 'Reject' : 'Cancel Request').css('opacity', '1');
+        },
+    });
+}
+
+function accept_friend_request(e, user_data) {
+    let that = $(e.target);
+    that.prop('disabled', true).text('Accepting').css('opacity', '0.5');
+    $('.pc-user-friend-accept').prop('disabled', true).css('opacity', '0.5');
+    $('.pc-user-friend-request').prop('disabled', true).css('opacity', '0.5');
+    $.ajax({
+        type: 'POST',
+        url: `/friends/accept`,
+        data: {
+            user: user_data.id
+        },
+        timeout: 30000,
+        success: function(result, textStatus, xhr) {
+            that.prop('disabled', false).text('Remove Friend').css('opacity', '1').attr('class', 'pc-user-remove-friend');
+            $('.pc-user-friend-accept').remove();
+            $('.pc-user-friend-request').remove();
+            that.off('click');
+            that.on('click', (e) => remove_friend(e, user_data));
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            that.prop('disabled', false).text('Accept Friend').css('opacity', '1');
+        },
+    });
+}
+
+function remove_friend(e, user_data) {
+    let that = $(e.target);
+    that.prop('disabled', true).text('Removing').css('opacity', '0.5');
+    $.ajax({
+        type: 'POST',
+        url: `/friends/remove`,
+        data: {
+            user: user_data.id
+        },
+        timeout: 30000,
+        success: function(result, textStatus, xhr) {
+            that.prop('disabled', false).text('Add Friend').css('opacity', '1').attr('class', 'pc-user-add-friend');
+            that.off('click');
+            that.on('click', (e) => add_friend(e, user_data));
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            that.prop('disabled', false).text('Remove Friend').css('opacity', '1');
+        },
+    });
 }

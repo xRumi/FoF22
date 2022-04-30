@@ -83,7 +83,7 @@
 	padding: 10px;
 	height: auto;
 	overflow: auto;
-	margin-bottom: 60px;
+	margin-bottom: 20px;
 }
 
 .message-img {
@@ -276,6 +276,8 @@
 	margin-bottom: 30px;
 }
 
+/*
+
 .messages-bottom {
 	position: fixed;
     width: inherit;
@@ -302,8 +304,20 @@
 	}
 }
 
-.context-menu-item {
-	font-size: 14px;
+*/
+
+.messages-bottom form {
+	margin-left: 10px;
+    margin-bottom: 30px;
+}
+
+#message-input {
+	width: 55%;
+    letter-spacing: 1.2px;
+    outline: 0;
+    font-size: 14px;
+    margin-left: 10px;
+    padding: 6px;
 }
 
 .message-deleted p {
@@ -318,18 +332,4 @@
 	background-color: #fff;
 	border: solid 0.1px;
 	font-style: italic;
-}
-
-.message-input-note span {
-	color: black;
-    position: absolute;
-    right: 42%;
-    top: 12px;
-    font-size: 28px;
-}
-
-@media screen and (max-width: 800px) {
-	.message-input-note span {
-		right: 8%;
-	}
 }

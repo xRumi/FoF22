@@ -529,4 +529,76 @@ img {
 /* profile end */
 
 
-/* other start */
+/* friends start */
+
+.friends {
+    margin: auto;
+    width: 780px;
+    height: auto;
+    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+	margin-top: 40px;
+}
+
+.fr-req-header {
+    padding: 10px;
+    font-size: 14px;
+    background-color: #07c;
+    padding-left: 10px;
+    color: white;
+}
+
+.fr-req-item {
+    padding: 5px;
+    height: 55px;
+    background-color: light;
+    border-bottom: solid 1px lightgrey;
+}
+
+.fr-req-img {
+    width: 40px;
+    height: 40px;
+    overflow: hidden;
+    border-radius: 50%;
+    float: left;
+}
+
+.fr-req-content {
+    float: left;
+    margin-left: 5px;
+    margin-top: 3px;
+}
+
+.fr-req-content span {
+    font-size: 11px;
+    color: grey;
+}
+
+.fr-req-btn-group {
+    margin-top: 7px;
+    float: right;
+	margin-right: 10px;
+}
+
+.fr-req-btn-group button {
+    margin-left: 5px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: inline-block;
+    outline: none;
+    padding: 4px 0.4em;
+    position: relative;
+    text-align: center;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+@media screen and (max-width: 800px) {
+    .friends {
+        width: 100%;
+		margin-top: 0;
+    }
+}
+
+/* friends end */

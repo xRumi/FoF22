@@ -11,48 +11,45 @@ const router = require('express').Router(),
 
 const me = require('./me');
 
-router.get('/', async (req, res) => {
-    res.render("index");
-});
+module.exports = (client) => {
 
-router.get('/spa', async (req, res) => {
-    if (req.user) {
-        res.render("spa", { user_id: req.user.id, username: req.user.username });
-    } else res.status(403).redirect('/login');
-});
+    router.get('/', async (req, res) => {
+        res.render("index");
+    });
 
-router.get('/spa/*', async (req, res) => {
-    if (req.user) {
-        res.render("spa", { user_id: req.user.id, username: req.user.username });
-    } else res.status(403).redirect('/login');
-});
+    router.get('/spa', async (req, res) => {
+        if (req.user) {
+            res.render("spa", { user_id: req.user.id, username: req.user.username });
+        } else res.status(403).redirect(`/login?ref=${req.originalUrl}`);
+    });
 
-router.get('/friends/fetch', async (req, res) => {
-    if (req.user) {
-        let friends = await req.client.cache.functions.get_friends(req.user.friends);
-        res.status(200).send(friends);
-    } else res.status(403).send('forbidden');
-});
+    router.get('/spa/*', async (req, res) => {
+        if (req.user) {
+            res.render("spa", { user_id: req.user.id, username: req.user.username });
+        } else res.status(403).redirect(`/login?ref=${req.originalUrl}`);
+    });
 
-router.use('/auth', auth);
-router.use('/profile', profile);
-router.use('/friends', friends);
-router.use('/messages', messages);
-router.use('/search', search);
-router.use('/settings', settings);
-router.use('/', password);
-router.use('/register', register);
-router.use('/debug', debug);
-router.use('/me', me);
+    router.use('/auth', auth(client));
+    router.use('/profile', profile(client));
+    router.use('/friends', friends(client));
+    router.use('/messages', messages(client));
+    router.use('/search', search(client));
+    router.use('/settings', settings(client));
+    router.use('/', password(client));
+    router.use('/register', register(client));
+    router.use('/debug', debug(client));
+    router.use('/me', me(client));
 
-router.get('/login', async (req, res) => {
-    if (!req.user) res.render("login");
-    else res.redirect('/spa');
-});
+    router.get('/login', async (req, res) => {
+        if (!req.user) res.render("login");
+        else res.redirect('/spa');
+    });
 
-router.get('/logout', async (req, res) => {
-    if (req.user) await req.session.destroy();
-    res.redirect('/login');
-});
+    router.get('/logout', async (req, res) => {
+        if (req.user) req.session.destroy();
+        res.redirect('/login');
+    });
 
-module.exports = router;
+    return router;
+
+}
