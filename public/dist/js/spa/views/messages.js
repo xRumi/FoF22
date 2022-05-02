@@ -19,6 +19,7 @@ const people_list = (new_people_list) => {
     if (old_people_list && old_people_list.length && Array.isArray(old_people_list)) $('.people-list').html(old_people_list.map(x => {
         let diff = Date.now() - x.time, time;
         if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
+        else if (diff < periods.day && _time.getDate() === today.getDate()) time = _time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
         else {
             let _time = new Date(x.time);
             if (diff < periods.week) time = days[_time.getDay()];
