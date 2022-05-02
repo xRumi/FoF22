@@ -1,28 +1,5 @@
 import Constructor from "./constructor.js";
 
-class Messages_Bottom extends HTMLElement {
-    constructor() {
-        super();
-        this.onsubmit = () => {
-            let input = this.querySelector('#message-input');
-            let _message = input ? input.value : false;
-            if (!_message || !client.messages.room_id) return false;
-            let _id = Math.random().toString(36).substring(2, 15);
-            socket.emit('send-message', ({ id: client.messages.room_id, _message, _id }), () => socket.emit('join-room', client.messages.room_id, (response) => join_room(response)));
-            $('.messages-list').append(`
-                <div class="message outgoing" data-username="${client.username}">
-                    <div class="message-content">
-                        <p id="${_id}" style="background-color: lightblue;">${_message.replace(/[&<>]/g, (t) => ttr[t] || t)}</p>
-                    </div>
-                </div>
-            `);
-            input.value = '';
-            $(".message:last-child")[0].scrollIntoView();
-            return false;
-        };
-    }
-}
-
 class Messages_Header_Back extends HTMLElement {
     constructor() {
         super();
@@ -68,7 +45,6 @@ class Load_More_Messages extends HTMLElement {
     }
 }
 
-customElements.define('messages-bottom', Messages_Bottom);
 customElements.define('messages-header-back', Messages_Header_Back);
 customElements.define('load-more-messages', Load_More_Messages);
 
@@ -160,7 +136,7 @@ export default class extends Constructor {
     }
 
     async render() {
-        return `
+        return $(`
             <div class="chat">
                 <div class="people">
                     <div class="people-header"></div>
@@ -179,15 +155,31 @@ export default class extends Constructor {
                     <div class="messages-list scrollbar">
                         <div class="lds-dual-ring"></div>
                     </div>
-                    <messages-bottom class="messages-bottom">
+                    <div class="messages-bottom">
                         <form autocomplete="off">
                             <input type="text" name="message-input" id="message-input" placeholder="type your message..." disabled>
                             <button type="submit" class="message-submit" style="display: none;">Send</button>
                         </form>
-                    </messages-bottom>
+                    </div>
                 </div>
             </div>
-        `;
+        `).on('submit', '.messages-bottom form', (e) => {
+            e.preventDefault();
+            let _message = $('#message-input').val();
+            if (!_message || !client.messages.room_id) return false;
+            let _id = Math.random().toString(36).substring(2, 15);
+            socket.emit('send-message', ({ id: client.messages.room_id, _message, _id }), () => socket.emit('join-room', client.messages.room_id, (response) => join_room(response)));
+            $('.messages-list').append(`
+                <div class="message outgoing" data-username="${client.username}">
+                    <div class="message-content">
+                        <p id="${_id}" style="background-color: lightblue;">${_message.replace(/[&<>]/g, (t) => ttr[t] || t)}</p>
+                    </div>
+                </div>
+            `);
+            input.value = '';
+            $(".message:last-child")[0].scrollIntoView();
+            return false;
+        });
     }
 
     async after_render() {
