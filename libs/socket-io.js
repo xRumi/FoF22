@@ -122,6 +122,7 @@ module.exports.sockets = (io, client) => {
                 }
             });
             socket.on('messages-typing', is => {
+                console.log(`user ${socket.user_id} is typing...`);
                 if (socket.room_id && socket.user_id) socket.broadcast.to(room.id).emit('messages-typing-response', { is, room_id: socket.room_id, user_id: socket.user_id });
             });
             socket.on('send-message', async ({ id, _message, _id }, callback) => {
