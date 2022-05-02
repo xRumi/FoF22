@@ -1,53 +1,5 @@
 import Constructor from "./constructor.js";
 
-class Messages_Header_Back extends HTMLElement {
-    constructor() {
-        super();
-        this.onclick = () => {
-            history.pushState(null, null, `/spa/messages`);
-            socket.emit('leave-room', client.messages.room_id);
-            client.messages.room_id = null;
-            document.title = 'Messages';
-            $('.chat').removeClass('chat-active');
-            $('.navbar').removeClass('chat-active');
-        };
-    }
-}
-
-class Load_More_Messages extends HTMLElement {
-    constructor() {
-        super();
-        this.onclick = () => {
-            this.querySelector('.lds-dual-ring').style.display = "inline-block";
-            socket.emit('load-more-messages', $('.message')[0].getAttribute('data-id'), ({ id, messages, mm }) => {
-                if (client.messages.room_id == id && messages.length) {
-                    let html = [], lm = {};
-                    for (let i = 0; i < messages.length; i++) {
-                        let m = messages[i];
-                        html.push(m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user} data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
-                            <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${!m.message ? ' message-deleted' : ''}" data-id="${m.id}">
-                                <div class="message-img">
-                                    <img src="/dist/img/users/${m.user}/profile.png">
-                                </div>
-                                <div class="message-content">
-                                    <p>${m.message ? m.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
-                                </div>
-                            </div>
-                        `);
-                        lm = m;
-                    }
-                    $('.messages-list').prepend(html.join(''));
-                    $('.load-more-messages .lds-dual-ring').hide();
-                } else $('.load-more-messages .lds-dual-ring').hide();
-                if (!mm) $('.load-more-messages').hide();
-            });
-        };
-    }
-}
-
-customElements.define('messages-header-back', Messages_Header_Back);
-customElements.define('load-more-messages', Load_More_Messages);
-
 var old_people_list = [];
 
 const periods = {
@@ -146,12 +98,15 @@ export default class extends Constructor {
                 </div>
                 <div class="messages">
                     <div class="messages-header header-back">
-                        <messages-header-back class="header-back-icon">
+                        <div class="header-back-icon">
                             <i class='bx bx-chevron-left'></i>
-                        </messages-header-back>
+                        </div>
                         <p class="messages-header-back-text header-back-text"></p>
                     </div>
-                    <load-more-messages class="load-more-messages" style="display: none;">load more messages...<div class="lds-dual-ring" style="display: none;"></div></load-more-messages>
+                    <div class="load-more-messages" style="display: none;">
+                        load more messages...
+                        <div class="lds-dual-ring" style="display: none;"></div>
+                    </div>
                     <div class="messages-list scrollbar">
                         <div class="lds-dual-ring"></div>
                     </div>
@@ -179,6 +134,37 @@ export default class extends Constructor {
             input.value = '';
             $(".message:last-child")[0].scrollIntoView();
             return false;
+        }).on('click', '.header-back-icon', e=> {
+            history.pushState(null, null, `/spa/messages`);
+            socket.emit('leave-room', client.messages.room_id);
+            client.messages.room_id = null;
+            document.title = 'Messages';
+            $('.chat').removeClass('chat-active');
+            $('.navbar').removeClass('chat-active');
+        }).on('click', '.load-more-messages', e => {
+            $('.load-more-messages .lds-dual-ring').css('display', 'inline-block');
+            socket.emit('load-more-messages', $('.message')[0].getAttribute('data-id'), ({ id, messages, mm }) => {
+                if (client.messages.room_id == id && messages.length) {
+                    let html = [], lm = {};
+                    for (let i = 0; i < messages.length; i++) {
+                        let m = messages[i];
+                        html.push(m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user} data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
+                            <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${!m.message ? ' message-deleted' : ''}" data-id="${m.id}">
+                                <div class="message-img">
+                                    <img src="/dist/img/users/${m.user}/profile.png">
+                                </div>
+                                <div class="message-content">
+                                    <p>${m.message ? m.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
+                                </div>
+                            </div>
+                        `);
+                        lm = m;
+                    }
+                    $('.messages-list').prepend(html.join(''));
+                    $('.load-more-messages .lds-dual-ring').hide();
+                } else $('.load-more-messages .lds-dual-ring').hide();
+                if (!mm) $('.load-more-messages').hide();
+            });
         });
     }
 
