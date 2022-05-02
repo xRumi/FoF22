@@ -60,7 +60,7 @@ const people_list = (new_people_list) => {
     }));
 }
 
-var _ajax0 = false;
+var _ajax0 = false, typing_timeout = false;
 
 export default class extends Constructor {
     constructor(params) {
@@ -136,7 +136,19 @@ export default class extends Constructor {
             input.value = '';
             $(".message:last-child")[0].scrollIntoView();
             return false;
-        }).on('click', '.header-back-icon', e=> {
+        }).on('keypress', '#message-input', e => {
+            if (e.which != 13) {
+                socket.emit('messages-typing', true);
+                clearTimeout(typing_timeout);
+                typing_timeout = setTimeout(() => {
+                    socket.emit('typing', false);
+                }, 3000);
+              } else {
+                clearTimeout(typing_timeout);
+                socket.emit('messages-typing', false);
+                console.log('send message');
+              }
+        }).on('click', '.header-back-icon', e => {
             history.pushState(null, null, `/spa/messages`);
             socket.emit('leave-room', client.messages.room_id);
             client.messages.room_id = null;

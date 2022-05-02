@@ -59,3 +59,9 @@ socket.on('notification', notification => {
         }
     });
 });
+
+socket.on('messages-typing-response', ({ is, room_id, user_id }) => {
+    if (room_id == client.messages.room_id) {
+        console.log(`user ${user_id} is typing`);
+    }
+});
