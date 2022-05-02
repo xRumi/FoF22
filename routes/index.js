@@ -19,13 +19,25 @@ module.exports = (client) => {
 
     router.get('/spa', async (req, res) => {
         if (req.user) {
-            res.render("spa", { user_id: req.user.id, username: req.user.username });
+            res.render("spa", { user_id: req.user.id, username: req.user.username, notification: {
+                home: req.user.notification.home,
+                friends: req.user.notification.friends,
+                messages: req.user.notification.messages,
+                search: req.user.notification.search,
+                menu: req.user.notification.menu
+            } });
         } else res.status(403).redirect(`/login?ref=${req.originalUrl}`);
     });
 
     router.get('/spa/*', async (req, res) => {
         if (req.user) {
-            res.render("spa", { user_id: req.user.id, username: req.user.username });
+            res.render("spa", { user_id: req.user.id, username: req.user.username, notification: {
+                home: req.user.notification.home,
+                friends: req.user.notification.friends,
+                messages: req.user.notification.messages,
+                search: req.user.notification.search,
+                menu: req.user.notification.menu
+            } });
         } else res.status(403).redirect(`/login?ref=${req.originalUrl}`);
     });
 

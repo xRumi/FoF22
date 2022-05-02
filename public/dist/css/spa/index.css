@@ -127,28 +127,32 @@ img {
 		margin-top: 10px;
 	}
 
-
 }
 
-.nav__link:hover {
-	background-color: #eeeeee;
+.nav__link {
+	cursor: default;
 }
 
 .nav__active {
-	color: #009578;
+	color: #4cbfa6;
+}
+
+.nav__alart:empty {
+	display: none;
 }
 
 .nav__alart {
 	position: absolute;
-    font-size: 14px;
+    font-size: 11px;
     color: white;
     border-radius: 50%;
-    height: 17px;
-    width: 18px;
+    height: 16px;
+    width: 16px;
     text-align: center;
     background-color: orangered;
     margin-left: 32px;
     top: 3px;
+    padding-top: 1px;
 }
 
 ._404 {
@@ -204,8 +208,8 @@ img {
 
 @media only screen and (max-width: 800px) {
 	.search-input {
-		width: 80%;
-		margin-top: 50px;
+		width: 90%;
+    	margin-top: 35px;
 	}
 }
 

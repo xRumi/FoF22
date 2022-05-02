@@ -30,7 +30,7 @@ export default class extends Constructor {
                     else {
                         if (user_data.is_my_friend) pc_user_btn_group.push($(`<button class="pc-user-remove-friend" type="submit" role="button">Remove Friend</button>`).on('click', (e) => remove_friend(e, user_data)));
                         else if (user_data.is_friend_requested) pc_user_btn_group.push($(`<button class="pc-user-friend-request" type="submit" role="button">Cancel Request</button>`).on('click', (e) => cancel_friend_request(e, user_data)));
-                        else if (user_data.is_friend_await_accept) {
+                        else if (user_data.is_friend_pending) {
                             pc_user_btn_group.push($(`<button class="pc-user-friend-accept" type="submit" role="button">Accept Friend</button>`).on('click', (e) => accept_friend_request(e, user_data)));
                             pc_user_btn_group.push($(`<button class="pc-user-friend-request" type="submit" role="button">Reject</button>`).on('click', (e) => cancel_friend_request(e, user_data)));
                         } else pc_user_btn_group.push($(`<button class="pc-user-add-friend" type="submit" role="button">Add Friend</button>`).click((e) => add_friend(e, user_data)));

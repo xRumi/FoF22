@@ -4,7 +4,7 @@ module.exports = (client) => {
 
     router.get('/fetch', async (req, res) => {
         if (req.user) {
-            Promise.all(req.user.friend_request.filter(x => x.type == 'await_accept').map(x => client.database.functions.get_user(x.target))).then(users => {
+            Promise.all(req.user.friend_request.filter(x => x.type == 'pending').map(x => client.database.functions.get_user(x.target))).then(users => {
                 let requests = [];
                 for (let i = 0; i < users.length; i++) {
                     let user = users[i];
@@ -30,7 +30,7 @@ module.exports = (client) => {
                         target: user.id
                     });
                     user.friend_request.push({
-                        type: 'await_accept',
+                        type: 'pending',
                         target: req.user.id
                     });
                     user.markModified('friend_request');
@@ -38,9 +38,9 @@ module.exports = (client) => {
                     await user.save();
                     await req.user.save();
                     res.sendStatus(200);
-                } else if (req.user.friend_request.some(x => x.target == user.id && x.type == 'await_accept')) {
+                } else if (req.user.friend_request.some(x => x.target == user.id && x.type == 'pending')) {
                     if (!req.user.friends.includes(user.id)) {
-                        let is_request = req.user.friend_request.findIndex(x => x.target === user.id && x.type == 'await_accept');
+                        let is_request = req.user.friend_request.findIndex(x => x.target === user.id && x.type == 'pending');
                         if (is_request > -1) {
                             req.user.friend_request.splice(is_request, 1);
                             let from_request = user.friend_request.findIndex(x => x.target === req.user.id && x.type == 'request');
@@ -87,7 +87,7 @@ module.exports = (client) => {
             let user = await client.database.functions.get_user(_user);
             if (user && user.id !== req.user.id) {
                 if (!req.user.friends.includes(user.id)) {
-                    let is_request = req.user.friend_request.findIndex(x => x.target === user.id && x.type == 'await_accept');
+                    let is_request = req.user.friend_request.findIndex(x => x.target === user.id && x.type == 'pending');
                     if (is_request > -1) {
                         req.user.friend_request.splice(is_request, 1);
                         let from_request = user.friend_request.findIndex(x => x.target === req.user.id && x.type == 'request');

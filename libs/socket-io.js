@@ -1,4 +1,5 @@
 const ObjectId = require("mongodb").ObjectId;
+const is_function = value => value && (Object.prototype.toString.call(value) === "[object Function]" || "function" === typeof value || value instanceof Function);
 
 module.exports.sockets = (io, client) => {
     io.on('connection', async (socket) => {
@@ -8,7 +9,7 @@ module.exports.sockets = (io, client) => {
             socket.user_id = user.id;
             client.cache.functions.update_user({ username: user.username, status: 'online' });
             socket.on('autocomplete', async (term, callback) => {
-                if (!callback && typeof callback !== 'function') return false;
+                if (!is_function(callback)) return false;
                 if (term) {
                     let result = {
                         names: null,
@@ -25,7 +26,7 @@ module.exports.sockets = (io, client) => {
                 }
             });
             socket.on('create-or-join-room', async (user_id, callback) => {
-                if (!callback && typeof callback !== 'function') return false;
+                if (!is_function(callback)) return false;
                 let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
                 let _user = await client.database.functions.get_user(user_id);
                 if (user && _user && _user.id !== user.id) {
@@ -47,8 +48,13 @@ module.exports.sockets = (io, client) => {
                     }
                 }
             });
+            socket.on('leave-room', async (id) => {
+                socket.leave(socket.room_id);
+                socket.room_id = null;
+                socket.chat_id = null;
+            });
             socket.on('join-room', async (id, callback) => {
-                if (!callback && typeof callback !== 'function') return false;
+                if (!is_function(callback)) return false;
                 let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
                 if (user && user.id == socket.user_id && id) {
                     if (ObjectId.isValid(id)) {
@@ -73,36 +79,53 @@ module.exports.sockets = (io, client) => {
                                     }
                                 } else name = room.name;
                                 let messages = chat.messages.slice(-20);
-                                for (let i = 0; i < messages.length; i++) {
-                                    let _user = await client.database.functions.get_user(messages[i].user);
-                                    messages[i].username = _user.username;
-                                }
-                                callback({ user: user.id, messages, id, name: name ? name : 'unknown', mm: chat.messages.length > 20 ? true : false });
+                                Promise.all(messages.map(message => client.database.functions.get_user(message.user))).then(users => {
+                                    for (let i = 0; i < users.length; i++) {
+                                        let user = users[i];
+                                        let message = messages.find(x => x.user == user.id);
+                                        if (message) message.username = user.username;
+                                    }
+                                    let message_notification_exists = user.notification.messages.indexOf(room.id);
+                                    if (message_notification_exists > -1) {
+                                        user.notification.messages.splice(message_notification_exists, 1);
+                                        user.markModified('notification'); save = true;
+                                        io.to(user.id).emit('notification', ({ messages: user.notification.messages }));
+                                    }
+                                    callback({ user: user.id, messages, id, name: name ? name : 'unknown', mm: chat.messages.length > 20 ? true : false });
+                                });
                             }
                         } else callback({ id, error: '<p>Oops! Chat Not Be Found</p><p>Sorry but the chat room you are looking for does not exist, have been removed. id changed or is temporarily unavailable</p>' });
                     } else callback({ id, error: '<p>Oops! Chat Not Be Found</p><p>Sorry but the chat room you are looking for does not exist, have been removed. id changed or is temporarily unavailable</p>' });
                 }
             });
-            socket.on('load-more-messages', async id => {
+            socket.on('load-more-messages', async (id, callback) => {
+                if (!is_function(callback)) return false;
                 if (id && id.length > 8 && socket.chat_id) {
                     let chat = await client.database.chat.findById(socket.chat_id);
                     if (chat && chat.room_id == socket.room_id) {
                         let a = chat.messages.length;
                         while(a--) {
                             if (chat.messages[a]?.id == id) {
-                                let messages = (a && a > 20) ? chat.messages.slice(a - 20, a) : messages = chat.messages.slice(0, a);
-                                for (let i = 0; i < messages.length; i++) {
-                                    let user = await client.database.functions.get_user(messages[i].user);
-                                    messages[i].username = user.username;
-                                }
-                                socket.emit('receive-more-messages', { id: socket.room_id, messages, mm: a - 20 > 20 ? true : false });
+                                let messages = (a && a > 20) ? chat.messages.slice(a - 20, a) : chat.messages.slice(0, a);
+                                Promise.all(messages.map(message => client.database.functions.get_user(message.user))).then(users => {
+                                    for (let i = 0; i < users.length; i++) {
+                                        let user = users[i];
+                                        let message = messages.find(x => x.user == user.id);
+                                        if (message) message.username = user.username;
+                                    }
+                                    callback({ id: socket.room_id, messages, mm: a - 20 > 20 ? true : false })
+                                });
                                 break;
                             }
                         }
                     }
                 }
             });
-            socket.on('send-message', async ({ id, _message, _id }) => {
+            socket.on('send-message', async ({ id, _message, _id }, callback) => {
+                if (!socket.room_id || socket.room_id !== id) {
+                    if (!is_function(callback)) return false;
+                    callback();
+                }
                 let message = _message?.trim();
                 if (socket.room_id == id && message?.length < 2000) {
                     let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
@@ -122,24 +145,42 @@ module.exports.sockets = (io, client) => {
                                     chat.messages.push(chat_data);
                                     await chat.save();
                                     chat_data.username = user.username;
+
                                     io.to(socket.room_id).emit('receive-message', { user: user.id, id: room.id, chat: chat_data, _id });
-                                    [...client.database_cache.users].filter(r_user => r_user.rooms?.includes(room.id))?.forEach(r_user => {
-                                        io.to(r_user.id).emit('new-message', { message, id: room.id, user: user.username, _id });
-                                    });
+
+                                    let room_members = [], _room_members = io.sockets.adapter.rooms.get(room.id);
+
+                                    for (const id of _room_members ) {
+                                        const room_member_socket = io.sockets.sockets.get(id);
+                                        if (room_member_socket.user_id) room_members.push(room_member_socket.user_id);
+                                    }
+                                    
                                     Promise.all(room.members.map(user => client.database.functions.get_user(user))).then(users => {
                                         Promise.all(users.filter(x => x).map(user => {
                                             let save = false;
                                             if (!user.rooms.includes(room.id)) {
                                                 user.rooms.push(room.id); save = true;
+                                                user.markModified('rooms');
                                             }
                                             if (user.rooms[0] !== room.id) {
                                                 user.rooms = user.rooms.filter(item => item !== room.id);
                                                 user.rooms.unshift(room.id); save = true;
-                                            }
-                                            if (save) {
                                                 user.markModified('rooms');
-                                                return user.save();
                                             }
+                                            let message_notification_exists = user.notification.messages.indexOf(room.id);
+                                            if (room_members.includes(user.id)) {
+                                                if (message_notification_exists > -1) {
+                                                    user.notification.messages.splice(message_notification_exists, 1);
+                                                    user.markModified('notification'); save = true;
+                                                    io.to(user.id).emit('notification', ({ messages: user.notification.messages }));
+                                                }
+                                            } else if (!user.notification.messages.includes(room.id)) {
+                                                user.notification.messages.push(room.id); save = true;
+                                                user.markModified('notification');
+                                                io.to(user.id).emit('notification', ({ messages: user.notification.messages }));
+                                            }
+                                            if (save) return user.save();
+                                            else return true;
                                         }));
                                     });
                                 } else socket.emit('error', 'chat does not exist');
@@ -149,7 +190,7 @@ module.exports.sockets = (io, client) => {
                 }
             });
             socket.on('delete-message', async ({ id, _id }, callback) => {
-                if (!callback && typeof callback !== 'function') return false;
+                if (!is_function(callback)) return false;
                 if (_id && id?.length > 8 && _id === socket.room_id) {
                     let chat = await client.database.chat.findById(socket.chat_id);
                     if (chat.room_id == socket.room_id) {

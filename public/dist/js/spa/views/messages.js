@@ -1,77 +1,5 @@
 import Constructor from "./constructor.js";
 
-class People_List extends HTMLElement {
-    static get observedAttributes() {
-        return ['rid'];
-    }
-    attributeChangedCallback(attrName, oldVal, newVal) {
-        if (oldVal !== newVal) {
-            this.innerHtml = '';
-            this.rid = newVal;
-            if (client.messages.room_id == this.rid) {
-                this.querySelector('._people').className += " _people-active";
-            }
-        }
-    }
-    constructor() {
-        super();
-        this.innerHTML = `<div class="_people">${this.innerHTML}</div>`;
-        this.onclick = () => {
-            $('#message-input').prop('disabled', true);
-            $('.load-more-messages .lds-dual-ring').hide();
-            $('.load-more-messages').hide();
-            $('.messages-list').html('');
-            $('.chat').addClass('chat-active');
-            $('.navbar').addClass('chat-active');
-            $('._people-active').removeClass('_people-active');
-            this.querySelector('._people').className += " _people-active";
-            client.messages.room_id = this.rid;
-            socket.emit('join-room', this.rid, (response) => {
-                if (response.error) {
-                    let { id, error } = response;
-                    if (client.messages.room_id == id) $('.messages-list').append(error);
-                    $('.messages-list .lds-dual-ring').hide();
-                } else {
-                    let { messages, id, name, mm } = response;
-                    if (client.messages.room_id == id) {
-                        document.title = name;
-                        $('.messages-header-back-text').text(name);
-                        let html = [], lm = {};
-                        for (let i = 0; i < messages.length; i++) {
-                            let m = messages[i];
-                            html.push(m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
-                                <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${!m.message ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
-                                    <div class="message-img">
-                                        <img src="/dist/img/users/${m.user}/profile.png">
-                                    </div>
-                                    <div class="message-content">
-                                        <p>${m.message ? m.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
-                                    </div>
-                                </div>
-                            `);
-                            lm = m;
-                        }
-                        message_time(html, (_html) => {
-                            $('.messages-list').html(_html);
-                            $('#message-input').prop('disabled', false);
-                            if ($(".message:last-child")[0]) $(".message:last-child")[0].scrollIntoView();
-                        });
-                        if (mm) $('.load-more-messages').show();
-                        nanobar.go(100);
-                    }
-                }
-            });
-            history.pushState(null, null, `/spa/messages/${this.rid}`);
-            let name = this.querySelector('._people-name');
-            if (name && name.innerHTML) {
-                document.title = name.innerHTML;
-                $('.messages-header-back-text').text(name.innerHTML);
-            }
-            nanobar.go(40);
-        };
-    }
-}
-
 class Messages_Bottom extends HTMLElement {
     constructor() {
         super();
@@ -80,7 +8,7 @@ class Messages_Bottom extends HTMLElement {
             let _message = input ? input.value : false;
             if (!_message || !client.messages.room_id) return false;
             let _id = Math.random().toString(36).substring(2, 15);
-            socket.emit('send-message', ({ id: client.messages.room_id, _message, _id }));
+            socket.emit('send-message', ({ id: client.messages.room_id, _message, _id }), () => socket.emit('join-room', client.messages.room_id, (response) => join_room(response)));
             $('.messages-list').append(`
                 <div class="message outgoing" data-username="${client.username}">
                     <div class="message-content">
@@ -100,6 +28,8 @@ class Messages_Header_Back extends HTMLElement {
         super();
         this.onclick = () => {
             history.pushState(null, null, `/spa/messages`);
+            socket.emit('leave-room', client.messages.room_id);
+            client.messages.room_id = null;
             document.title = 'Messages';
             $('.chat').removeClass('chat-active');
             $('.navbar').removeClass('chat-active');
@@ -112,12 +42,32 @@ class Load_More_Messages extends HTMLElement {
         super();
         this.onclick = () => {
             this.querySelector('.lds-dual-ring').style.display = "inline-block";
-            socket.emit('load-more-messages', $('.message')[0].getAttribute('data-id'));
+            socket.emit('load-more-messages', $('.message')[0].getAttribute('data-id'), ({ id, messages, mm }) => {
+                if (client.messages.room_id == id && messages.length) {
+                    let html = [], lm = {};
+                    for (let i = 0; i < messages.length; i++) {
+                        let m = messages[i];
+                        html.push(m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user} data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
+                            <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${!m.message ? ' message-deleted' : ''}" data-id="${m.id}">
+                                <div class="message-img">
+                                    <img src="/dist/img/users/${m.user}/profile.png">
+                                </div>
+                                <div class="message-content">
+                                    <p>${m.message ? m.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
+                                </div>
+                            </div>
+                        `);
+                        lm = m;
+                    }
+                    $('.messages-list').prepend(html.join(''));
+                    $('.load-more-messages .lds-dual-ring').hide();
+                } else $('.load-more-messages .lds-dual-ring').hide();
+                if (!mm) $('.load-more-messages').hide();
+            });
         };
     }
 }
 
-customElements.define('people-list', People_List);
 customElements.define('messages-bottom', Messages_Bottom);
 customElements.define('messages-header-back', Messages_Header_Back);
 customElements.define('load-more-messages', Load_More_Messages);
@@ -146,8 +96,8 @@ const people_list = (new_people_list) => {
             if (diff < periods.week) time = days[_time.getDay()];
             else time = _time.toLocaleDateString();
         }
-        return `
-            <people-list rid="${x.id}">
+        return $(`
+            <div data-id="${x.id}" class="_people${client.messages.room_id == x.id ? ' _people-active' : ''}"${x.is_unread ? ` style="background-color: aliceblue;"` : ''}>
                 <div class="_people-img">
                     <img src="${x.image}">
                 </div>
@@ -156,9 +106,28 @@ const people_list = (new_people_list) => {
                     <span class="_people-name">${x.name}</span>
                     <p>${x.last_message}</p>
                 </div>
-            </people-list>
-        `
-    }).join(''));
+            </div>
+        `).on('click', (e) => {
+            $('.chat').addClass('chat-active');
+            $('.navbar').addClass('chat-active');
+            $('#message-input').prop('disabled', true);
+            $('.load-more-messages .lds-dual-ring').hide();
+            $('.load-more-messages').hide();
+            $('.messages-list').html('');
+            $('._people-active').removeClass('_people-active');
+            let _people = $(e.currentTarget);
+            _people.addClass('_people-active');
+            client.messages.room_id = _people.data('id');
+            socket.emit('join-room', client.messages.room_id, (response) => join_room(response));
+            history.pushState(null, null, `/spa/messages/${client.messages.room_id}`);
+            let name = e.currentTarget.querySelector('._people-name');
+            if (name && name.innerHTML) {
+                document.title = name.innerHTML;
+                $('.messages-header-back-text').text(name.innerHTML);
+            }
+            nanobar.go(40);
+        });
+    }));
 }
 
 var _ajax0 = false;
@@ -227,45 +196,12 @@ export default class extends Constructor {
             $('.chat').addClass('chat-active');
             $('.navbar').addClass('chat-active');
             client.messages.room_id = this.id;
-            socket.emit('join-room', this.id, (response) => {
-                if (response.error) {
-                    let { id, error } = response;
-                    if (client.messages.room_id == id) $('.messages-list').append(error);
-                    $('.messages-list .lds-dual-ring').hide();
-                } else {
-                    let { messages, id, name, mm } = response;
-                    if (client.messages.room_id == id) {
-                        document.title = name;
-                        $('.messages-header-back-text').text(name);
-                        let html = [], lm = {};
-                        for (let i = 0; i < messages.length; i++) {
-                            let m = messages[i];
-                            html.push(m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
-                                <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${!m.message ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
-                                    <div class="message-img">
-                                        <img src="/dist/img/users/${m.user}/profile.png">
-                                    </div>
-                                    <div class="message-content">
-                                        <p>${m.message ? m.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
-                                    </div>
-                                </div>
-                            `);
-                            lm = m;
-                        }
-                        message_time(html, (_html) => {
-                            $('.messages-list').html(_html);
-                            $('#message-input').prop('disabled', false);
-                            if ($(".message:last-child")[0]) $(".message:last-child")[0].scrollIntoView();
-                        });
-                        if (mm) $('.load-more-messages').show();
-                        nanobar.go(100);
-                    }
-                }
-            });
+            socket.emit('join-room', this.id, (response) => join_room(response));
         }
     }
 
     async before_new_render() {
+        socket.emit('leave-room', client.messages.room_id);
         client.messages.room_id = null;
         $('.chat').removeClass('chat-active');
         $('.navbar').removeClass('chat-active');
@@ -287,22 +223,15 @@ socket.on('receive-message', ({ id, chat, _id }) => {
             message.attr({ 'data-username': chat.username, 'data-user-id': chat.user, 'data-id': chat.id, 'data-time': chat.time });
             let prev_message = message.prev()[0];
             let prev_message_time = prev_message ? prev_message.querySelector('.outgoing .message-time') : false;
-            if (prev_message_time && prev_message_time.innerText && (parseInt(prev_message.dataset.time) - parseInt(chat.time)) < 2 * 60 * 1000) {
-                prev_message_time.remove();
-                let diff = Date.now() - chat.time, time;
+            let diff = Date.now() - chat.time, time;
                 time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
-                message[0].querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
-            }
+            if (prev_message_time && prev_message_time.innerText && (parseInt(prev_message.dataset.time) - parseInt(chat.time)) < 2 * 60 * 1000) prev_message_time.remove();
+            message[0].querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
         } else {
-            // not tested
-            let prev_message = $('.message:last-child:not(.outgoing)')[0], time;
+            let diff = Date.now() - chat.time;
+            let prev_message = $('.message:last-child:not(.outgoing)')[0], time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
             let prev_message_time = prev_message ? prev_message.querySelector('.message-time') : false;
-            if (prev_message_time && prev_message_time.innerText && (parseInt(prev_message.dataset.time) - parseInt(chat.time)) < 2 * 60 * 1000) {
-                prev_message_time.remove();
-                let diff = Date.now() - chat.time;
-                time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
-            }
-            // not tested
+            if (prev_message_time && prev_message_time.innerText && (parseInt(prev_message.dataset.time) - parseInt(chat.time)) < 2 * 60 * 1000) prev_message_time.remove();
             $('.messages-list').append(`
                 <div class="message${client.id == chat.user ? ' outgoing' : $('.message:last-child').data('user-id') == chat.user ? ' stack-message' : ''}${!chat.message ? ' message-deleted' : ''}" data-username="${chat.username}" data-user-id="${chat.user}" data-id="${chat.id}" data-time="${chat.time}">
                     <div class="message-img">
@@ -316,29 +245,6 @@ socket.on('receive-message', ({ id, chat, _id }) => {
             `)
         }
     }
-});
-
-socket.on('receive-more-messages', ({ id, messages, mm }) => {
-    if (client.messages.room_id == id && messages.length) {
-        let html = [], lm = {};
-        for (let i = 0; i < messages.length; i++) {
-            let m = messages[i];
-            html.push(m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user} data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
-                <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${!m.message ? ' message-deleted' : ''}" data-id="${m.id}">
-                    <div class="message-img">
-                        <img src="/dist/img/users/${m.user}/profile.png">
-                    </div>
-                    <div class="message-content">
-                        <p>${m.message ? m.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
-                    </div>
-                </div>
-            `);
-            lm = m;
-        }
-        $('.messages-list').prepend(html.join(''));
-        $('.load-more-messages .lds-dual-ring').hide();
-    } else $('.load-more-messages .lds-dual-ring').hide();
-    if (!mm) $('.load-more-messages').hide();
 });
 
 /*
@@ -431,4 +337,41 @@ function message_time (html, callback) {
     }
 
     callback(Array.prototype.concat.apply([], messages_group));
+}
+
+function join_room(response) {
+    if (response.error) {
+        let { id, error } = response;
+        if (client.messages.room_id == id) $('.messages-list').append(error);
+        $('.messages-list .lds-dual-ring').hide();
+    } else {
+        let { messages, id, name, mm } = response;
+        if (client.messages.room_id == id) {
+            document.title = name;
+            $('.messages-header-back-text').text(name);
+            let html = [], lm = {};
+            for (let i = 0; i < messages.length; i++) {
+                let m = messages[i];
+                html.push(m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
+                    <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${!m.message ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
+                        <div class="message-img">
+                            <img src="/dist/img/users/${m.user}/profile.png">
+                        </div>
+                        <div class="message-content">
+                            <p>${m.message ? m.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
+                        </div>
+                    </div>
+                `);
+                lm = m;
+            }
+            message_time(html, (_html) => {
+                $('.messages-list').html(_html);
+                $('#message-input').prop('disabled', false);
+                if ($(".message:last-child")[0]) $(".message:last-child")[0].scrollIntoView();
+            });
+            if (mm) $('.load-more-messages').show();
+            $(`._people[data-id="${id}"]`).css('background-color', '');
+            nanobar.go(100);
+        }
+    }
 }

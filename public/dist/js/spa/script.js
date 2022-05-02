@@ -49,3 +49,13 @@ setTimeout(() => setInterval(() => {
         if (time) x.innerText = time;
     });
 }, 60000), (60 - n_time.getSeconds()) * 1000);
+
+socket.on('notification', notification => {
+    Object.keys(notification).forEach(key => {
+        $(`#nav__link__${key} .nav__alart`).text(notification[key].length || '');
+        if (key == 'messages') {
+            let unread_messages = notification[key];
+            unread_messages.forEach(m => $(`._people[data-id=${m}]`).css('background-color', 'aliceblue'));
+        }
+    });
+});
