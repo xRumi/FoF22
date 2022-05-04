@@ -85,11 +85,11 @@ module.exports.sockets = (io, client) => {
                                         let message = messages.find(x => x.user == user.id);
                                         if (message) message.username = user.username;
                                     }
-                                    let message_notification_exists = user.notification.messages.indexOf(room.id);
-                                    if (message_notification_exists > -1) {
-                                        user.notification.messages.splice(message_notification_exists, 1);
-                                        user.markModified('notification'); save = true;
-                                        io.to(user.id).emit('notification', ({ messages: user.notification.messages }));
+                                    let message_unread_exists = user.unread.messages.indexOf(room.id);
+                                    if (message_unread_exists > -1) {
+                                        user.unread.messages.splice(message_unread_exists, 1);
+                                        user.markModified('unread'); save = true;
+                                        io.to(user.id).emit('unread', ({ messages: user.unread.messages }));
                                     }
                                     callback({ user: user.id, messages, id, name: name ? name : 'unknown', mm: chat.messages.length > 20 ? true : false });
                                 });
@@ -171,17 +171,17 @@ module.exports.sockets = (io, client) => {
                                                 user.rooms.unshift(room.id); save = true;
                                                 user.markModified('rooms');
                                             }
-                                            let message_notification_exists = user.notification.messages.indexOf(room.id);
+                                            let message_unread_exists = user.unread.messages.indexOf(room.id);
                                             if (room_members.includes(user.id)) {
-                                                if (message_notification_exists > -1) {
-                                                    user.notification.messages.splice(message_notification_exists, 1);
-                                                    user.markModified('notification'); save = true;
-                                                    io.to(user.id).emit('notification', ({ messages: user.notification.messages }));
+                                                if (message_unread_exists > -1) {
+                                                    user.unread.messages.splice(message_unread_exists, 1);
+                                                    user.markModified('unread'); save = true;
+                                                    io.to(user.id).emit('unread', ({ messages: user.unread.messages }));
                                                 }
-                                            } else if (!user.notification.messages.includes(room.id)) {
-                                                user.notification.messages.push(room.id); save = true;
-                                                user.markModified('notification');
-                                                io.to(user.id).emit('notification', ({ messages: user.notification.messages }));
+                                            } else if (!user.unread.messages.includes(room.id)) {
+                                                user.unread.messages.push(room.id); save = true;
+                                                user.markModified('unread');
+                                                io.to(user.id).emit('unread', ({ messages: user.unread.messages }));
                                             }
                                             if (save) return user.save();
                                             else return true;

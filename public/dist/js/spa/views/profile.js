@@ -7,7 +7,6 @@ export default class extends Constructor {
         super(params);
         this.id = params.id;
         this.setTitle("Profile");
-        navbar('#nav__link__profile', true);
         if (!_ajax0) {
             _ajax0 = true;
             nanobar.go(30);
@@ -98,7 +97,7 @@ export default class extends Constructor {
         return `
             <div class="profile">
                 <div class="profile-header header-back">
-                    <div class="header-back-icon" onclick="history.back();">
+                    <div class="header-back-icon" onclick="$.fn.go_back('/spa');">
                         <i class='bx bx-chevron-left'></i>
                     </div>
                     <p class="header-back-text">FoF22 User</p>

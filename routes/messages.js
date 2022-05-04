@@ -31,7 +31,7 @@ module.exports = (client) => {
                                 image: image || `/dist/img/users/61d001de9b64b8c435985da9/profile.png`,
                                 time: last_message?.time,
                                 last_message: last_message?.message || 'This message was deleted',
-                                is_unread: req.user.notification.messages.includes(room.id)
+                                is_unread: req.user.unread.messages.includes(room.id)
                             });
                         }
                     }

@@ -50,11 +50,11 @@ setTimeout(() => setInterval(() => {
     });
 }, 60000), (60 - n_time.getSeconds()) * 1000);
 
-socket.on('notification', notification => {
-    Object.keys(notification).forEach(key => {
-        $(`#nav__link__${key} .nav__alart`).text(notification[key].length || '');
+socket.on('unread', unread => {
+    Object.keys(unread).forEach(key => {
+        $(`#nav__link__${key} .nav__alart`).text(unread[key].length || '');
         if (key == 'messages') {
-            let unread_messages = notification[key];
+            let unread_messages = unread[key];
             unread_messages.forEach(m => $(`._people[data-id=${m}]`).css('background-color', 'aliceblue'));
         }
     });

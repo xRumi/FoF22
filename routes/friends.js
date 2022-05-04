@@ -4,14 +4,15 @@ module.exports = (client) => {
 
     router.get('/fetch', async (req, res) => {
         if (req.user) {
-            Promise.all(req.user.friend_request.filter(x => x.type == 'pending').map(x => client.database.functions.get_user(x.target))).then(users => {
+            Promise.all(req.user.friend_requests.filter(x => x.type == 'pending').map(x => client.database.functions.get_user(x.target))).then(users => {
                 let requests = [];
                 for (let i = 0; i < users.length; i++) {
                     let user = users[i];
                     requests.push({
                         id: user.id,
                         username: user.username,
-                        name: user.name
+                        name: user.name,
+                        created_at: req.user.friend_requests.find(x => x.type == 'pending' && x.target == user.id)?.created_at,
                     });
                 }
                 res.status(200).send(requests);
@@ -24,31 +25,33 @@ module.exports = (client) => {
             let _user = req.body.user;
             let user = await client.database.functions.get_user(_user);
             if (user && user.id !== req.user.id) {
-                if (!req.user.friends.includes(user.id) && !req.user.friend_request.some(x => x.target == user.id)) {
-                    req.user.friend_request.push({
+                if (!req.user.friends.includes(user.id) && !req.user.friend_requests.some(x => x.target == user.id)) {
+                    req.user.friend_requests.push({
                         type: 'request',
-                        target: user.id
+                        target: user.id,
+                        created_at: Date.now(),
                     });
-                    user.friend_request.push({
+                    user.friend_requests.push({
                         type: 'pending',
-                        target: req.user.id
+                        target: req.user.id,
+                        created_at: Date.now(),
                     });
-                    user.markModified('friend_request');
-                    req.user.markModified('friend_request');
+                    user.markModified('friend_requests');
+                    req.user.markModified('friend_requests');
                     await user.save();
                     await req.user.save();
                     res.sendStatus(200);
-                } else if (req.user.friend_request.some(x => x.target == user.id && x.type == 'pending')) {
+                } else if (req.user.friend_requests.some(x => x.target == user.id && x.type == 'pending')) {
                     if (!req.user.friends.includes(user.id)) {
-                        let is_request = req.user.friend_request.findIndex(x => x.target === user.id && x.type == 'pending');
+                        let is_request = req.user.friend_requests.findIndex(x => x.target === user.id && x.type == 'pending');
                         if (is_request > -1) {
-                            req.user.friend_request.splice(is_request, 1);
-                            let from_request = user.friend_request.findIndex(x => x.target === req.user.id && x.type == 'request');
-                            if (from_request > -1) user.friend_request.splice(from_request, 1);
+                            req.user.friend_requests.splice(is_request, 1);
+                            let from_request = user.friend_requests.findIndex(x => x.target === req.user.id && x.type == 'request');
+                            if (from_request > -1) user.friend_requests.splice(from_request, 1);
                             req.user.friends.push(user.id);
                             user.friends.push(req.user.id);
-                            user.markModified('friend_request');
-                            req.user.markModified('friend_request');
+                            user.markModified('friend_requests');
+                            req.user.markModified('friend_requests');
                             user.markModified('friends');
                             req.user.markModified('friends');
                             await req.user.save();
@@ -66,13 +69,13 @@ module.exports = (client) => {
             let _user = req.body.user;
             let user = await client.database.functions.get_user(_user);
             if (user && user.id !== req.user.id) {
-                let is_request = req.user.friend_request.findIndex(x => x.target === user.id);
+                let is_request = req.user.friend_requests.findIndex(x => x.target === user.id);
                 if (is_request > -1) {
-                    req.user.friend_request.splice(is_request, 1);
-                    let from_request = user.friend_request.findIndex(x => x.target === req.user.id);
-                    if (from_request > -1) user.friend_request.splice(from_request, 1);
-                    user.markModified('friend_request');
-                    req.user.markModified('friend_request');
+                    req.user.friend_requests.splice(is_request, 1);
+                    let from_request = user.friend_requests.findIndex(x => x.target === req.user.id);
+                    if (from_request > -1) user.friend_requests.splice(from_request, 1);
+                    user.markModified('friend_requests');
+                    req.user.markModified('friend_requests');
                     await req.user.save();
                     await user.save();
                     res.sendStatus(200);
@@ -87,15 +90,15 @@ module.exports = (client) => {
             let user = await client.database.functions.get_user(_user);
             if (user && user.id !== req.user.id) {
                 if (!req.user.friends.includes(user.id)) {
-                    let is_request = req.user.friend_request.findIndex(x => x.target === user.id && x.type == 'pending');
+                    let is_request = req.user.friend_requests.findIndex(x => x.target === user.id && x.type == 'pending');
                     if (is_request > -1) {
-                        req.user.friend_request.splice(is_request, 1);
-                        let from_request = user.friend_request.findIndex(x => x.target === req.user.id && x.type == 'request');
-                        if (from_request > -1) user.friend_request.splice(from_request, 1);
+                        req.user.friend_requests.splice(is_request, 1);
+                        let from_request = user.friend_requests.findIndex(x => x.target === req.user.id && x.type == 'request');
+                        if (from_request > -1) user.friend_requests.splice(from_request, 1);
                         req.user.friends.push(user.id);
                         user.friends.push(req.user.id);
-                        user.markModified('friend_request');
-                        req.user.markModified('friend_request');
+                        user.markModified('friend_requests');
+                        req.user.markModified('friend_requests');
                         user.markModified('friends');
                         req.user.markModified('friends');
                         await req.user.save();

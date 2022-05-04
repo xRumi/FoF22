@@ -2,6 +2,7 @@ import Index from "./views/index.js";
 import Profile from "./views/profile.js";
 import Friends from "./views/friends.js";
 import Search from "./views/search.js";
+import Notifications from "./views/notifications.js";
 
 // messages
 import Messages from "./views/messages.js";
@@ -32,9 +33,12 @@ const router = async () => {
     const routes = [
         { path: "/spa", view: Index },
         { path: "/spa/friends", view: Friends },
+
         { path: "/spa/messages", view: Messages },
         { path: "/spa/messages/:id", view: Messages },
-        { path: "/spa/search", view: Search },
+
+        { path: "/spa/notifications", view: Notifications },
+
         { path: "/spa/menu", view: Menu },
         { path: "/spa/menu/settings", view: Settings },
         { path: "/spa/menu/settings/account", view: AccountSettings },
@@ -42,6 +46,8 @@ const router = async () => {
 
         { path: "/spa/profile", view: Profile },
         { path: "/spa/profile/:id", view: Profile },
+        
+        { path: "/spa/search", view: Search },
 
     ];
 
@@ -90,6 +96,14 @@ $('body').on('click', 'a[data-link]', e => {
 
 $.fn.navigateTo = navigateTo;
 $.fn.router = router;
+
+$.fn.go_back = (fallback) => {
+    let prev_page = window.location.href;
+    history.back();
+    setTimeout(() => { 
+        if (window.location.href == prev_page) $.fn.navigateTo(fallback);
+    }, 100);
+}
 
 $(window).resize(() => {
     if ($.fn.hide_nav_in_mobile && $(window).width() < 801) $('.navbar').hide();

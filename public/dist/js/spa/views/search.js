@@ -10,9 +10,19 @@ export default class extends Constructor {
         navbar('#nav__link__search', true);
     }
 
+    async before_render() {
+        $('.navbar').hide();
+    }
+
     async render() {
         return `
             <div class="search">
+               <div class="search-header header-back">
+                    <div class="header-back-icon" onclick="$.fn.go_back('/spa');">
+                        <i class='bx bx-chevron-left'></i>
+                    </div>
+                    <p class="header-back-text">Search</p>
+                </div>
                 <div class="search-input">
                     <input type="text" placeholder="Type to search.." spellcheck="false">
                     <div class="autocom-box"></div>

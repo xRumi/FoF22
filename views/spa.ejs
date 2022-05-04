@@ -14,11 +14,11 @@
             <nav class="navbar">
                 <div class="nav__logo">FoF22</div>
                 <div class="nav__list">
-                    <a id="nav__link__home" href="/spa" class="nav__link" data-link><div class="nav__alart"><%=notification.home.length || ''%></div><i class="bx bx-home-alt nav__icon"></i></a>
-                    <a id="nav__link__friends" href="/spa/friends" class="nav__link" data-link><div class="nav__alart"><%=notification.friends.length || ''%></div><i class="bx bx-group nav__icon"></i></i></a>
-                    <a id="nav__link__messages" href="/spa/messages" class="nav__link" data-link><div class="nav__alart"><%=notification.messages.length || ''%></div><i class="bx bx-chat nav__icon"></i></a>
-                    <a id="nav__link__search" href="/spa/search" class="nav__link" data-link><div class="nav__alart"><%=notification.search.length || ''%></div><i class="bx bx-search nav__icon"></i></a>
-                    <a id="nav__link__menu" href="/spa/menu" class="nav__link" data-link><div class="nav__alart"><%=notification.menu.length || ''%></div><i class="bx bx-cog nav__icon"></i></a>
+                    <a id="nav__link__home" href="/spa" class="nav__link" data-link><div class="nav__alart"><%=unread.home.length || ''%></div><i class="bx bx-home-alt nav__icon"></i></a>
+                    <a id="nav__link__friends" href="/spa/friends" class="nav__link" data-link><div class="nav__alart"><%=unread.friends.length || ''%></div><i class="bx bx-group nav__icon"></i></i></a>
+                    <a id="nav__link__messages" href="/spa/messages" class="nav__link" data-link><div class="nav__alart"><%=unread.messages.length || ''%></div><i class="bx bx-chat nav__icon"></i></a>
+                    <a id="nav__link__notifications" href="/spa/notifications" class="nav__link" data-link><div class="nav__alart"><%=unread.notifications.length || ''%></div><i class="bx bx-bell nav__icon"></i></a>
+                    <a id="nav__link__menu" href="/spa/menu" class="nav__link" data-link><div class="nav__alart"><%=unread.menu.length || ''%></div><i class="bx bx-cog nav__icon"></i></a>
                 </div>
                 <div class="nav__img">
                     <img src="/dist/img/users/<%=user_id%>/profile.png">

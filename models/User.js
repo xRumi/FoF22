@@ -30,14 +30,16 @@ module.exports = mongoose.model("user", new mongoose.Schema({
     friends: { type: Array, default: [] },
     rooms: { type: Array, default: [] },
 
-    friend_request: { type: Array, default: [] },
+    friend_requests: { type: Array, default: [] },
 
-    notification: { type: Object, default: {
+    notifications: { type: Array, default: [] },
+
+    unread: { type: Object, default: {
         home: [],
         friends: [],
         messages: [],
-        search: [],
+        notifications: [],
         menu: []
-    } }
+    } },
 
 }) );
