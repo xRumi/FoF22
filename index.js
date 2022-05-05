@@ -29,13 +29,13 @@ const session_store = session({
     unset: 'destroy'
 });
 
-const nodemailer = require('nodemailer');
-
 io.use(function(socket, next) {
     session_store(socket.request, socket.request.res || {}, next);
 });
 
 const client = {};
+
+client.mail = {};
 
 client.database = {};
 client.database.user = require("./models/User");
@@ -55,19 +55,10 @@ client.cache.users = new Map();
 
 client.io = io;
 
-client.transporter = nodemailer.createTransport({
-    host: 'smtp.mail.yahoo.com',
-    port: 465,
-    secure: true,
-    auth: {
-        user: 'mehedihasanrumi@yahoo.com',
-        pass: 'udxiaghwxqrvzadq'
-    }
-});
-
 require("./functions/db")(client);
 require("./libs/schedule")(client);
 require("./functions/cache")(client);
+require("./functions/mail")(client);
 
 require("./libs/socket-io.js").sockets(io, client);
 

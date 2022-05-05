@@ -29,26 +29,26 @@ module.exports = (client) => {
                 _user = await client.database.user.exists({ email });
                 if (_user) return res.status(400).send('Email address is not available');
                 _user = new client.database._user({ email });
-                res.status(200).send(`We have sent a confirmation email to <b>${email}</b>. Make sure to check the both index and spam folder.`);
-                client.transporter.sendMail({
-                    from: 'mehedihasanrumi@yahoo.com',
+                client.mail.send({
+                    from: `FoF22 <no-reply@fof22.me`,
                     to: email,
-                    subject: 'Verify Your Email',
-                    html: `<p>Visit <a href="https://fof22.me/register/confirm/?token=${_user.id}">here</a> to confirm this email address and change the password.</p><br><hr><p>You're receiving this email because you have registered with this address in <a href="https://fof22.me">https://fof22.me</a>.</p>`,
-                }, function(error) {
-                    if (error) console.log(error);
+                    subject: `Please verify your email address`,
+                    html: `<div style="font-size: 15px;">Click <a href="https://fof22.me/register/confirm/?token=${_user.id}">here</a> to confirm your email address. This link will expire in 1 day.</div><p style="color: grey;">If you did not request for this email, simply ignore this email.</p><hr><br><p>This email message was auto-generated. Please do not respond. If you need additional help, send an email to <a href="mailto:help@fof22.me">help@fof22.me</p>`
+                }, (done) => {
+                    if (done) res.status(200).send(`We have sent a confirmation email to <b>${email}</b>. Make sure to check the both index and spam folder.`);
+                    else res.sendStatus(400);
                 });
                 await _user.save();
             } else {
-                client.transporter.sendMail({
-                    from: 'mehedihasanrumi@yahoo.com',
+                client.mail.send({
+                    from: `FoF22 <no-reply@fof22.me`,
                     to: email,
-                    subject: 'Verify Your Email',
-                    html: `<p>Visit <a href="https://fof22.me/register/confirm/?token=${_user.id}">here</a> to confirm this email address and change the password.</p><br><hr><p>You're receiving this email because you have registered with this address in <a href="https://fof22.me">https://fof22.me</a>.</p>`,
-                }, function(error) {
-                    if (error) console.log(error);
+                    subject: `Please verify your email address`,
+                    html: `<div style="font-size: 15px;">Click <a href="https://fof22.me/register/confirm/?token=${_user.id}">here</a> to confirm your email address. This link will expire in 1 day.</div><p style="color: grey;">If you did not request for this email, simply ignore this email.</p><hr><br><p>This email message was auto-generated. Please do not respond. If you need additional help, send an email to <a href="mailto:help@fof22.me">help@fof22.me</p>`
+                }, (done) => {
+                    if (done) res.status(200).send('We have sent a confirmation email to <b>${email}</b>. Make sure to check the both index and spam folder.');
+                    else res.sendStatus(400);
                 });
-                res.status(200).send('Resending account confirmation email');
             }
         } else res.status(400).send('Invalid data was provided');
     });

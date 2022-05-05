@@ -28,16 +28,16 @@ module.exports = (client) => {
         const user = req.body.email ? await client.database.functions.get_user_by_email(req.body.email) : false;
         if (user) {
             const token = await client.database.functions.create_token(user.id);
-            client.transporter.sendMail({
-                from: 'mehedihasanrumi@yahoo.com',
-                to: user.email,
-                subject: 'reset password',
-                html: `<p>You requested for reset password, kindly use this <a href="https://fof22.me/reset-password/?token=${token.id}">link</a> to reset your password.</p><br><hr><p>This link will expire in <b>${humanize_duration((token.expire_at) - Date.now())}</b></p><p>You're receiving this email because a password reset was requested for your account.</p>`,
-            }, function(error) {
-                if (error) console.log(error);
+            client.mail.send({
+                from: `FoF22 <no-reply@fof22.me`,
+                to: email,
+                subject: `Reset your password`,
+                html: `<div style="font-size: 15px;">Click <a href="https://fof22.me/reset-password/?token=${token.id}">link</a> to reset your password. This link will expire in 1 day.</div><p style="color: grey;">If you did not request for this email, simply ignore this email.</p><hr><br><p>This email message was auto-generated. Please do not respond. If you need additional help, send an email to <a href="mailto:help@fof22.me">help@fof22.me</p>`
+            }, (done) => {
+                if (done) res.sendStatus(200);
+                else res.sendStatus(400);
             });
         }
-        res.sendStatus(200);
     });
 
     const limiter2 = rateLimit({
