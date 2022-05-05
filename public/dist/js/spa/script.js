@@ -7,6 +7,7 @@ const client = {
     },
     id: null,
     username: null,
+    name: null
 };
 
 var before_new_render = null;
@@ -25,9 +26,10 @@ const navbar = (id, show) => {
 
 socket.on('redirect', url => window.location.replace(url));
 
-function init(id, username) {
+function init(id, username, name) {
     client.id = id;
     client.username = username;
+    client.name = name;
 }
 
 let n_time = new Date();
@@ -51,7 +53,10 @@ setTimeout(() => setInterval(() => {
 }, 60000), (60 - n_time.getSeconds()) * 1000);
 
 socket.on('unread', unread => {
+    console.log(unread);
     Object.keys(unread).forEach(key => {
+        console.log(key);
+        console.log(unread[key]);
         $(`#nav__link__${key} .nav__alart`).text(unread[key].length || '');
         if (key == 'messages') {
             let unread_messages = unread[key];
@@ -61,7 +66,6 @@ socket.on('unread', unread => {
 });
 
 socket.on('messages-typing-response', ({ room_id, typing }) => {
-    console.log(typing);
     if (room_id == client.messages.room_id) {
         if (typing.length) $('.messages-typing').show().find('.message-content p').html(typing.map(x => `<b>${x}</b>`).join(', ') + ' is typing..');
         else $('.messages-typing').hide().find('.message-content p').html('');

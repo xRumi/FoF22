@@ -97,6 +97,34 @@ module.exports = (client) => {
                         if (from_request > -1) user.friend_requests.splice(from_request, 1);
                         req.user.friends.push(user.id);
                         user.friends.push(req.user.id);
+                        let id0 = Math.random().toString(36).substring(2, 15),
+                            id1 = Math.random().toString(36).substring(2, 15);
+                        req.user.notifications.push({
+                            id: id0,
+                            user_id: user.id,
+                            title: `You are now friends with <b>${user.username}</b>`,
+                            detail: 'Say Hi to your new friend!',
+                            time: Date.now(),
+                            navigateTo: `/spa/profile/${user.id}`
+                        });
+                        req.user.unread.notifications.push(id0);
+                        user.notifications.push({
+                            id: id1,
+                            user_id: req.user.id,
+                            title: `<b>${req.user.username}</b> has accepted your friend request`,
+                            detail: 'Say Hi to your new friend!',
+                            time: Date.now(),
+                            navigateTo: `/spa/profile/${req.user.id}`
+                        });
+
+                        client.io.to(req.user.id).emit('unread', ({ notifications: req.user.unread.notifications }));
+                        client.io.to(user.id).emit('unread', ({ notifications: user.unread.notifications }));
+
+                        user.unread.notifications.push(id1);
+                        user.markModified('notifications');
+                        req.user.markModified('notifications');
+                        user.markModified('unread.notifications');
+                        req.user.markModified('unread.notifications');
                         user.markModified('friend_requests');
                         req.user.markModified('friend_requests');
                         user.markModified('friends');

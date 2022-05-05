@@ -6,7 +6,7 @@ $.fn.isValid = function() {
 $('.form').submit(function(e) {
     e.preventDefault();
     if (!$('.form').isValid()) return false;
-    $('#sub-btn').prop("disabled", true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Logging');
+    $('#sub-btn').prop("disabled", true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
     const username = $("#username").val(), password = $("#password").val();
     $.ajax({
         type: 'POST',

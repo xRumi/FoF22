@@ -7,7 +7,8 @@ const router = require('express').Router(),
     settings = require('./settings'),
     password = require('./reset-password'),
     register = require('./register'),
-    debug = require('./debug');
+    debug = require('./debug'),
+    notifications = require('./notifications');
 
 const me = require('./me');
 
@@ -19,14 +20,14 @@ module.exports = (client) => {
 
     router.get('/spa', async (req, res) => {
         if (req.user) {
-            res.render("spa", { user_id: req.user.id, username: req.user.username, unread: req.user.unread });
+            res.render("spa", { user_id: req.user.id, username: req.user.username, name: req.user.name, unread: req.user.unread });
         } else res.status(403).redirect(`/login?ref=${req.originalUrl}`);
 
     });
 
     router.get('/spa/*', async (req, res) => {
         if (req.user) {
-            res.render("spa", { user_id: req.user.id, username: req.user.username, unread: req.user.unread });
+            res.render("spa", { user_id: req.user.id, username: req.user.username, name: req.user.name, unread: req.user.unread });
         } else res.status(403).redirect(`/login?ref=${req.originalUrl}`);
     });
 
@@ -40,6 +41,7 @@ module.exports = (client) => {
     router.use('/register', register(client));
     router.use('/debug', debug(client));
     router.use('/me', me(client));
+    router.use('/notifications', notifications(client));
 
     router.get('/login', async (req, res) => {
         if (!req.user) res.render("login");

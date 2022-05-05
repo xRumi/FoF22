@@ -8,16 +8,20 @@ export default class extends Constructor {
     }
     async render() {
         return `
-            <div>
-                <div class="card">
-                    <div class="card-header">Helps & Settings</div>
-                    <div class="card-body no-padding">
-                        <div class="list-group list-group-flush">
-                            <a href="#" class="list-group-item list-group-item-action"><i class="bx bx-info-circle menu__icon"></i> Help</a>
-                            <a href="/spa/menu/settings" class="list-group-item list-group-item-action" data-link><i class="bx bx-cog menu__icon"></i> Settings</a>
-                            <a href="/logout" class="list-group-item list-group-item-action"><i class="bx bx-log-out menu__icon"></i> Log Out</a>
+            <div class="menu">
+                <div class="menu-user">
+                    <div class="menu-user-top">
+                        <div class="menu-user-img">
+                            <img src="/dist/img/users/${client.id}/profile.png">
                         </div>
-                    <div>
+                        <div class="menu-user-content">
+                            <div>${client.name}</div>
+                            <span>@${client.username}</span>
+                        </div>
+                    </div>
+                    <div class="menu-user-actions">
+                        hello
+                    </div>
                 </div>
             </div>
         `;

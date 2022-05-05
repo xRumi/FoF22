@@ -25,6 +25,7 @@ const getParams = match => {
 };
 
 const navigateTo = url => {
+    if (!url) return false;
     history.pushState(null, null, url);
     router();
 };

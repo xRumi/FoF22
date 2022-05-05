@@ -1,10 +1,10 @@
 import Constructor from "./constructor.js";
 
-let _ajax0 = false, old_friends_list = [];
+let _ajax0 = false, old_friends_list = [], update_next_time = false;
 
 const people_list = (new_friends_list) => {
-    if (new_friends_list && JSON.stringify(new_friends_list) == JSON.stringify(old_friends_list)) return false;
-    if (new_friends_list) old_friends_list = new_friends_list;
+    if (!update_next_time && new_friends_list && JSON.stringify(new_friends_list) == JSON.stringify(old_friends_list)) return false;
+    if (new_friends_list) old_friends_list = new_friends_list; update_next_time = false;
     if (old_friends_list && old_friends_list.length && Array.isArray(old_friends_list)) $('.fr-req-items').html(old_friends_list.map(x => {
         return $(`
             <div class="fr-req-item">
@@ -82,6 +82,7 @@ function accept_friend_request(e, user_data) {
             $('#fr-req-reject').remove();
             that.off('click');
             that.on('click', (e) => remove_friend(e, x));
+            update_next_time = true;
         },
         error: function(xhr, textStatus, errorThrown) {
             that.prop('disabled', false).text('Accept').css('opacity', '1');
