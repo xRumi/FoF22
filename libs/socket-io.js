@@ -52,6 +52,7 @@ module.exports.sockets = (io, client) => {
                 socket.leave(socket.room_id);
                 socket.room_id = null;
                 socket.chat_id = null;
+                socket.typing = null;
             });
             socket.on('join-room', async (id, callback) => {
                 if (!is_function(callback)) return false;
@@ -67,6 +68,7 @@ module.exports.sockets = (io, client) => {
                                     socket.join(room.id);
                                     socket.room_id = room.id;
                                     socket.chat_id = room.chat_id;
+                                    socket.typing = [];
                                 }
                                 let name;
                                 if (room.type == 'private') {
@@ -80,11 +82,16 @@ module.exports.sockets = (io, client) => {
                                 } else name = room.name;
                                 let messages = chat.messages.slice(-20);
                                 Promise.all(messages.map(message => client.database.functions.get_user(message.user))).then(users => {
-                                    for (let i = 0; i < users.length; i++) {
-                                        let user = users[i];
-                                        let message = messages.find(x => x.user == user.id);
-                                        if (message) message.username = user.username;
-                                    }
+                                    messages = messages.map(x => {
+                                        return {
+                                            id: x.id,
+                                            user: x.user,
+                                            username: users.find(y => y.id == x.user)?.username,
+                                            message: x.message,
+                                            time: x.time,
+                                            seen_by: x.seen_by
+                                        }
+                                    });
                                     let message_unread_exists = user.unread.messages.indexOf(room.id);
                                     if (message_unread_exists > -1) {
                                         user.unread.messages.splice(message_unread_exists, 1);
@@ -122,8 +129,21 @@ module.exports.sockets = (io, client) => {
                 }
             });
             socket.on('messages-typing', is => {
-                console.log(`user ${socket.user_id} is typing...`);
-                if (socket.room_id && socket.user_id) socket.broadcast.to(socket.room_id).emit('messages-typing-response', { is, room_id: socket.room_id, user_id: socket.user_id });
+                if (socket.room_id && socket.user_id) {
+                    let user_id = socket.user_id;
+                    if (socket.typing) {
+                        if (is) {
+                            if (!socket.typing.includes(user_id)) socket.typing.push(user_id);
+                        } else if (socket.typing.includes(user_id)) {
+                            let u_index = socket.typing.indexOf(user_id);
+                            if (u_index > -1) socket.typing.splice(u_index, 1);
+                        }
+                    } else if (is) socket.typing = [user_id];
+                    Promise.all(socket.typing.map(x => client.database.functions.get_user(x))).then(users => {
+                        let usernames = users.map(x => x.username);
+                        socket.broadcast.to(socket.room_id).emit('messages-typing-response', { room_id: socket.room_id, typing: usernames });
+                    });
+                }
             });
             socket.on('send-message', async ({ id, _message, _id }, callback) => {
                 if (!socket.room_id || socket.room_id !== id) {

@@ -60,7 +60,9 @@ const people_list = (new_people_list) => {
     }));
 }
 
-var _ajax0 = false, typing_timeout = false;
+var _ajax0 = false;
+var typing = false;
+var typing_timeout = undefined;
 
 export default class extends Constructor {
     constructor(params) {
@@ -112,6 +114,12 @@ export default class extends Constructor {
                     <div class="messages-list scrollbar">
                         <div class="lds-dual-ring"></div>
                     </div>
+                    <div class="messages-typing message" style="display: none">
+                        <div class="message-img"></div>
+                        <div class="message-content">
+                            <p><b>Rumi</b> is typing..</p>
+                        </div>
+                    </div>
                     <div class="messages-bottom">
                         <form autocomplete="off">
                             <input type="text" name="message-input" id="message-input" placeholder="type your message..." disabled>
@@ -122,10 +130,13 @@ export default class extends Constructor {
             </div>
         `).on('submit', '.messages-bottom form', (e) => {
             e.preventDefault();
-            let _message = $('#message-input').val();
+            let input = $('#message-input'),
+                _message = input.val();
             if (!_message || !client.messages.room_id) return false;
             let _id = Math.random().toString(36).substring(2, 15);
             socket.emit('send-message', ({ id: client.messages.room_id, _message, _id }), () => socket.emit('join-room', client.messages.room_id, (response) => join_room(response)));
+            typing = false;
+            socket.emit('messages-typing', false);
             $('.messages-list').append(`
                 <div class="message outgoing" data-username="${client.username}">
                     <div class="message-content">
@@ -133,21 +144,24 @@ export default class extends Constructor {
                     </div>
                 </div>
             `);
-            input.value = '';
+            input.val('');
             $(".message:last-child")[0].scrollIntoView();
             return false;
         }).on('keypress', '#message-input', e => {
-            if (e.which != 13) {
+            if (!typing) {
+                typing = true;
                 socket.emit('messages-typing', true);
+                typing_timeout = setTimeout(() => {
+                    typing = false;
+                    socket.emit('messages-typing', false);
+                }, 3000);
+            } else {
                 clearTimeout(typing_timeout);
                 typing_timeout = setTimeout(() => {
-                    socket.emit('typing', false);
+                    typing = false;
+                    socket.emit('messages-typing', false);
                 }, 3000);
-              } else {
-                clearTimeout(typing_timeout);
-                socket.emit('messages-typing', false);
-                console.log('send message');
-              }
+            }
         }).on('click', '.header-back-icon', e => {
             history.pushState(null, null, `/spa/messages`);
             socket.emit('leave-room', client.messages.room_id);
@@ -217,13 +231,13 @@ socket.on('receive-message', ({ id, chat, _id }) => {
             let prev_message_time = prev_message ? prev_message.querySelector('.outgoing .message-time') : false;
             let diff = Date.now() - chat.time, time;
                 time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
-            if (prev_message_time && prev_message_time.innerText && (parseInt(prev_message.dataset.time) - parseInt(chat.time)) < 2 * 60 * 1000) prev_message_time.remove();
+            if (prev_message_time && prev_message_time.innerText && (parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 2 * 60 * 1000) prev_message_time.remove();
             message[0].querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
         } else {
             let diff = Date.now() - chat.time;
             let prev_message = $('.message:last-child:not(.outgoing)')[0], time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
             let prev_message_time = prev_message ? prev_message.querySelector('.message-time') : false;
-            if (prev_message_time && prev_message_time.innerText && (parseInt(prev_message.dataset.time) - parseInt(chat.time)) < 2 * 60 * 1000) prev_message_time.remove();
+            if (prev_message_time && prev_message_time.innerText && (parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 2 * 60 * 1000) prev_message_time.remove();
             $('.messages-list').append(`
                 <div class="message${client.id == chat.user ? ' outgoing' : $('.message:last-child').data('user-id') == chat.user ? ' stack-message' : ''}${!chat.message ? ' message-deleted' : ''}" data-username="${chat.username}" data-user-id="${chat.user}" data-id="${chat.id}" data-time="${chat.time}">
                     <div class="message-img">

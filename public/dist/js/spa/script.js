@@ -42,7 +42,7 @@ const periods = {
 };
 
 setTimeout(() => setInterval(() => {
-    if (client.messages.room_id) $('.message .message-time').toArray().forEach(x => {
+    if (client.messages.room_id) $('.messages-list .message .message-time').toArray().forEach(x => {
         let message = x.parentNode.parentNode,
             diff = Date.now() - parseInt(message.dataset.time), time;
         if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
@@ -60,8 +60,10 @@ socket.on('unread', unread => {
     });
 });
 
-socket.on('messages-typing-response', ({ is, room_id, user_id }) => {
+socket.on('messages-typing-response', ({ room_id, typing }) => {
+    console.log(typing);
     if (room_id == client.messages.room_id) {
-        console.log(`user ${user_id} is typing`);
+        if (typing.length) $('.messages-typing').show().find('.message-content p').html(typing.map(x => `<b>${x}</b>`).join(', ') + ' is typing..');
+        else $('.messages-typing').hide().find('.message-content p').html('');
     }
 });
