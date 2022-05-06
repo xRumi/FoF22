@@ -29,7 +29,7 @@ module.exports = (client) => {
         if (user) {
             const token = await client.database.functions.create_token(user.id);
             client.mail.send({
-                from: `FoF22 <no-reply@fof22.me`,
+                from: `FoF22 <no-reply@fof22.me>`,
                 to: email,
                 subject: `Reset your password`,
                 html: `<div style="font-size: 15px;">Click <a href="https://fof22.me/reset-password/?token=${token.id}">link</a> to reset your password. This link will expire in 1 day.</div><p style="color: grey;">If you did not request for this email, simply ignore this email.</p><hr><br><p>This email message was auto-generated. Please do not respond. If you need additional help, send an email to <a href="mailto:help@fof22.me">help@fof22.me</p>`

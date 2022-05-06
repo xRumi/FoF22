@@ -30,7 +30,7 @@ module.exports = (client) => {
                 if (_user) return res.status(400).send('Email address is not available');
                 _user = new client.database._user({ email });
                 client.mail.send({
-                    from: `FoF22 <no-reply@fof22.me`,
+                    from: `FoF22 <no-reply@fof22.me>`,
                     to: email,
                     subject: `Please verify your email address`,
                     html: `<div style="font-size: 15px;">Click <a href="https://fof22.me/register/confirm/?token=${_user.id}">here</a> to confirm your email address. This link will expire in 1 day.</div><p style="color: grey;">If you did not request for this email, simply ignore this email.</p><hr><br><p>This email message was auto-generated. Please do not respond. If you need additional help, send an email to <a href="mailto:help@fof22.me">help@fof22.me</p>`
@@ -41,7 +41,7 @@ module.exports = (client) => {
                 await _user.save();
             } else {
                 client.mail.send({
-                    from: `FoF22 <no-reply@fof22.me`,
+                    from: `FoF22 <no-reply@fof22.me>`,
                     to: email,
                     subject: `Please verify your email address`,
                     html: `<div style="font-size: 15px;">Click <a href="https://fof22.me/register/confirm/?token=${_user.id}">here</a> to confirm your email address. This link will expire in 1 day.</div><p style="color: grey;">If you did not request for this email, simply ignore this email.</p><hr><br><p>This email message was auto-generated. Please do not respond. If you need additional help, send an email to <a href="mailto:help@fof22.me">help@fof22.me</p>`

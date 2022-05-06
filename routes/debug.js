@@ -1,14 +1,32 @@
 const router = require('express').Router();
 
-Function.prototype.toJSON = function() { return "(...)" };
-
 const _eval = async (content, client, user, io) => {
     const result = new Promise((resolve) => resolve(eval(content)));
-	return result.then((output) => {
-	    return JSON.stringify(output);
-	}).catch((err) => {
-		return err?.toString();
-	});
+	return result.then((output) => stringify(output)).catch((err) => stringify(err));
+}
+
+function stringify(obj) {
+    Object.prototype.toJSON = function () {
+        var sobj = {},
+            i;
+        for (i in this)
+            if (this.hasOwnProperty(i))
+                sobj[i] = typeof this[i] == 'function' ?
+                this[i].toString() : this[i];
+
+        return sobj;
+    };
+    Array.prototype.toJSON = function () {
+        var sarr = [],
+            i;
+        for (i = 0; i < this.length; i++)
+            sarr.push(typeof this[i] == 'function' ? this[i].toString() : this[i]);
+
+        return sarr;
+    };
+    let str = JSON.stringify(obj);
+    delete Object.prototype.toJSON;
+    return str;
 }
 
 module.exports = (client) => {

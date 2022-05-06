@@ -36,21 +36,30 @@ module.exports = (client) => {
                         target: req.user.id,
                         created_at: Date.now(),
                     });
+                    user.unread.friends.push(req.user.id);
+                    user.markModified('unread.friends');
                     user.markModified('friend_requests');
                     req.user.markModified('friend_requests');
                     await user.save();
                     await req.user.save();
                     res.sendStatus(200);
-                } else if (req.user.friend_requests.some(x => x.target == user.id && x.type == 'pending')) {
+                } else {
                     if (!req.user.friends.includes(user.id)) {
                         let is_request = req.user.friend_requests.findIndex(x => x.target === user.id && x.type == 'pending');
                         if (is_request > -1) {
                             req.user.friend_requests.splice(is_request, 1);
                             let from_request = user.friend_requests.findIndex(x => x.target === req.user.id && x.type == 'request');
-                            if (from_request > -1) user.friend_requests.splice(from_request, 1);
+                            if (from_request > -1) {
+                                user.friend_requests.splice(from_request, 1);
+                                user.markModified('friend_requests');
+                            }
                             req.user.friends.push(user.id);
                             user.friends.push(req.user.id);
-                            user.markModified('friend_requests');
+                            let is_unread = req.user.unread.friends.indexOf(user.id);
+                            if (is_unread > -1) {
+                                req.user.unread.friends.splice(is_unread, 1);
+                                req.user.markModified('unread.friends');
+                            }
                             req.user.markModified('friend_requests');
                             user.markModified('friends');
                             req.user.markModified('friends');
@@ -59,7 +68,7 @@ module.exports = (client) => {
                             res.sendStatus(200);
                         } else res.sendStatus(400);
                     } else res.sendStatus(200);
-                } else res.sendStatus(200);
+                }
             } else res.sendStatus(400);
         } else res.status(403).send('forbidden');
     });
@@ -74,6 +83,16 @@ module.exports = (client) => {
                     req.user.friend_requests.splice(is_request, 1);
                     let from_request = user.friend_requests.findIndex(x => x.target === req.user.id);
                     if (from_request > -1) user.friend_requests.splice(from_request, 1);
+                    let is_unread0 = req.user.unread.friends.indexOf(user.id),
+                        is_unread1 = user.unread.friends.indexOf(req.user.id);
+                    if (is_unread0 > -1) {
+                        req.user.unread.friends.splice(is_unread0, 1);
+                        req.user.markModified('unread.friends');
+                    }
+                    if (is_unread1 > -1) {
+                        user.unread.friends.splice(is_unread1, 1);
+                        user.markModified('unread.friends');
+                    }
                     user.markModified('friend_requests');
                     req.user.markModified('friend_requests');
                     await req.user.save();
@@ -116,11 +135,15 @@ module.exports = (client) => {
                             time: Date.now(),
                             navigateTo: `/spa/profile/${req.user.id}`
                         });
-
+                        user.unread.notifications.push(id1);
+                        let is_unread = req.user.unread.friends.indexOf(user.id);
+                        if (is_unread > -1) {
+                            req.user.unread.friends.splice(is_unread, 1);
+                            req.user.markModified('unread.friends');
+                            client.io.to(req.user.id).emit('unread', ({ friends: req.user.unread.friends }));
+                        }
                         client.io.to(req.user.id).emit('unread', ({ notifications: req.user.unread.notifications }));
                         client.io.to(user.id).emit('unread', ({ notifications: user.unread.notifications }));
-
-                        user.unread.notifications.push(id1);
                         user.markModified('notifications');
                         req.user.markModified('notifications');
                         user.markModified('unread.notifications');
