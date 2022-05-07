@@ -28,15 +28,26 @@ module.exports = (client) => {
         const user = req.body.email ? await client.database.functions.get_user_by_email(req.body.email) : false;
         if (user) {
             const token = await client.database.functions.create_token(user.id);
-            client.mail.send({
-                from: `FoF22 <no-reply@fof22.me>`,
-                to: email,
-                subject: `Reset your password`,
-                html: `<div style="font-size: 15px;">Click <a href="https://fof22.me/reset-password/?token=${token.id}">link</a> to reset your password. This link will expire in 1 day.</div><p style="color: grey;">If you did not request for this email, simply ignore this email.</p><hr><br><p>This email message was auto-generated. Please do not respond. If you need additional help, send an email to <a href="mailto:help@fof22.me">help@fof22.me</p>`
-            }, (done) => {
-                if (done) res.sendStatus(200);
-                else res.sendStatus(400);
-            });
+            if (token.mailed > 6) res.status(400).send(`You have reached maximum for resending reset email, you can try again in ${humanize_duration(token.expire_at - Date.now())}`);
+            else {
+                // html: `<div style="font-size: 15px;">Click <a href="https://fof22.me/reset-password/?token=${token.id}">link</a> to reset your password. This link will expire in 1 day.</div><p style="color: grey;">If you did not request for this email, simply ignore this email.</p><hr><br><p>This email message was auto-generated. Please do not respond. If you need additional help, send an email to <a href="mailto:help@fof22.me">help@fof22.me</p>`
+                client.mail.send({
+                    from: `FoF22 <no-reply@fof22.me>`,
+                    to: email,
+                    subject: `Reset your password`,
+                    template: "reset_password",
+                    'h:X-Mailgun-Variables': {
+                        reset_url: `https://fof22.me/reset-password/?token=${token.id}`
+                    },
+                }, (done) => {
+                    if (done) {
+                        token.mailed++;
+                        token.save();
+                        res.sendStatus(200);
+                    }
+                    else res.sendStatus(400);
+                });
+            }
         }
     });
 
@@ -64,7 +75,7 @@ module.exports = (client) => {
 
     const limiter3 = rateLimit({
         windowMs: 60 * 1000,
-        max: 10,
+        max: 6,
         message: 'Too many requests',
     });
 

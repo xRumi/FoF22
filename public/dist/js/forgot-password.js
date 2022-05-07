@@ -4,7 +4,7 @@ $.fn.isValid = function() {
 $('.form').submit(function(e) {
     e.preventDefault();
     if (!$('.form').isValid()) return false;
-    $('#sub-btn').prop("disabled", true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Reseting');
+    $('#sub-btn').prop("disabled", true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
     const email = $("#email").val();
     $.ajax({
         type: 'POST',
@@ -19,10 +19,10 @@ $('.form').submit(function(e) {
                 <hr>
                 <p class="mb-0">The email address must be associated with a registered user</p>
             </div>`);
-            $('#sub-btn').html('Reset').prop("disabled", false);
+            $('#sub-btn').html('Done');
         },
         error: function(xhr, textStatus, errorThrown) {
-            $('.alert-section').html(`<div class="alert alert-danger" role="alert">Something went wrong! Try again later.</div>`);
+            $('.alert-section').html(`<div class="alert alert-danger" role="alert">${xhr.responseText || 'Something went wrong! Try again later.'}</div>`);
             $('#sub-btn').html('Reset').prop("disabled", false);
         },
     });
