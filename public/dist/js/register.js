@@ -24,6 +24,7 @@ $('.form').submit(function(e) {
         error: function(xhr, textStatus, errorThrown) {
             $('.alert-section').html(`<div class="alert alert-danger" role="alert">${xhr.responseJSON ? `Try again in ${xhr.responseJSON.time_left + 5} seconds` : xhr.responseText || 'Something went wrong! Try again later.'}</div>`);
             if (xhr.responseJSON) start_timer(xhr.responseJSON.time_left + 5);
+            else $('#sub-btn').html('Resend').prop("disabled", false);
         },
     });
 });

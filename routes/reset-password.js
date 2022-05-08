@@ -30,22 +30,31 @@ module.exports = (client) => {
             const token = await client.database.functions.create_token(user.id);
             if (token.mailed > 6) res.status(400).send(`You have reached maximum for resending reset email, you can try again in ${humanize_duration(token.expire_at - Date.now())}`);
             else {
-                // html: `<div style="font-size: 15px;">Click <a href="https://fof22.me/reset-password/?token=${token.id}">link</a> to reset your password. This link will expire in 1 day.</div><p style="color: grey;">If you did not request for this email, simply ignore this email.</p><hr><br><p>This email message was auto-generated. Please do not respond. If you need additional help, send an email to <a href="mailto:help@fof22.me">help@fof22.me</p>`
                 client.mail.send({
                     from: `FoF22 <no-reply@fof22.me>`,
                     to: email,
                     subject: `Reset your password`,
-                    template: "reset_password",
-                    'h:X-Mailgun-Variables': {
-                        reset_url: `https://fof22.me/reset-password/?token=${token.id}`
-                    },
+                    html: `
+                        <div style="font-size: 15px;">
+                            Reset your account password by clicking the link below.
+                        </div>
+                        <br>
+                        <a style="text-decoration: none;" href="https://fof22.me/reset-password/?token=${token.id}">https://fof22.me/reset-password/?token=${token.id}</a>
+                        <br><br><hr>
+                        <div>
+                            If you did not request for this email, you don’t have to do anything.
+                        </div>
+                        <div>
+                            Just ignore this email the way your cat ignores you.
+                        </div>
+                        <p>Please do not respond, this email was auto-generated. If you need additional help, send an email to <a href="mailto:help@fof22.me">help@fof22.me</p>
+                    `
                 }, (done) => {
                     if (done) {
                         token.mailed++;
                         token.save();
                         res.sendStatus(200);
-                    }
-                    else res.sendStatus(400);
+                    } else res.sendStatus(400);
                 });
             }
         }

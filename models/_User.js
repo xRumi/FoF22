@@ -6,6 +6,6 @@ module.exports = mongoose.model("_user", new mongoose.Schema({
     email: { type: String },
 
     created_at: { type: Date, default: Date.now },
-    mailed: { type: Number, default: 1 }
+    mailed: { type: Number, default: 0 }
 
 }) );
