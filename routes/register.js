@@ -57,7 +57,7 @@ module.exports = (client) => {
                 });
                 await _user.save();
             } else {
-                if (_user.mailed > 5) res.status(400).send(`You have reached maximum resend limit, mail to <a href="mailto:help@fof22.me">help@fof22.me</a> for help`);
+                if (_user.mailed > 5) res.status(400).send(`You have reached the maximum resend limit for this email, send an email to <a style="text-decoration: none;" href="mailto:help@fof22.me">help@fof22.me</a> for help`);
                 else {
                     let diff = _user.mailed ? Date.now() - _user.created_at : 6 * 60 * 1000;
                     if (diff > 2 * 60 * 1000) {

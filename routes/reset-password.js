@@ -28,7 +28,7 @@ module.exports = (client) => {
         const user = req.body.email ? await client.database.functions.get_user_by_email(req.body.email) : false;
         if (user) {
             const token = await client.database.functions.create_token(user.id);
-            if (token.mailed > 6) res.status(400).send(`You have reached maximum for resending reset email, you can try again in ${humanize_duration(token.expire_at - Date.now())}`);
+            if (token.mailed > 6) res.status(400).send(`You have reached the maximum resend limit for this email, you can try again in ${humanize_duration(token.expire_at - Date.now())} or send an email to <a style="text-decoration: none;" href="mailto:help@fof22.me">help@fof22.me</a> for help`);
             else {
                 client.mail.send({
                     from: `FoF22 <no-reply@fof22.me>`,
