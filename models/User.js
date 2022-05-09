@@ -42,4 +42,6 @@ module.exports = mongoose.model("user", new mongoose.Schema({
         menu: []
     } },
 
+    login_retry: { type: Number, default: 0 }
+
 }) );

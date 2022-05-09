@@ -55,6 +55,8 @@ client.cache.users = new Map();
 
 client.io = io;
 
+// client.database.user.find().then(users => users.forEach(user => user.save()));
+
 require("./functions/db")(client);
 require("./libs/schedule")(client);
 require("./functions/cache")(client);

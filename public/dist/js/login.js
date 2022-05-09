@@ -18,7 +18,7 @@ $('.form').submit(function(e) {
         },
         timeout: 30000,
         success: function(result, textStatus, xhr) {
-            $('#sub-btn').html('Logged in').addClass('btn-success').css('opacity', '1');
+            $('#sub-btn').html('LoggedIn').addClass('btn-success').css('opacity', '1');
 		    window.location.replace(result.returnTo || `/${ref}` || "/");
         },
         error: function(xhr, textStatus, errorThrown) {

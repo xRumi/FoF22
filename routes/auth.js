@@ -26,6 +26,10 @@ module.exports = (client) => {
             req.logIn(user, async (err) => {
                 if (req.body.remember == 'false') req.session.cookie.expires = false;
                 if (err) return res.status(400).send( err );
+                if (user.login_retry) {
+                    user.login_retry = 0;
+                    await user.save();
+                }
                 if (user.status == 'active') return res.status(200).json({ message: 'user logged in', returnTo });
                 else if (user.status == 'deactive') {
                     user.status = 'active';
