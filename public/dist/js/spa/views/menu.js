@@ -23,7 +23,7 @@ export default class extends Constructor {
                 </div>
                 <div class="menu-account">
                     <div class="menu-header">Account</div>
-                    <a class="menu-item"><i class='bx bx-log-out'></i><span>Logout</span></a>
+                    <a href="/logout" class="menu-item"><i class='bx bx-log-out'></i><span>Logout</span></a>
                 </div>
             </div>
         `;
