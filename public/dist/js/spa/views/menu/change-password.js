@@ -6,42 +6,6 @@ export default class extends Constructor {
     constructor(params) {
         super(params);
         this.setTitle("Change Password");
-        $('#app').on('keyup.change-password', '#password, #password-confirm', function () {
-            if ($("#password").val() && $("#password").val().length >= 8) $('#password').removeClass('is-invalid').addClass('is-valid');
-            else $('#password').removeClass('is-valid').addClass('is-invalid');
-            if ($('#password').val() == $('#password-confirm').val()) $('#password-confirm').removeClass('is-invalid').addClass('is-valid');
-            else $('#password-confirm').removeClass('is-valid').addClass('is-invalid');
-        });
-        $.fn.change_password = (e) => {
-            e.preventDefault();
-            if ($('#current_password').val() && $('#current_password').val().length >= 8 && $('#password').val() && $('#password').val().length >= 8 && $('#password').val() == $('#password-confirm').val()) {
-               $('#sub-btn').prop("disabled", true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
-                const new_pass = $("#password").val(),
-                    old_pass = $('#current_password').val();
-                $.ajax({
-                    type: 'POST',
-                    url: `/me/password/edit`,
-                    data: {
-                        old_pass,
-                        new_pass,
-                    },
-                    timeout: 30000,
-                    success: function(result, textStatus, xhr) {
-                        $('.alert-section').html(`<div class="alert alert-success" role="alert">${result}</div>`);
-                        $('#sub-btn').html('update').prop("disabled", false);
-                        $('#current_password').val('');
-                        $('#password').val('');
-                        $('#password-confirm').val('');
-                        setTimeout(() => window.location.replace('/login'), 2000);
-                    },
-                    error: function(xhr, textStatus, errorThrown) {
-                        $('#current_password').val('');
-                        $('.alert-section').html(`<div class="alert alert-danger" role="alert">${xhr.responseText || 'Something went wrong! Try again later.'}</div>`);
-                        $('#sub-btn').html('update').prop("disabled", false);
-                    },
-                });
-            } else return false;
-        }
     }
 
     async before_render() {
@@ -69,9 +33,9 @@ export default class extends Constructor {
                     <div class="account-change-password-header">Change Your Password</div>
                     <form id="change-password-form" style="padding: 10px;">
                         <label for="new-password-input">New Password</label>
-                        <input style="display: block; width: 50%; outline: 0;" id="new-password-input" type="password" minlength="8" maxlength="32" required>
+                        <input style="display: block; width: 400px; outline: 0;" id="new-password-input" type="password" minlength="8" maxlength="32" required>
                         <label for="confirm-new-password-input">Confirm New Password</label>
-                        <input style="display: block; width: 50%; outline: 0;" id="confirm-new-password-input" type="password" minlength="8" maxlength="32" required>
+                        <input style="display: block; width: 400px; outline: 0;" id="confirm-new-password-input" type="password" minlength="8" maxlength="32" required>
                         <input type="submit" hidden />
                     </form>
                     <div id="new-password-response" style="color: white; border-top: solid 1px; background-color: darkorange; padding: 5px; padding-left: 10px; display: none"></div>
