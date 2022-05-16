@@ -32,7 +32,7 @@ module.exports = (client) => {
             else {
                 client.mail.send({
                     from: `FoF22 <no-reply@fof22.me>`,
-                    to: email,
+                    to: user.email,
                     subject: `Reset your password`,
                     html: `
                         <div style="font-size: 15px;">

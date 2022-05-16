@@ -1,6 +1,6 @@
 import Constructor from "./constructor.js";
 
-let _ajax0 = false, old_notifications = [];
+let _ajax0 = false, old_notifications = [], today = new Date();
 
 const periods = {
     month: 30 * 24 * 60 * 60 * 1000,
