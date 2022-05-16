@@ -95,7 +95,7 @@ module.exports.sockets = (io, client) => {
                                     let message_unread_exists = user.unread.messages.indexOf(room.id);
                                     if (message_unread_exists > -1) {
                                         user.unread.messages.splice(message_unread_exists, 1);
-                                        user.markModified('unread'); save = true;
+                                        user.markModified('unread.messages'); user.save();
                                         io.to(user.id).emit('unread', ({ messages: user.unread.messages }));
                                     }
                                     callback({ user: user.id, messages, id, name: name ? name : 'unknown', mm: chat.messages.length > 20 ? true : false });
@@ -195,12 +195,12 @@ module.exports.sockets = (io, client) => {
                                             if (room_members.includes(user.id)) {
                                                 if (message_unread_exists > -1) {
                                                     user.unread.messages.splice(message_unread_exists, 1);
-                                                    user.markModified('unread'); save = true;
+                                                    user.markModified('unread.messages'); save = true;
                                                     io.to(user.id).emit('unread', ({ messages: user.unread.messages }));
                                                 }
                                             } else if (!user.unread.messages.includes(room.id)) {
                                                 user.unread.messages.push(room.id); save = true;
-                                                user.markModified('unread');
+                                                user.markModified('unread.messages');
                                                 io.to(user.id).emit('unread', ({ messages: user.unread.messages }));
                                             }
                                             if (save) return user.save();

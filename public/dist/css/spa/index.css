@@ -741,7 +741,7 @@ img {
 }
 
 .nic-time {
-	color: grey;
+	color: black;
 }
 
 @media screen and (max-width: 800px) {

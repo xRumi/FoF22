@@ -11,6 +11,8 @@ const periods = {
     second: 1000
 };
 
+const days = ["Sunday", "Monday", "Tuesday", "Wednesday ", "Thursday", "Friday", "Saturday"];
+
 const notifications_list = (new_notifications) => {
     if (new_notifications && JSON.stringify(new_notifications) == JSON.stringify(old_notifications)) return false;
     if (new_notifications) old_notifications = new_notifications;
@@ -52,7 +54,6 @@ export default class extends Constructor {
                 url: `/notifications/fetch`,
                 timeout: 30000,
                 success: function(result, textStatus, xhr) {
-                    console.log(result);
                     if (!result.length) $('.notifications-list').html(`<span style="position: absolute; margin: 25px; color: red;">Empty</span>`);
                     else notifications_list(result);
                     _ajax0 = false;
