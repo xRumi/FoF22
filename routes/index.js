@@ -5,7 +5,7 @@ const router = require('express').Router(),
     messages = require('./messages'),
     search = require('./search'),
     settings = require('./settings'),
-    password = require('./reset-password'),
+    recover_password = require('./recover-password'),
     register = require('./register'),
     debug = require('./debug'),
     notifications = require('./notifications');
@@ -37,7 +37,7 @@ module.exports = (client) => {
     router.use('/messages', messages(client));
     router.use('/search', search(client));
     router.use('/settings', settings(client));
-    router.use('/', password(client));
+    router.use('/', recover_password(client));
     router.use('/register', register(client));
     router.use('/debug', debug(client));
     router.use('/me', me(client));

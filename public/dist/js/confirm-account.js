@@ -7,7 +7,7 @@ $('#sub-btn').click(function() {
         name = $("#name").val();
     $.ajax({
         type: 'POST',
-        url: `/register/confirm/post`,
+        url: `/register/confirm/new`,
         data: {
             token,
             password,

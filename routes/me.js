@@ -103,7 +103,6 @@ module.exports = (client) => {
             if (req.body.password === req.user.password) {
                 req.user.status = 'deactive';
                 await req.user.save();
-                console.log(req.user)
                 await req.session.destroy();
                 res.status(200).send( 'account deactivated, re-login to cancel' );
                 let filter = {'session':{'$regex': '.*"user":"'+req.user.username+'".*'}};
@@ -118,7 +117,6 @@ module.exports = (client) => {
                 req.user.status = 'delete';
                 req.user.delete_time = new Date((new Date()) + 86400000);
                 await req.user.save();
-                console.log(req.user)
                 await req.session.destroy();
                 res.status(200).send( 'account will be deleted in 24 hours, re-login to cancel' );
                 let filter = {'session':{'$regex': '.*"user":"'+req.user.username+'".*'}};

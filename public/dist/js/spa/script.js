@@ -53,10 +53,7 @@ setTimeout(() => setInterval(() => {
 }, 60000), (60 - n_time.getSeconds()) * 1000);
 
 socket.on('unread', unread => {
-    console.log(unread);
     Object.keys(unread).forEach(key => {
-        console.log(key);
-        console.log(unread[key]);
         $(`#nav__link__${key} .nav__alart`).text(unread[key].length || '');
         if (key == 'messages') {
             let unread_messages = unread[key];

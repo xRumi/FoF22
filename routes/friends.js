@@ -55,11 +55,35 @@ module.exports = (client) => {
                             }
                             req.user.friends.push(user.id);
                             user.friends.push(req.user.id);
+                            let id0 = Math.random().toString(36).substring(2, 15),
+                                id1 = Math.random().toString(36).substring(2, 15);
+                            req.user.notifications.push({
+                                id: id0,
+                                user_id: user.id,
+                                title: `You are now friends with <b>${user.username}</b>, say Hi to your new friend!`,
+                                time: Date.now(),
+                                navigateTo: `/spa/profile/${user.id}`,
+                                unread: true,
+                            });
+                            req.user.unread.notifications.push(id0);
+                            user.notifications.push({
+                                id: id1,
+                                user_id: req.user.id,
+                                title: `You are now friends with <b>${req.user.username}</b>, say Hi to your new friend!`,
+                                time: Date.now(),
+                                navigateTo: `/spa/profile/${req.user.id}`,
+                                unread: true,
+                            });
+                            user.unread.notifications.push(id1);
                             let is_unread = req.user.unread.friends.indexOf(user.id);
                             if (is_unread > -1) {
                                 req.user.unread.friends.splice(is_unread, 1);
                                 req.user.markModified('unread.friends');
                             }
+                            client.io.to(req.user.id).emit('unread', ({ notifications: req.user.unread.notifications }));
+                            client.io.to(user.id).emit('unread', ({ notifications: user.unread.notifications }));
+                            user.markModified('notifications');
+                            req.user.markModified('notifications');
                             req.user.markModified('friend_requests');
                             user.markModified('friends');
                             req.user.markModified('friends');
@@ -122,7 +146,6 @@ module.exports = (client) => {
                             id: id0,
                             user_id: user.id,
                             title: `You are now friends with <b>${user.username}</b>`,
-                            detail: 'Say Hi to your new friend!',
                             time: Date.now(),
                             navigateTo: `/spa/profile/${user.id}`
                         });
@@ -130,8 +153,7 @@ module.exports = (client) => {
                         user.notifications.push({
                             id: id1,
                             user_id: req.user.id,
-                            title: `<b>${req.user.username}</b> has accepted your friend request`,
-                            detail: 'Say Hi to your new friend!',
+                            title: `<b>${req.user.username}</b> has accepted your friend request, say Hi to your new friend`,
                             time: Date.now(),
                             navigateTo: `/spa/profile/${req.user.id}`
                         });

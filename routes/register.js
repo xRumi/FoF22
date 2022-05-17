@@ -19,9 +19,9 @@ module.exports = (client) => {
         windowMs: 24 * 60 * 60 * 1000,
         max: 15,
         message: 'Too many requests'
-    })
+    });
 
-    router.post('/post', limiter1, _limiter1, async (req, res) => {
+    router.post('/new', limiter1, _limiter1, async (req, res) => {
         const email = req.body.email;
         if (email && email.match(/^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i)) {
             let _user = await client.database._user.findOne({ email });
@@ -120,7 +120,7 @@ module.exports = (client) => {
         message: 'Too many requests',
     });
 
-    router.post('/confirm/post', limiter3, async (req, res) => {
+    router.post('/confirm/new', limiter3, async (req, res) => {
         let username = req.body.username?.toLowerCase(),
             name = req.body.name,
             _token = req.body.token,

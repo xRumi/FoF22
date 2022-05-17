@@ -712,22 +712,26 @@ img {
 }
 
 .notifications-item {
-	display: flex;
     padding: 10px;
     border-left: solid;
     border-bottom: solid 1px lightgray;
 }
 
 .notifications-item-img {
-	width: 50px;
-    height: 50px;
+	width: 40px;
+    height: 40px;
     overflow: hidden;
     border-radius: 50%;
     float: left;
+    margin-right: 10px;
 }
 
 .notifications-item-content {
 	margin-left: 10px;
+}
+
+.nic-unread {
+    background-color: #f8f8f8;
 }
 
 .nic-title {
@@ -735,13 +739,8 @@ img {
     margin-top: 1px;
 }
 
-.nic-detail {
-	margin-bottom: 2px;
-    color: grey;
-}
-
 .nic-time {
-	color: black;
+	color: grey;
 }
 
 @media screen and (max-width: 800px) {

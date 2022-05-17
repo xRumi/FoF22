@@ -29,6 +29,7 @@ module.exports = (client) => {
     }
     client.database.functions.get_user_by_email = async ( email ) => {
         if (!email) return false;
+        if (!email.match(/^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i)) return false;
         let user;
         for (const [key, value] of client.database_cache.users) if (value.elements?.email == email) user = client.database_cache.users.get(key);
         if (user) return user;

@@ -10,7 +10,7 @@ $('.form').submit(function(e) {
     const email = $("#email").val();
     $.ajax({
         type: 'POST',
-        url: `/register/post`,
+        url: `/register/new`,
         data: {
             email,
         },

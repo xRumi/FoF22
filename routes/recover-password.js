@@ -7,8 +7,8 @@ const rateLimit = require('express-rate-limit');
 
 module.exports = (client) => {
 
-    router.get('/forgot-password', async (req, res) => {
-        if (!req.user) res.render("forgot-password");
+    router.get('/recover-password', async (req, res) => {
+        if (!req.user) res.render("recover-password");
         else res.redirect('/');
     });
 
@@ -24,7 +24,7 @@ module.exports = (client) => {
         message: 'Too many requests'
     });
 
-    router.post('/forgot-password/post', limiter1, _limiter1, async (req, res) => {
+    router.post('/recover-password/new', limiter1, _limiter1, async (req, res) => {
         const user = req.body.email ? await client.database.functions.get_user_by_email(req.body.email) : false;
         if (user) {
             const token = await client.database.functions.create_token(user.id);
@@ -57,7 +57,7 @@ module.exports = (client) => {
                     } else res.sendStatus(400);
                 });
             }
-        }
+        } else res.sendStatus(200);
     });
 
     const limiter2 = rateLimit({

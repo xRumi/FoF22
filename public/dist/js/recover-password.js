@@ -8,7 +8,7 @@ $('.form').submit(function(e) {
     const email = $("#email").val();
     $.ajax({
         type: 'POST',
-        url: `/forgot-password/post`,
+        url: `/recover-password/new`,
         data: {
             email
         },
