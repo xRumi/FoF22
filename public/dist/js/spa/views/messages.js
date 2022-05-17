@@ -11,7 +11,7 @@ const periods = {
     second: 1000
 };
 
-const days = ["Sunday", "Monday", "Tuesday", "Wednesday ", "Thursday", "Friday", "Saturday"];
+const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 const people_list = (new_people_list) => {
     if (new_people_list && JSON.stringify(new_people_list) == JSON.stringify(old_people_list)) return false;
@@ -108,7 +108,7 @@ export default class extends Constructor {
                         <p class="messages-header-back-text header-back-text"></p>
                     </div>
                     <div class="load-more-messages" style="display: none;">
-                        load more messages...
+                        See More Messages
                         <div class="lds-dual-ring" style="display: none;"></div>
                     </div>
                     <div class="messages-list scrollbar">
@@ -229,15 +229,12 @@ socket.on('receive-message', ({ id, chat, _id }) => {
             message.attr({ 'data-username': chat.username, 'data-user-id': chat.user, 'data-id': chat.id, 'data-time': chat.time });
             let prev_message = message.prev()[0];
             let prev_message_time = prev_message ? prev_message.querySelector('.outgoing .message-time') : false;
-            let diff = Date.now() - chat.time, time;
-                time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
             if (prev_message_time && prev_message_time.innerText && (parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 2 * 60 * 1000) prev_message_time.remove();
-            message[0].querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
+            message[0].querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${parse_message_time(chat.time)}</div>`);
         } else {
-            let diff = Date.now() - chat.time;
-            let prev_message = $('.message:last-child:not(.outgoing)')[0], time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
+            let prev_message = $('.message:last-child:not(.outgoing)')[0];
             let prev_message_time = prev_message ? prev_message.querySelector('.message-time') : false;
-            if (prev_message_time && prev_message_time.innerText && (parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 2 * 60 * 1000) prev_message_time.remove();
+            if (prev_message_time && prev_message_time.innerText && Math.abs(parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 2 * 60 * 1000) prev_message_time.remove();
             $('.messages-list').append(`
                 <div class="message${client.id == chat.user ? ' outgoing' : $('.message:last-child').data('user-id') == chat.user ? ' stack-message' : ''}${!chat.message ? ' message-deleted' : ''}" data-username="${chat.username}" data-user-id="${chat.user}" data-id="${chat.id}" data-time="${chat.time}">
                     <div class="message-img">
@@ -245,7 +242,7 @@ socket.on('receive-message', ({ id, chat, _id }) => {
                     </div>
                     <div class="message-content">
                         <p>${chat.message ? chat.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
-                        ${time ? `<div class="message-time">${time}</div>` : ''}
+                        <div class="message-time">${parse_message_time(chat.time)}</div>
                     </div>
                 </div>
             `)
@@ -284,7 +281,23 @@ socket.on('update-message', ({ id, chat }) => {
 
 let today = new Date();
 
-function message_time (html, callback) {
+let months = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ];
+
+function parse_message_time(message_time) {
+    let _time = new Date(message_time),
+        diff = Math.abs(Date.now() - message_time), time;
+    if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
+    else if (diff < periods.day && _time.getDate() === today.getDate()) time = `Today at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
+    else {
+        if (diff < periods.week) time = `${days[_time.getDay()]} at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`;
+        else {
+            time = `${_time.getDate()} ${months[_time.getMonth()]}${_time.getFullYear() !== today.getFullYear() ? ` ${_time.getFullYear()}` : ''}`
+        }
+    }
+    return time;
+}
+
+function message_time(html, callback) {
 
     let messages = $(html.join('')).filter('.message, .system-message').toArray();
 
@@ -298,46 +311,17 @@ function message_time (html, callback) {
     for (let i = 0; i < messages_group.length; i++) {
         if (messages_group[i].constructor !== Array) continue;
         else if (messages_group[i].length == 1) {
-            let message = messages_group[i][0],
-                message_time = parseInt(message.dataset.time),
-                _time = new Date(message_time),
-                diff = Date.now() - message_time, time;
-            if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
-            else if (diff < periods.day && _time.getDate() === today.getDate()) time = `Today at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
-            else {
-                if (diff < periods.week) time = `${days[_time.getDay()]} at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`;
-                else time = `${_time.toLocaleDateString()} at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
-            }
-            message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
+            let message = messages_group[i][0];
+            message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${parse_message_time(parseInt(message.dataset.time))}</div>`);
         } else {
             for (let j = 0; j < messages_group[i].length; j++) {
                 let message = messages_group[i][j];
                 let next_message = messages_group[i][j + 1] ? messages_group[i][j + 1] : false;
-                if (next_message) {
-                    if (Math.abs(parseInt(message.dataset.time) - parseInt(next_message.dataset.time)) > 60 * 1000) {
-                        let message_time = parseInt(message.dataset.time),
-                            _time = new Date(message_time),
-                            diff = Date.now() - message_time, time;
-                        if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
-                        else if (diff < periods.day && _time.getDate() === today.getDate()) time = `Today at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
-                        else {
-                            if (diff < periods.week) time = `${days[_time.getDay()]} at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`;
-                            else time = `${_time.toLocaleDateString()} at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
-                        }
+                let time = parse_message_time(parseInt(message.dataset.time));
+                if (next_message)
+                    if (Math.abs(parseInt(message.dataset.time) - parseInt(next_message.dataset.time)) > 60 * 1000)
                         message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
-                    }
-                } else {
-                    let message_time = parseInt(message.dataset.time),
-                        _time = new Date(message_time),
-                        diff = Date.now() - message_time, time;
-                    if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
-                    else if (diff < periods.day && _time.getDate() === today.getDate()) time = `Today at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
-                    else {
-                        if (diff < periods.week) time = `${days[_time.getDay()]} at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`;
-                        else time = `${_time.toLocaleDateString()} at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
-                    }
-                    message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
-                }
+                else message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
             }
         }
     }

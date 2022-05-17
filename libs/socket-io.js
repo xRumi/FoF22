@@ -80,7 +80,7 @@ module.exports.sockets = (io, client) => {
                                         if (_friend) name = _friend.name || _friend.username;
                                     }
                                 } else name = room.name;
-                                let messages = chat.messages.slice(-20);
+                                let messages = chat.messages.slice(-7);
                                 Promise.all(messages.map(message => client.database.functions.get_user(message.user))).then(users => {
                                     messages = messages.map(x => {
                                         return {
@@ -98,7 +98,7 @@ module.exports.sockets = (io, client) => {
                                         user.markModified('unread.messages'); user.save();
                                         io.to(user.id).emit('unread', ({ messages: user.unread.messages }));
                                     }
-                                    callback({ user: user.id, messages, id, name: name ? name : 'unknown', mm: chat.messages.length > 20 ? true : false });
+                                    callback({ user: user.id, messages, id, name: name ? name : 'unknown', mm: chat.messages.length > 7 ? true : false });
                                 });
                             }
                         } else callback({ id, error: '<p>Oops! Chat Not Be Found</p><p>Sorry but the chat room you are looking for does not exist, have been removed. id changed or is temporarily unavailable</p>' });
@@ -113,14 +113,14 @@ module.exports.sockets = (io, client) => {
                         let a = chat.messages.length;
                         while(a--) {
                             if (chat.messages[a]?.id == id) {
-                                let messages = (a && a > 20) ? chat.messages.slice(a - 20, a) : chat.messages.slice(0, a);
+                                let messages = (a && a > 7) ? chat.messages.slice(a - 7, a) : chat.messages.slice(0, a);
                                 Promise.all(messages.map(message => client.database.functions.get_user(message.user))).then(users => {
                                     for (let i = 0; i < users.length; i++) {
                                         let user = users[i];
                                         let message = messages.find(x => x.user == user.id);
                                         if (message) message.username = user.username;
                                     }
-                                    callback({ id: socket.room_id, messages, mm: a - 20 > 20 ? true : false })
+                                    callback({ id: socket.room_id, messages, mm: a - 7 > 7 ? true : false })
                                 });
                                 break;
                             }
@@ -171,6 +171,14 @@ module.exports.sockets = (io, client) => {
                                     chat_data.username = user.username;
 
                                     io.to(socket.room_id).emit('receive-message', { user: user.id, id: room.id, chat: chat_data, _id });
+
+                                    /*io.to('6241d152216bc87c370928f6').emit('receive-message', { user: '61d001de9b64b8c435985da5e', id: '6241d152216bc87c370928f6', chat_data: {
+                                        id: Math.random().toString(36).substring(2, 15),
+                                        user: '61d001de9b64b8c435985da5',
+                                        message: 'hey!',
+                                        time: Date.now(),
+                                        seen_by: []
+                                    } });*/
 
                                     let room_members = [], _room_members = io.sockets.adapter.rooms.get(room.id);
 
