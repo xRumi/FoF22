@@ -290,9 +290,7 @@ function parse_message_time(message_time) {
     else if (diff < periods.day && _time.getDate() === today.getDate()) time = `Today at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
     else {
         if (diff < periods.week) time = `${days[_time.getDay()]} at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`;
-        else {
-            time = `${_time.getDate()} ${months[_time.getMonth()]}${_time.getFullYear() !== today.getFullYear() ? ` ${_time.getFullYear()}` : ''}`
-        }
+        else time = `${_time.getDate()} ${months[_time.getMonth()]} at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}${_time.getFullYear() !== today.getFullYear() ? `, ${_time.getFullYear()}` : ''}`
     }
     return time;
 }
