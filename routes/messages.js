@@ -16,7 +16,7 @@ module.exports = (client) => {
                         if (room && chat && chat.room_id == chat.id) {
                             let last_message = chat.messages[chat.messages.length - 1], name, _user, image;
                             if (room.type == 'private') {
-                                _user = room.members[0] === req.user.id ? (await client.database.functions.get_user(room.members[1])) : (await client.database.functions.get_user(room.members[0]));
+                                _user = await client.database.functions.get_user(room.members[0] == req.user.id ? room.members[1] : room.members[0]);
                                 if (_user) {
                                     name = _user.username;
                                     image = `/dist/img/users/${_user.id}/profile.png`
