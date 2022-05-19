@@ -13,6 +13,9 @@ module.exports = (client) => {
                 Promise.all(rooms.map(room => client.database.chat.findById(room.chat_id))).then(async chats => {
                     let data = chats.map(chat => {
                         let room = rooms.find(y => y.chat_id == chat.id);
+                        console.log(room);
+                        console.log(room.members);
+                        console.log()
                         if (room && chat && chat.room_id == chat.id) {
                             let last_message = chat.messages[chat.messages.length - 1], name, _user, image;
                             if (room.type == 'private') {
