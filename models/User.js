@@ -31,16 +31,7 @@ module.exports = mongoose.model("user", new mongoose.Schema({
     rooms: { type: Array, default: [] },
 
     friend_requests: { type: Array, default: [] },
-
     notifications: { type: Array, default: [] },
-
-    unread: { type: Object, default: {
-        home: [],
-        friends: [],
-        messages: [],
-        notifications: [],
-        menu: []
-    } },
 
     login_retry: { type: Number, default: 0 }
 

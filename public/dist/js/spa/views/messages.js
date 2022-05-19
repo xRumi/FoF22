@@ -27,7 +27,7 @@ const people_list = (new_people_list) => {
             else time = _time.toLocaleDateString();
         }
         return $(`
-            <div data-id="${x.id}" class="_people${client.messages.room_id == x.id ? ' _people-active' : ''}"${x.is_unread ? ` style="background-color: aliceblue;"` : ''}>
+            <div data-id="${x.id}" class="_people${client.messages.room_id == x.id ? ' _people-active' : ''}${x.unread ? ` _people-unread` : ''}">
                 <div class="_people-img">
                     <img src="${x.image}">
                 </div>

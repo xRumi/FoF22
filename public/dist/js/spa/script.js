@@ -54,10 +54,10 @@ setTimeout(() => setInterval(() => {
 
 socket.on('unread', unread => {
     Object.keys(unread).forEach(key => {
-        $(`#nav__link__${key} .nav__alart`).text(unread[key].length || '');
+        $(`#nav__link__${key} .nav__alart`).text(unread[key].count || '');
         if (key == 'messages') {
-            let unread_messages = unread[key];
-            unread_messages.forEach(m => $(`._people[data-id=${m}]`).css('background-color', 'aliceblue'));
+            if (unread[key].unread) unread[key].unread.forEach(m => $(`._people[data-id=${m}]`).addClass('_people-unread'));
+            if (unread[key].read) unread[key].read.forEach(m => $(`._people[data-id=${m}]`).removeClass('_people-unread'));
         }
     });
 });

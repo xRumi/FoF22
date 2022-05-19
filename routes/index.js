@@ -20,14 +20,25 @@ module.exports = (client) => {
 
     router.get('/spa', async (req, res) => {
         if (req.user) {
-            res.render("spa", { user_id: req.user.id, username: req.user.username, name: req.user.name, unread: req.user.unread });
+            res.render("spa", { user_id: req.user.id, username: req.user.username, name: req.user.name, unread: {
+                home: 0,
+                friends: req.user.friend_requests.filter(x => x.unread).length,
+                messages: req.user.rooms.filter(x => x.unread).length,
+                notifications: req.user.notifications.filter(x => x.unread).length,
+                menu: 0
+            } });
         } else res.status(403).redirect(`/login?ref=${req.originalUrl}`);
-
     });
 
     router.get('/spa/*', async (req, res) => {
         if (req.user) {
-            res.render("spa", { user_id: req.user.id, username: req.user.username, name: req.user.name, unread: req.user.unread });
+            res.render("spa", { user_id: req.user.id, username: req.user.username, name: req.user.name, unread: {
+                home: 0,
+                friends: req.user.friend_requests.filter(x => x.unread).length,
+                messages: req.user.rooms.filter(x => x.unread).length,
+                notifications: req.user.notifications.filter(x => x.unread).length,
+                menu: 0
+            } });
         } else res.status(403).redirect(`/login?ref=${req.originalUrl}`);
     });
 

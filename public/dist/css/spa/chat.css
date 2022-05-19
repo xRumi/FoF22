@@ -21,6 +21,10 @@
 	display: none;
 }
 
+._peolpe-unread {
+	background-color: aliceblue;
+}
+
 ._people {
 	padding: 10px;
 	width: 100%;

@@ -76,13 +76,16 @@ module.exports = (client) => {
         await chat.save();
         if (_u) {
             let user = await client.database.functions.get_user(_u);
-            user.rooms.push(room.id);
+            user.rooms.push({
+                id: room.id
+            });
             await user.save();
-
         } else {
             Promise.all(members.map(id => client.database.users.get_user(id))).then(users => {
                 Promise.all(users.map(user => {
-                    user.rooms.push(room.id);
+                    user.rooms.push({
+                        id: room.id
+                    });
                     return user.save();
                 }));
             });

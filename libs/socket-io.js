@@ -32,12 +32,16 @@ module.exports.sockets = (io, client) => {
                 if (user && _user && _user.id !== user.id) {
                     let room_exists = await client.database.room.findOne({ members: { $all: [user.id, _user.id], $size: 2 } });
                     if (room_exists) {
-                        if (!user.rooms.includes(room_exists.id)) {
-                            user.rooms.push(room_exists.id);
+                        if (!user.rooms.some(x => x.id == room_exists.id)) {
+                            user.rooms.push({
+                                id: room_exists.id,
+                            });
                             await user.save();
                         }
-                        if (!_user.rooms.includes(room_exists.id)) {
-                            _user.rooms.push(room_exists.id);
+                        if (!_user.rooms.some(x => x.id == room_exists.id)) {
+                            _user.rooms.push({
+                                id: room_exists.id,
+                            });
                             await _user.save();
                         }
                         callback(room_exists.id);
@@ -92,11 +96,15 @@ module.exports.sockets = (io, client) => {
                                             seen_by: x.seen_by
                                         }
                                     });
-                                    let message_unread_exists = user.unread.messages.indexOf(room.id);
-                                    if (message_unread_exists > -1) {
-                                        user.unread.messages.splice(message_unread_exists, 1);
-                                        user.markModified('unread.messages'); user.save();
-                                        io.to(user.id).emit('unread', ({ messages: user.unread.messages }));
+                                    let user_room = user.rooms.find(x => x.id == room.id);
+                                    if (user_room && user_room.unread) {
+                                        user_room.unread = false; user.save();
+                                        // user.markModified('rooms');
+                                        let unread_rooms = user.rooms.filter(x => x.unread);
+                                        io.to(user.id).emit('unread', ({ messages: {
+                                            count: unread_rooms.length,
+                                            read: [user_room.id]
+                                        } }));
                                     }
                                     callback({ user: user.id, messages, id, name: name ? name : 'unknown', mm: chat.messages.length > 7 ? true : false });
                                 });
@@ -154,7 +162,7 @@ module.exports.sockets = (io, client) => {
                 if (socket.room_id == id && message?.length < 2000) {
                     let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
                     if (user?.id == socket.user_id) {
-                        if (user.rooms.includes(id)) {
+                        if (user.rooms.some(x => x.id == id)) {
                             let room = await client.database.functions.get_room(socket.room_id);
                             if (room?.members?.includes(user.id)) {
                                 let chat = await client.database.chat.findById(room.chat_id);
@@ -190,26 +198,38 @@ module.exports.sockets = (io, client) => {
                                     Promise.all(room.members.map(user => client.database.functions.get_user(user))).then(users => {
                                         Promise.all(users.filter(x => x).map(user => {
                                             let save = false;
-                                            if (!user.rooms.includes(room.id)) {
-                                                user.rooms.push(room.id); save = true;
-                                                user.markModified('rooms');
+                                            if (!user.rooms.some(x => x.id == room.id)) {
+                                                user.rooms.push({
+                                                    id: room.id
+                                                }); save = true;
+                                                // user.markModified('rooms');
                                             }
-                                            if (user.rooms[0] !== room.id) {
-                                                user.rooms = user.rooms.filter(item => item !== room.id);
-                                                user.rooms.unshift(room.id); save = true;
-                                                user.markModified('rooms');
-                                            }
-                                            let message_unread_exists = user.unread.messages.indexOf(room.id);
-                                            if (room_members.includes(user.id)) {
-                                                if (message_unread_exists > -1) {
-                                                    user.unread.messages.splice(message_unread_exists, 1);
-                                                    user.markModified('unread.messages'); save = true;
-                                                    io.to(user.id).emit('unread', ({ messages: user.unread.messages }));
+                                            if (user.rooms[0]?.id !== room.id) {
+                                                let user_room_index = user.rooms.findIndex(x => x.id == room.id);
+                                                if (user_room_index > -1) {
+                                                    user.rooms.unshift(user.rooms[user_room_index]);
+                                                    user.rooms.slice(user_room_index, 1); save = true;
+                                                    // user.markModified('rooms');
                                                 }
-                                            } else if (!user.unread.messages.includes(room.id)) {
-                                                user.unread.messages.push(room.id); save = true;
-                                                user.markModified('unread.messages');
-                                                io.to(user.id).emit('unread', ({ messages: user.unread.messages }));
+                                            }
+                                            let user_room = user.rooms.find(x => x.id == room.id);
+                                            if (room_members.includes(user.id)) {
+                                                if (user_room && user_room.unread) {
+                                                    user_room.unread = false; save = true;
+                                                    // user.markModified('rooms');
+                                                    let unread_rooms = user.rooms.filter(x => x.unread);
+                                                    io.to(user.id).emit('unread', ({ messages: {
+                                                        count: unread_rooms.length,
+                                                        read: [user_room.id]
+                                                    } }));
+                                                }
+                                            } else if (!user_room.unread) {
+                                                user_room.unread = true; save = true;
+                                                // user.markModified('rooms');
+                                                io.to(user.id).emit('unread', ({ messages: {
+                                                    count: unread_rooms.length,
+                                                    unread: [user_room.id]
+                                                } }));
                                             }
                                             if (save) return user.save();
                                             else return true;
