@@ -11,7 +11,7 @@ module.exports = (client) => {
         if (req.user) {
             Promise.all(req.user.rooms.map(x => client.database.functions.get_room(x.id))).then(rooms => {
                 Promise.all(rooms.map(room => client.database.chat.findById(room.chat_id))).then(async chats => {
-                    let data = chats.map(chat => {
+                    let data = chats.map(async chat => {
                         let room = rooms.find(y => y.chat_id == chat.id);
                         if (room && chat && chat.room_id == chat.id) {
                             let last_message = chat.messages[chat.messages.length - 1], name, _user, image;
