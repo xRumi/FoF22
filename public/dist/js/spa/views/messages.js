@@ -316,10 +316,10 @@ function message_time(html, callback) {
                 let message = messages_group[i][j];
                 let next_message = messages_group[i][j + 1] ? messages_group[i][j + 1] : false;
                 let time = parse_message_time(parseInt(message.dataset.time));
-                if (next_message)
+                if (next_message) {
                     if (Math.abs(parseInt(message.dataset.time) - parseInt(next_message.dataset.time)) > 60 * 1000)
                         message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
-                else message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
+                } else message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
             }
         }
     }
