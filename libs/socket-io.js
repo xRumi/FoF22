@@ -100,9 +100,8 @@ module.exports.sockets = (io, client) => {
                                     if (user_room && user_room.unread) {
                                         user_room.unread = false; user.save();
                                         // user.markModified('rooms');
-                                        let unread_rooms = user.rooms.filter(x => x.unread);
                                         io.to(user.id).emit('unread', ({ messages: {
-                                            count: unread_rooms.length,
+                                            count: user.rooms.filter(x => x.unread).length,
                                             read: [user_room.id]
                                         } }));
                                     }
@@ -217,9 +216,8 @@ module.exports.sockets = (io, client) => {
                                                 if (user_room && user_room.unread) {
                                                     user_room.unread = false; save = true;
                                                     // user.markModified('rooms');
-                                                    let unread_rooms = user.rooms.filter(x => x.unread);
                                                     io.to(user.id).emit('unread', ({ messages: {
-                                                        count: unread_rooms.length,
+                                                        count: user.rooms.filter(x => x.unread).length,
                                                         read: [user_room.id]
                                                     } }));
                                                 }
@@ -227,7 +225,7 @@ module.exports.sockets = (io, client) => {
                                                 user_room.unread = true; save = true;
                                                 // user.markModified('rooms');
                                                 io.to(user.id).emit('unread', ({ messages: {
-                                                    count: unread_rooms.length,
+                                                    count: user.rooms.filter(x => x.unread).length,
                                                     unread: [user_room.id]
                                                 } }));
                                             }
