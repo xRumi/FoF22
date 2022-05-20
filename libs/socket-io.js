@@ -98,8 +98,8 @@ module.exports.sockets = (io, client) => {
                                     });
                                     let user_room = user.rooms.find(x => x.id == room.id);
                                     if (user_room && user_room.unread) {
-                                        user_room.unread = false; user.save();
-                                        // user.markModified('rooms');
+                                        user_room.unread = false;
+                                        user.markModified('rooms'); user.save();
                                         io.to(user.id).emit('unread', ({ messages: {
                                             count: user.rooms.filter(x => x.unread).length,
                                             read: [user_room.id]
@@ -208,14 +208,14 @@ module.exports.sockets = (io, client) => {
                                                 if (user_room_index > -1) {
                                                     user.rooms.unshift(user.rooms[user_room_index]);
                                                     user.rooms.slice(user_room_index, 1); save = true;
-                                                    // user.markModified('rooms');
+                                                    user.markModified('rooms');
                                                 }
                                             }
                                             let user_room = user.rooms.find(x => x.id == room.id);
                                             if (room_members.includes(user.id)) {
                                                 if (user_room && user_room.unread) {
                                                     user_room.unread = false; save = true;
-                                                    // user.markModified('rooms');
+                                                    user.markModified('rooms');
                                                     io.to(user.id).emit('unread', ({ messages: {
                                                         count: user.rooms.filter(x => x.unread).length,
                                                         read: [user_room.id]
@@ -223,7 +223,9 @@ module.exports.sockets = (io, client) => {
                                                 }
                                             } else if (!user_room.unread) {
                                                 user_room.unread = true; save = true;
-                                                // user.markModified('rooms');
+                                                console.log(user.rooms);
+                                                console.log(user_room)
+                                                user.markModified('rooms');
                                                 io.to(user.id).emit('unread', ({ messages: {
                                                     count: user.rooms.filter(x => x.unread).length,
                                                     unread: [user_room.id]
