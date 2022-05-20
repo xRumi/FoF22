@@ -223,8 +223,6 @@ module.exports.sockets = (io, client) => {
                                                 }
                                             } else if (!user_room.unread) {
                                                 user_room.unread = true; save = true;
-                                                console.log(user.rooms);
-                                                console.log(user_room)
                                                 user.markModified('rooms');
                                                 io.to(user.id).emit('unread', ({ messages: {
                                                     count: user.rooms.filter(x => x.unread).length,
