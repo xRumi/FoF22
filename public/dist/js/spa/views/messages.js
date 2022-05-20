@@ -319,6 +319,8 @@ function message_time(html, callback) {
                 if (next_message)
                     if (Math.abs(parseInt(message.dataset.time) - parseInt(next_message.dataset.time)) > 60 * 1000)
                         message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
+                    else 
+                        message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">hehehe</div>`);
                 else message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
             }
         }
