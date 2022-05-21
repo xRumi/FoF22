@@ -127,7 +127,7 @@ module.exports.sockets = (io, client) => {
                                         let message = messages.find(x => x.user == user.id);
                                         if (message) message.username = user.username;
                                     }
-                                    callback({ id: socket.room_id, messages, mm: a - 7 > 7 ? true : false })
+                                    callback({ id: socket.room_id, messages, mm: a - 7 > 0 ? true : false })
                                 });
                                 break;
                             }
