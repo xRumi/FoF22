@@ -201,7 +201,7 @@ module.exports.sockets = (io, client) => {
                                                 user.rooms.push({
                                                     id: room.id
                                                 }); save = true;
-                                                // user.markModified('rooms');
+                                                user.markModified('rooms');
                                             }
                                             if (user.rooms[0]?.id !== room.id) {
                                                 let user_room_index = user.rooms.findIndex(x => x.id == room.id);

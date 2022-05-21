@@ -188,8 +188,10 @@ export default class extends Constructor {
                         `);
                         lm = m;
                     }
-                    $('.messages-list').prepend(html.join(''));
-                    $('.load-more-messages .lds-dual-ring').hide();
+                    message_time(html, (_html) => {
+                        $('.messages-list').prepend(_html);
+                        $('.load-more-messages .lds-dual-ring').hide();
+                    });
                 } else $('.load-more-messages .lds-dual-ring').hide();
                 if (!mm) $('.load-more-messages').hide();
             });
@@ -229,12 +231,12 @@ socket.on('receive-message', ({ id, chat, _id }) => {
             message.attr({ 'data-username': chat.username, 'data-user-id': chat.user, 'data-id': chat.id, 'data-time': chat.time });
             let prev_message = message.prev()[0];
             let prev_message_time = prev_message ? prev_message.querySelector('.outgoing .message-time') : false;
-            if (prev_message_time && prev_message_time.innerText && (parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 2 * 60 * 1000) prev_message_time.remove();
+            if (prev_message_time && prev_message_time.innerText && (parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 5 * 60 * 1000) prev_message_time.remove();
             message[0].querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${parse_message_time(chat.time)}</div>`);
         } else {
             let prev_message = $('.message:last-child:not(.outgoing)')[0];
             let prev_message_time = prev_message ? prev_message.querySelector('.message-time') : false;
-            if (prev_message_time && prev_message_time.innerText && Math.abs(parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 2 * 60 * 1000) prev_message_time.remove();
+            if (prev_message_time && prev_message_time.innerText && Math.abs(parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 5 * 60 * 1000) prev_message_time.remove();
             $('.messages-list').append(`
                 <div class="message${client.id == chat.user ? ' outgoing' : $('.message:last-child').data('user-id') == chat.user ? ' stack-message' : ''}${!chat.message ? ' message-deleted' : ''}" data-username="${chat.username}" data-user-id="${chat.user}" data-id="${chat.id}" data-time="${chat.time}">
                     <div class="message-img">
@@ -317,7 +319,7 @@ function message_time(html, callback) {
                 let next_message = messages_group[i][j + 1] ? messages_group[i][j + 1] : false;
                 let time = parse_message_time(parseInt(message.dataset.time));
                 if (next_message) {
-                    if (Math.abs(parseInt(message.dataset.time) - parseInt(next_message.dataset.time)) > 60 * 1000)
+                    if (Math.abs(parseInt(message.dataset.time) - parseInt(next_message.dataset.time)) > 5 * 60 * 1000)
                         message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
                 } else message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
             }
