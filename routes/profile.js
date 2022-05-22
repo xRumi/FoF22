@@ -1,20 +1,40 @@
 const router = require('express').Router(), fs = require('fs');
+const rateLimit = require('express-rate-limit');
 
 module.exports = (client) => {
-
-    router.get('/', async (req, res) => {
-        if (req.user) res.render("index", { user: req.user, route: 'profile' });
-        else res.status(403).redirect('/login?ref=profile');
+ 
+    router.get('/spa/profile/:id', async (req, res, next) => {
+        if (req.user) next();
+        else res.render('./no-login-spa/profile');
     });
 
-    router.get('/fetch/:id', async (req, res) => {
+    const limiter = rateLimit({
+        windowMs: 10 * 1000,
+        max: 10,
+        message: 'Too many requests',
+    });
+
+    const _limiter = rateLimit({
+        windowMs: 24 * 60 * 60 * 1000,
+        max: 100,
+        message: 'Too many requests, blocked for a day'
+    });
+
+    router.get('/profile/fetch/:id', limiter, _limiter, async (req, res) => {
         if (req.user) {
             let id = req.params.id,
-                user = id === 'me' ? req.user : await client.database.functions.get_user(id);
+                is_me = id == 'me' || id == req.user.id ? true : false;
+                user = is_me ? req.user : await client.database.functions.get_user(id);
             if (user) {
-                let user_info = user.user_info, _hide = user_info._hide;
-                for (let key in user_info) {
-                    if (_hide.includes(key)) user_info[key] = false;
+                let profile_data = user.profile_data;
+                for (let key in profile_data) {
+                    if (!profile_data[key]?.value?.length) delete profile_data[key];
+                    if (is_me) continue;
+                    let value_type = profile_data[key]?.type;
+                    if (value_type == 'friends-only') {
+                        if (!req.user.friends.includes(user.id))
+                            delete profile_data[key];
+                    } else if (value_type == 'private') delete profile_data[key];
                 }
                 res.status(200).send({
                     id: user.id,
@@ -29,21 +49,9 @@ module.exports = (client) => {
                     is_my_friend: user.friends.includes(req.user.id),
                     is_friend_requested: req.user.friend_requests.some(x => x.target == user.id && x.type == 'request'),
                     is_friend_pending: req.user.friend_requests.some(x => x.target == user.id && x.type == 'pending'),
-                    user_info: {
-                        about: {
-                            bio: {
-                                "Full Name": user.name,
-                                "Nickname": user_info.nickname,
-                                "Age": user_info.age,
-                                "Gender": user_info.gender,
-                                "Birth Of Date": user_info.bod,
-                                "Hobby": user_info.Hobby
-                            },
-                            "About Myself": user_info.about_myself,
-                        }
-                    }
+                    profile_data
                 });
-            } else res.status(404).send(`<div style="padding: 50px;"><div style="font-size: 20px;">Oops! User Not Be Found</div><div style="color: lightgray; margin-top: 5px;">Sorry but the chat room you are looking for does not exist, have been removed. id changed or is temporarily unavailable</div></div>`);
+            } else res.status(404).send(`<div style="padding: 50px;"><div style="font-size: 20px;">Oops! User Not Be Found</div><div style="color: lightgray; margin-top: 5px;">Sorry but the user you are looking for does not exist, have been removed. id changed or is temporarily unavailable</div></div>`);
         } else res.status(403).send('forbidden');
     });
 

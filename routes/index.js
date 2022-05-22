@@ -16,7 +16,18 @@ module.exports = (client) => {
 
     router.get('/', async (req, res) => {
         res.render("index");
-    });
+    }) 
+    router.use('/auth', auth(client));
+    router.use('/', profile(client));
+    router.use('/friends', friends(client));
+    router.use('/messages', messages(client));
+    router.use('/search', search(client));
+    router.use('/settings', settings(client));
+    router.use('/', recover_password(client));
+    router.use('/register', register(client));
+    router.use('/debug', debug(client));
+    router.use('/me', me(client));
+    router.use('/notifications', notifications(client));
 
     router.get('/spa', async (req, res) => {
         if (req.user) {
@@ -42,17 +53,6 @@ module.exports = (client) => {
         } else res.status(403).redirect(`/login?ref=${req.originalUrl}`);
     });
 
-    router.use('/auth', auth(client));
-    router.use('/profile', profile(client));
-    router.use('/friends', friends(client));
-    router.use('/messages', messages(client));
-    router.use('/search', search(client));
-    router.use('/settings', settings(client));
-    router.use('/', recover_password(client));
-    router.use('/register', register(client));
-    router.use('/debug', debug(client));
-    router.use('/me', me(client));
-    router.use('/notifications', notifications(client));
 
     router.get('/login', async (req, res) => {
         if (!req.user) res.render("login");

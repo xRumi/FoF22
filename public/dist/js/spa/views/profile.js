@@ -43,43 +43,53 @@ export default class extends Constructor {
                         }));
                     }
                     $('.pc-user-btn-group').html(pc_user_btn_group);
-                    let pc_user_info_bio = '', user_info_bio = user_data.user_info.about.bio;
-                    for (let key in user_info_bio) {
-                        if (user_info_bio[key]) {
-                            pc_user_info_bio += `
-                                <div>
-                                    <div>${key}:</div>
-                                    <span>${user_info_bio[key]}</span>
-                                </div>
-                            `
+                    let profile_data_obj = {
+                        "bio": {
+                            header: 'Biological Information',
+                            raw: '',
+                        },
+                        "myself": {
+                            header: 'About MySelf',
+                            raw: ''
+                        },
+                        "contact": {
+                            header: 'Contact Information',
+                            raw: ''
                         }
+                    };
+                    for (let key in user_data.profile_data) {
+                        let value = user_data.profile_data[key];
+                        if (value.value && value.value.length && profile_data_obj[value.category]) 
+                            profile_data_obj[value.category].raw += value.category == 'myself' ? value.value :
+                            `
+                                <tr>
+                                    <th>${key}:</th>
+                                    <td>${Array.isArray(value.value) ? value.value.join(', ') : value.value}</td>
+                                </tr>
+                            `
                     }
-                    let pc_user_info_myself = user_data.user_info.about["About Myself"] || "";
-                    let pc_user_about = '';
-                    if (pc_user_info_bio) pc_user_about += `
-                        <div class="pc-user-info-bio">
-                            <div class="pc-user-info-header">Biological Information</div>
-                            <div class="pc-user-info-content">
-                                ${pc_user_info_bio}
+                    let profile_data_raw = '';
+                    for (let key in profile_data_obj) {
+                        let value = profile_data_obj[key];
+                        if (value.raw) profile_data_raw += `
+                            <div class="pc-user-info-${key}">
+                                <div class="pc-user-info-header">${value.header}</div>
+                                <div class="pc-user-info-content">
+                                    <table>
+                                        ${value.raw}
+                                    </table>
+                                </div>
                             </div>
-                        </div>
-                    `;
-                    if (pc_user_info_myself) pc_user_about += `
-                        <div class="pc-user-info-myself">
-                            <div class="pc-user-info-header">About Myself</div>
-                            <div class="pc-user-info-content">
-                                ${pc_user_info_myself}
-                            </div>
-                        </div>
-                    `;
-                    $('.pc-user-info-body').html(pc_user_about || 'Nothing to show');
+                        `;
+                    }
+                    $('.pc-user-info-body').html(profile_data_raw || '<div style="padding: 10px;">Nothing to show</div>');
                     $('.profile .lds-dual-ring').hide();
                     $('.profile-content').show();
                     nanobar.go(100);
                 },
                 error: function(xhr, textStatus, errorThrown) {
                     if (xhr.status == 404) {
-                        $('.profile').html(xhr.responseText);
+                        $('.profile-content').html(xhr.responseText).show();
                         $('.profile .lds-dual-ring').hide();
                     }
                     _ajax0 = false;

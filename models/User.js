@@ -8,20 +8,18 @@ module.exports = mongoose.model("user", new mongoose.Schema({
     name: { type: String },
     email: { type: String, unique: true },
 
-    user_info: { type: Object, default: {
-        nickname: null,
-        age: null,
-        gender: null,
-        bod: null,
-        hobby: null,
-        relationship: null,
-        religion: null,
-        about_myself: null,
-        current_address: null,
-        permanent_address: null,
-        mobile_number: [],
-        email_address: null,
-        _hide: []
+    profile_data: { type: Object, default: {
+        "Nickname": { value: null, type: 'public', category: 'bio' },
+        "Gender": { value: null, type: 'public', category: 'bio' },
+        "Birth Of Date": { value: null, type: 'public', category: 'bio' },
+        "Hobby": { value: null, type: 'public', category: 'bio' },
+        "Relationship": { value: null, type: 'public', category: 'bio' },
+        "Religion": { value: null, type: 'public', category: 'bio' },
+        "About Myself": { value: null, type: 'public', category: 'myself' },
+        "Current Address": { value: null, type: 'public', category: 'contact' },
+        "Permanent Address": { value: null, type: 'public', category: 'contact' },
+        "Mobile Number": { value: [], type: 'public', category: 'contact' },
+        "Email Address": { value: [], type: 'public', category: 'contact' },
     } },
 
     created_at: { type: Date, default: Date.now },

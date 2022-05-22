@@ -521,14 +521,15 @@ img {
 	border: solid 2px lightgray;
 }
 
-.pc-user-info-content div div {
-    float: left;
+.pc-user-info-content table tr th {
     width: 110px;
+    font-weight: normal;
+    text-align: unset;
 }
 
-.pc-user-info-content div span {
+.pc-user-info-content table tr td {
     color: gray;
-}
+  }
 
 /* profile end */
 

@@ -22,7 +22,7 @@ module.exports = {
             new Local_strategy(async (username, password, done) => {
                 try {
                     const user = await client.database.functions.get_user_by_username(username?.toLowerCase());
-                    if (user && user.status !== 'deleted' && user.username !== 'system') return (user.password && user.password === password) ? done(null, user) : done(null, false);
+                    if (user && user.status !== 'deleted') return (user.password && user.password === password) ? done(null, user) : done(null, false);
                     else return done(null, false);
                 } catch (err) {
                     console.log(err);
