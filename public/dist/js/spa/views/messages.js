@@ -63,6 +63,7 @@ const people_list = (new_people_list) => {
 var _ajax0 = false;
 var typing = false;
 var typing_timeout = undefined;
+var loading_more_messages = false;
 
 export default class extends Constructor {
     constructor(params) {
@@ -170,8 +171,11 @@ export default class extends Constructor {
             $('.chat').removeClass('chat-active');
             $('.navbar').removeClass('chat-active');
         }).on('click', '.load-more-messages', e => {
+            if (loading_more_messages) return false;
             $('.load-more-messages .lds-dual-ring').css('display', 'inline-block');
+            loading_more_messages = true;
             socket.emit('load-more-messages', $('.message')[0].getAttribute('data-id'), ({ id, messages, mm }) => {
+                loading_more_messages = false;
                 if (client.messages.room_id == id && messages.length) {
                     let html = [], lm = {};
                     for (let i = 0; i < messages.length; i++) {
