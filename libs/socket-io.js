@@ -32,13 +32,13 @@ module.exports.sockets = (io, client) => {
                 if (user && _user && _user.id !== user.id) {
                     let room_exists = await client.database.room.findOne({ members: { $all: [user.id, _user.id], $size: 2 } });
                     if (room_exists) {
-                        if (!user.rooms.some(x => x.id == room_exists.id)) {
+                        if (!user.rooms.some(x => x.id === room_exists.id)) {
                             user.rooms.push({
                                 id: room_exists.id,
                             });
                             await user.save();
                         }
-                        if (!_user.rooms.some(x => x.id == room_exists.id)) {
+                        if (!_user.rooms.some(x => x.id === room_exists.id)) {
                             _user.rooms.push({
                                 id: room_exists.id,
                             });
@@ -114,8 +114,9 @@ module.exports.sockets = (io, client) => {
             });
             socket.on('load-more-messages', async (id, callback) => {
                 if (!is_function(callback)) return false;
-                if (id && id.length > 8 && socket.chat_id) {
-                    let chat = await client.database.chat.findById(socket.chat_id);
+                if (id && id.length > 8) {
+                    if (!socket.chat_id) return callback(false);
+                    let chat = await client.database.functions.get_chat(socket.chat_id);
                     if (chat && chat.room_id == socket.room_id) {
                         let a = chat.messages.length;
                         while(a--) {
@@ -153,10 +154,8 @@ module.exports.sockets = (io, client) => {
                 }
             });
             socket.on('send-message', async ({ id, _message, _id }, callback) => {
-                if (!socket.room_id || socket.room_id !== id) {
-                    if (!is_function(callback)) return false;
-                    callback();
-                }
+                if (!is_function(callback)) return false;
+                if (!socket.room_id || socket.room_id !== id) return callback(false);
                 let message = _message?.trim();
                 if (socket.room_id == id && message?.length < 2000) {
                     let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
@@ -176,8 +175,9 @@ module.exports.sockets = (io, client) => {
                                     chat.messages.push(chat_data);
                                     await chat.save();
                                     chat_data.username = user.username;
-
-                                    io.to(socket.room_id).emit('receive-message', { user: user.id, id: room.id, chat: chat_data, _id });
+                                    
+                                    callback({ user: user.id, id: room.id, chat: chat_data, _id });
+                                    socket.broadcast.to(socket.room_id).emit('receive-message', { user: user.id, id: room.id, chat: chat_data, _id });
 
                                     /*io.to('6241d152216bc87c370928f6').emit('receive-message', { user: '61d001de9b64b8c435985da5e', id: '6241d152216bc87c370928f6', chat_data: {
                                         id: Math.random().toString(36).substring(2, 15),
@@ -197,7 +197,7 @@ module.exports.sockets = (io, client) => {
                                     Promise.all(room.members.map(user => client.database.functions.get_user(user))).then(users => {
                                         Promise.all(users.filter(x => x).map(user => {
                                             let save = false;
-                                            if (!user.rooms.some(x => x.id == room.id)) {
+                                            if (!user.rooms.some(x => x.id === room.id)) {
                                                 user.rooms.push({
                                                     id: room.id
                                                 }); save = true;
@@ -206,8 +206,9 @@ module.exports.sockets = (io, client) => {
                                             if (user.rooms[0]?.id !== room.id) {
                                                 let user_room_index = user.rooms.findIndex(x => x.id == room.id);
                                                 if (user_room_index > -1) {
-                                                    user.rooms.unshift(user.rooms[user_room_index]);
-                                                    user.rooms.slice(user_room_index, 1); save = true;
+                                                    let _user_room = user.rooms[user_room_index];
+                                                    user.rooms.splice(user_room_index, 1); save = true;
+                                                    user.rooms.unshift(_user_room);
                                                     user.markModified('rooms');
                                                 }
                                             }

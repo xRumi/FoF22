@@ -15,7 +15,7 @@ module.exports = (client) => {
         }
     }
     client.database.functions.get_user_by_username = async ( username ) => {
-        if (username?.length < 3) return false;
+        if (username?.length < 3 && username.length > 16) return false;
         let user;
         for (const [key, value] of client.database_cache.users) if (value.elements?.username == username) user = client.database_cache.users.get(key);
         if (user) return user;
@@ -55,6 +55,7 @@ module.exports = (client) => {
         }
     }
     client.database.functions.delete_user = async ( id ) => {
+        if (!id || !ObjectId.isValid(id)) return false;
         let user = await client.database.user.findById(id);
         if (user) {
             user = {
@@ -94,6 +95,7 @@ module.exports = (client) => {
         return room;
     }
     client.database.functions.get_room = async ( id ) => {
+        if (!id || !ObjectId.isValid(id)) return false;
         let room = client.database_cache.rooms.get(id);
         if (room) return room;
         else {
@@ -109,11 +111,17 @@ module.exports = (client) => {
         return room;
     }
     client.database.functions.delete_messages = async (chat_id) => {
+        if (!chat_id || !ObjectId.isValid(chat_id)) return false;
         let chat = await client.database.chat.findById(chat_id);
         if (chat) {
             chat.messages = [];
             await chat.save();
         }
+    }
+    client.database.functions.get_chat = async (id) => {
+        if (!id || !ObjectId.isValid(id)) return false;
+        let chat = await client.database.chat.findById(id);
+        return chat;
     }
     // end
 

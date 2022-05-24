@@ -1,1 +1,93 @@
-heew
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="description" content="Friends of Friends 2022">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
+        <link rel="stylesheet" href="/dist/css/spa/index.css">
+        <title>FoF22</title>
+    </head>
+
+    <%  if (!error) {
+            let profile_data_obj = {
+                "bio": {
+                    header: 'Biological Information',
+                    raw: '',
+                },
+                "myself": {
+                    header: 'About MySelf',
+                    raw: ''
+                },
+                "contact": {
+                    header: 'Contact Information',
+                    raw: ''
+                }
+            };
+            for (let key in user_data.profile_data) {
+                let value = user_data.profile_data[key];
+                if (value.value && value.value.length && profile_data_obj[value.category]) 
+                    profile_data_obj[value.category].raw += value.category == 'myself' ? value.value :
+                    `
+                        <tr>
+                            <th>${key}:</th>
+                            <td>${Array.isArray(value.value) ? value.value.join(', ') : value.value}</td>
+                        </tr>
+                    `
+            }
+            var profile_data_raw = '';
+            for (let key in profile_data_obj) {
+                let value = profile_data_obj[key];
+                if (value.raw) profile_data_raw += `
+                    <div class="pc-user-info-${key}">
+                        <div class="pc-user-info-header">${value.header}</div>
+                        <div class="pc-user-info-content">
+                            <table>
+                                ${value.raw}
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+    -%>
+
+    <body>
+        <main id="app">
+            <div class="profile">
+                <div class="profile-header header-back">
+                    <div class="header-back-icon" onclick="history.back();">
+                        <i class='bx bx-chevron-left'></i>
+                    </div>
+                    <p class="header-back-text"><%=error ? '' : user_data.name%></p>
+                </div>
+                <div class="profile-content">
+                    <% if (error) { -%>
+                        <%- error -%>
+                    <% } else { -%>
+                        <div class="pc-main">
+                            <div class="pc-user-cover"<%=user_data.has_cover ? ` style="background-image: /dist/img/users/${user_data.id}/cover.png;"` : ``%>>
+                                <div class="pc-user">
+                                    <div class="pc-user-img">
+                                        <img src="<%=user_data.has_profile_picture ? `/dist/img/users/${user_data.id}/profile.png` : `/dist/img/default-profile.png`%>" alt="not found">
+                                    </div>
+                                    <div class="pc-user-name">
+                                        <div><%=user_data.name%></div>
+                                        <span>@<%=user_data.username%></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="pc-user-actions">
+                                <div class="pc-user-btn-group"></div>
+                            </div>
+                            <div class="pc-user-info-body">
+                                <%- profile_data_raw || `<div style="padding: 10px;">Nothing to show</div>`%>
+                            </div>
+                        </div>
+                    <% } -%>
+                </div>
+            </div>
+        </main>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    </body>
+</html>

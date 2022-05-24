@@ -100,7 +100,7 @@ $.fn.go_back = (fallback) => {
     history.back();
     setTimeout(() => { 
         if (window.location.href == prev_page) $.fn.navigateTo(fallback);
-    }, 100);
+    }, 200);
 }
 
 $(window).resize(() => {

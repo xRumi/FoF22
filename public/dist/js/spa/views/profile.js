@@ -7,6 +7,10 @@ export default class extends Constructor {
         super(params);
         this.id = params.id;
         this.setTitle("Profile");
+        if (!this.id || this.id == 'me') {
+            this.id = client.id;
+            history.pushState(null, null, `/spa/profile/${this.id}`);
+        }
         if (!_ajax0) {
             _ajax0 = true;
             nanobar.go(30);
@@ -110,7 +114,7 @@ export default class extends Constructor {
                     <div class="header-back-icon" onclick="$.fn.go_back('/spa');">
                         <i class='bx bx-chevron-left'></i>
                     </div>
-                    <p class="header-back-text">FoF22 User</p>
+                    <p class="header-back-text"></p>
                 </div>
                 <div class="lds-dual-ring"></div>
                 <div class="profile-content" style="display: none;">

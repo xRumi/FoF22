@@ -5,7 +5,32 @@ module.exports = (client) => {
  
     router.get('/spa/profile/:id', async (req, res, next) => {
         if (req.user) next();
-        else res.render('./no-login-spa/profile');
+        else {
+            let id = req.params.id,
+                user = await client.database.functions.get_user(id);
+            if (user) {
+                let profile_data = user.profile_data;
+                for (let key in profile_data) {
+                    if (!profile_data[key]?.value?.length) delete profile_data[key];
+                    else {
+                        let value_type = profile_data[key]?.type;
+                        if (value_type !== 'public') delete profile_data[key];
+                    }
+                }
+                res.render("./no-login-spa/profile", { error: false, user_data: {
+                    id: user.id,
+                    username: user.username,
+                    name: user.name,
+                    email: user.email,
+                    status: user.status,
+                    created_at: user.created_at,
+                    friends: user.friends,
+                    has_cover: fs.existsSync(`../public/dist/img/users/${user.id}/cover.png`),
+                    has_profile_picture: fs.existsSync(`../public/dist/img/users/${user.id}/profile.png`),
+                    profile_data
+                }});
+            } else res.render("./no-login-spa/profile", { error: `<div style="padding: 50px;"><div style="font-size: 20px;">Oops! User Not Be Found</div><div style="color: lightgray; margin-top: 5px;">Sorry but the user you are looking for does not exist, have been removed. id changed or is temporarily unavailable</div></div>` });
+        }
     });
 
     const limiter = rateLimit({
@@ -29,12 +54,14 @@ module.exports = (client) => {
                 let profile_data = user.profile_data;
                 for (let key in profile_data) {
                     if (!profile_data[key]?.value?.length) delete profile_data[key];
-                    if (is_me) continue;
-                    let value_type = profile_data[key]?.type;
-                    if (value_type == 'friends-only') {
-                        if (!req.user.friends.includes(user.id))
-                            delete profile_data[key];
-                    } else if (value_type == 'private') delete profile_data[key];
+                    else {
+                        if (is_me) continue;
+                        let value_type = profile_data[key]?.type;
+                        if (value_type == 'friends-only') {
+                            if (!req.user.friends.includes(user.id))
+                                delete profile_data[key];
+                        } else if (value_type == 'private') delete profile_data[key];
+                    }
                 }
                 res.status(200).send({
                     id: user.id,

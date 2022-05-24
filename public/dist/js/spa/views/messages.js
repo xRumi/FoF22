@@ -134,10 +134,7 @@ export default class extends Constructor {
             let input = $('#message-input'),
                 _message = input.val();
             if (!_message || !client.messages.room_id) return false;
-            let _id = Math.random().toString(36).substring(2, 15);
-            socket.emit('send-message', ({ id: client.messages.room_id, _message, _id }), () => socket.emit('join-room', client.messages.room_id, (response) => join_room(response)));
-            typing = false;
-            socket.emit('messages-typing', false);
+            input.val(''); let _id = Math.random().toString(36).substring(2, 15);
             $('.messages-list').append(`
                 <div class="message outgoing" data-username="${client.username}">
                     <div class="message-content">
@@ -145,7 +142,22 @@ export default class extends Constructor {
                     </div>
                 </div>
             `);
-            input.val('');
+            send_message(_message, _id, ({ id, chat, _id }) => {
+                if (client.messages.room_id == id) {
+                    let message_content = $(`#${_id}`);
+                    if (message_content.length) {
+                        message_content.css('background-color', '#007bff');
+                        let message = message_content.parent().parent();
+                        message.attr({ 'data-username': chat.username, 'data-user-id': chat.user, 'data-id': chat.id, 'data-time': chat.time });
+                        let prev_message = message.prev()[0];
+                        let prev_message_time = prev_message ? prev_message.querySelector('.outgoing .message-time') : false;
+                        if (prev_message_time && prev_message_time.innerText && (parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 7 * 60 * 1000) prev_message_time.remove();
+                        message[0].querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${parse_message_time(chat.time)}</div>`);
+                    }
+                }
+            });
+            typing = false;
+            socket.emit('messages-typing', false);
             $(".message:last-child")[0].scrollIntoView();
             return false;
         }).on('keypress', '#message-input', e => {
@@ -174,31 +186,7 @@ export default class extends Constructor {
             if (loading_more_messages) return false;
             $('.load-more-messages .lds-dual-ring').css('display', 'inline-block');
             loading_more_messages = true;
-            socket.emit('load-more-messages', $('.message')[0].getAttribute('data-id'), ({ id, messages, mm }) => {
-                loading_more_messages = false;
-                if (client.messages.room_id == id && messages.length) {
-                    let html = [], lm = {};
-                    for (let i = 0; i < messages.length; i++) {
-                        let m = messages[i];
-                        html.push(m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
-                            <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${!m.message ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
-                                <div class="message-img">
-                                    <img src="/dist/img/users/${m.user}/profile.png">
-                                </div>
-                                <div class="message-content">
-                                    <p>${m.message ? m.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
-                                </div>
-                            </div>
-                        `);
-                        lm = m;
-                    }
-                    message_time(html, (_html) => {
-                        $('.messages-list').prepend(_html);
-                        $('.load-more-messages .lds-dual-ring').hide();
-                    });
-                } else $('.load-more-messages .lds-dual-ring').hide();
-                if (!mm) $('.load-more-messages').hide();
-            });
+            load_more_messages();
         });
     }
 
@@ -238,7 +226,7 @@ socket.on('receive-message', ({ id, chat, _id }) => {
             if (prev_message_time && prev_message_time.innerText && (parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 7 * 60 * 1000) prev_message_time.remove();
             message[0].querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${parse_message_time(chat.time)}</div>`);
         } else {
-            let prev_message = $('.message:last-child:not(.outgoing)')[0];
+            let prev_message = client.id == chat.user ? $('.message:last-child.outgoing')[0] : $('.message:last-child:not(.outgoing)')[0];
             let prev_message_time = prev_message ? prev_message.querySelector('.message-time') : false;
             if (prev_message_time && prev_message_time.innerText && Math.abs(parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 7 * 60 * 1000) prev_message_time.remove();
             $('.messages-list').append(`
@@ -368,4 +356,48 @@ function join_room(response) {
             nanobar.go(100);
         }
     }
+}
+
+function send_message(_message, _id, callback) {
+    if (!client.messages.room_id) return false;
+    socket.emit('send-message', ({ id: client.messages.room_id, _message, _id }), (response) => {
+        if (response) callback(response);
+        else socket.emit('join-room', client.messages.room_id, () => send_message(_message, _id, callback));
+    });
+}
+
+function load_more_messages() {
+    if (!client.messages.room_id) {
+        $('.load-more-messages .lds-dual-ring').hide();
+        return false;
+    }
+    socket.emit('load-more-messages', $('.message')[0].getAttribute('data-id'), (response) => {
+        if (!response) socket.emit('join-room', client.messages.room_id, () => load_more_messages());
+        else {
+            let { id, messages, mm } = response;
+            loading_more_messages = false;
+            if (client.messages.room_id == id && messages.length) {
+                let html = [], lm = {};
+                for (let i = 0; i < messages.length; i++) {
+                    let m = messages[i];
+                    html.push(m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
+                        <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${!m.message ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
+                            <div class="message-img">
+                                <img src="/dist/img/users/${m.user}/profile.png">
+                            </div>
+                            <div class="message-content">
+                                <p>${m.message ? m.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
+                            </div>
+                        </div>
+                    `);
+                    lm = m;
+                }
+                message_time(html, (_html) => {
+                    $('.messages-list').prepend(_html);
+                    $('.load-more-messages .lds-dual-ring').hide();
+                });
+            } else $('.load-more-messages .lds-dual-ring').hide();
+            if (!mm) $('.load-more-messages').hide();
+        }
+    });
 }
