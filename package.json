@@ -1,6 +1,6 @@
 {
   "name": "fof22",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Friends of Friends 2022",
   "main": "index.js",
   "scripts": {
@@ -13,17 +13,17 @@
   "dependencies": {
     "compression": "^1.7.4",
     "connect-mongo": "^4.6.0",
-    "ejs": "^3.1.7",
+    "ejs": "^3.1.8",
     "express": "^4.18.1",
     "express-rate-limit": "^6.4.0",
-    "express-session": "^1.17.2",
+    "express-session": "^1.17.3",
     "http": "^0.0.1-security",
     "humanize-duration": "^3.27.1",
-    "mongodb": "^4.5.0",
-    "mongoose": "^6.3.2",
+    "mongodb": "^4.6.0",
+    "mongoose": "^6.3.4",
     "mailgun-js": "^0.22.0",
-    "passport": "^0.5.2",
+    "passport": "^0.6.0",
     "passport-local": "^1.0.0",
-    "socket.io": "^4.5.0"
+    "socket.io": "^4.5.1"
   }
 }

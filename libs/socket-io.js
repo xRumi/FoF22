@@ -1,5 +1,7 @@
 const ObjectId = require("mongodb").ObjectId;
 const is_function = value => value && (Object.prototype.toString.call(value) === "[object Function]" || "function" === typeof value || value instanceof Function);
+const fs = require("fs");
+const path = require('path');
 
 module.exports.sockets = (io, client) => {
     io.on('connection', async (socket) => {
@@ -86,16 +88,11 @@ module.exports.sockets = (io, client) => {
                                 } else name = room.name;
                                 let messages = chat.messages.slice(-7);
                                 Promise.all(messages.map(message => client.database.functions.get_user(message.user))).then(users => {
-                                    messages = messages.map(x => {
-                                        return {
-                                            id: x.id,
-                                            user: x.user,
-                                            username: users.find(y => y.id == x.user)?.username,
-                                            message: x.message,
-                                            time: x.time,
-                                            seen_by: x.seen_by
-                                        }
-                                    });
+                                    for (let i = 0; i < users.length; i++) {
+                                        let user = users[i];
+                                        let message = messages.find(x => x.user == user.id);
+                                        if (message) message.username = user.username;
+                                    }
                                     let user_room = user.rooms.find(x => x.id == room.id);
                                     if (user_room && user_room.unread) {
                                         user_room.unread = false;
@@ -153,11 +150,12 @@ module.exports.sockets = (io, client) => {
                     });
                 }
             });
-            socket.on('send-message', async ({ id, _message, _id }, callback) => {
+            socket.on('send-message', async ({ id, _message, _id, _attachments = [] }, callback) => {
                 if (!is_function(callback)) return false;
-                if (!socket.room_id || socket.room_id !== id) return callback(false);
+                if (!socket.room_id || socket.room_id !== id) return callback({ join_room: true });
                 let message = _message?.trim();
-                if (socket.room_id == id && message?.length < 2000) {
+                if (_attachments.length >= 10) return false;
+                if (socket.room_id == id && message?.length < 2000 && (message.length || _attachments.length)) {
                     let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
                     if (user?.id == socket.user_id) {
                         if (user.rooms.some(x => x.id == id)) {
@@ -165,74 +163,103 @@ module.exports.sockets = (io, client) => {
                             if (room?.members?.includes(user.id)) {
                                 let chat = await client.database.chat.findById(room.chat_id);
                                 if (chat) {
-                                    let chat_data = {
-                                        id: Math.random().toString(36).substring(2, 15),
-                                        user: user.id,
-                                        message,
-                                        time: Date.now(),
-                                        seen_by: []
-                                    };
-                                    chat.messages.push(chat_data);
-                                    await chat.save();
-                                    chat_data.username = user.username;
-                                    
-                                    callback({ user: user.id, id: room.id, chat: chat_data, _id });
-                                    socket.broadcast.to(socket.room_id).emit('receive-message', { user: user.id, id: room.id, chat: chat_data, _id });
-
-                                    /*io.to('6241d152216bc87c370928f6').emit('receive-message', { user: '61d001de9b64b8c435985da5e', id: '6241d152216bc87c370928f6', chat_data: {
-                                        id: Math.random().toString(36).substring(2, 15),
-                                        user: '61d001de9b64b8c435985da5',
-                                        message: 'hey!',
-                                        time: Date.now(),
-                                        seen_by: []
-                                    } });*/
-
-                                    let room_members = [], _room_members = io.sockets.adapter.rooms.get(room.id);
-
-                                    for (const id of _room_members ) {
-                                        const room_member_socket = io.sockets.sockets.get(id);
-                                        if (room_member_socket.user_id) room_members.push(room_member_socket.user_id);
+                                    let room_img_path = path.join(__dirname, `/../public/dist/img/rooms/${room.id}`);
+                                    if (_attachments.length) {
+                                        if (!fs.existsSync(room_img_path)) fs.mkdir(room_img_path, { recursive: true }, (err) => {
+                                            if (err) throw err;
+                                        });
                                     }
+
+                                    const process_file = async (attachment) => {
+                                        if (attachment && attachment.type?.match('image') && attachment.size == attachment.bytes?.length) {
+                                            return new Promise((resolve, reject) => {
+                                                let __id = Math.random().toString(36).substring(2, 15);
+                                                let buffer = Buffer.from(attachment.bytes);
+                                                fs.writeFile(`${room_img_path}/${__id}_${attachment.name}`, buffer, (err, result) => {
+                                                    if (!err) resolve({
+                                                        name: attachment.name,
+                                                        type: attachment.type,
+                                                        size: attachment.size,
+                                                        url: `/dist/img/rooms/${room.id}/${__id}_${attachment.name}`
+                                                    });
+                                                    else reject();
+                                                });
+                                            });
+                                        } else return false;
+                                    }
+
+                                    Promise.all(_attachments.map(attachment => process_file(attachment))).then(async attachments => {
                                     
-                                    Promise.all(room.members.map(user => client.database.functions.get_user(user))).then(users => {
-                                        Promise.all(users.filter(x => x).map(user => {
-                                            let save = false;
-                                            if (!user.rooms.some(x => x.id === room.id)) {
-                                                user.rooms.push({
-                                                    id: room.id
-                                                }); save = true;
-                                                user.markModified('rooms');
-                                            }
-                                            if (user.rooms[0]?.id !== room.id) {
-                                                let user_room_index = user.rooms.findIndex(x => x.id == room.id);
-                                                if (user_room_index > -1) {
-                                                    let _user_room = user.rooms[user_room_index];
-                                                    user.rooms.splice(user_room_index, 1); save = true;
-                                                    user.rooms.unshift(_user_room);
+                                        let chat_data = {
+                                            id: Math.random().toString(36).substring(2, 15),
+                                            user: user.id,
+                                            message,
+                                            time: Date.now(),
+                                            seen_by: [],
+                                            attachments
+                                        };
+                                        chat.messages.push(chat_data);
+                                        await chat.save();
+                                        chat_data.username = user.username;
+                                        
+                                        callback({ success: true, user: user.id, id: room.id, chat: chat_data, _id });
+                                        socket.broadcast.to(socket.room_id).emit('receive-message', { user: user.id, id: room.id, chat: chat_data, _id });
+
+                                        /*io.to('6241d152216bc87c370928f6').emit('receive-message', { user: '61d001de9b64b8c435985da5e', id: '6241d152216bc87c370928f6', chat_data: {
+                                            id: Math.random().toString(36).substring(2, 15),
+                                            user: '61d001de9b64b8c435985da5',
+                                            message: 'hey!',
+                                            time: Date.now(),
+                                            seen_by: []
+                                        } });*/
+
+                                        let room_members = [], _room_members = io.sockets.adapter.rooms.get(room.id);
+
+                                        for (const id of _room_members ) {
+                                            const room_member_socket = io.sockets.sockets.get(id);
+                                            if (room_member_socket?.user_id) room_members.push(room_member_socket.user_id);
+                                        }
+                                        
+                                        Promise.all(room.members.map(user => client.database.functions.get_user(user))).then(users => {
+                                            Promise.all(users.filter(x => x).map(user => {
+                                                let save = false;
+                                                if (!user.rooms.some(x => x.id === room.id)) {
+                                                    user.rooms.push({
+                                                        id: room.id
+                                                    }); save = true;
                                                     user.markModified('rooms');
                                                 }
-                                            }
-                                            let user_room = user.rooms.find(x => x.id == room.id);
-                                            if (room_members.includes(user.id)) {
-                                                if (user_room && user_room.unread) {
-                                                    user_room.unread = false; save = true;
+                                                if (user.rooms[0]?.id !== room.id) {
+                                                    let user_room_index = user.rooms.findIndex(x => x.id == room.id);
+                                                    if (user_room_index > -1) {
+                                                        let _user_room = user.rooms[user_room_index];
+                                                        user.rooms.splice(user_room_index, 1); save = true;
+                                                        user.rooms.unshift(_user_room);
+                                                        user.markModified('rooms');
+                                                    }
+                                                }
+                                                let user_room = user.rooms.find(x => x.id == room.id);
+                                                if (room_members.includes(user.id)) {
+                                                    if (user_room && user_room.unread) {
+                                                        user_room.unread = false; save = true;
+                                                        user.markModified('rooms');
+                                                        io.to(user.id).emit('unread', ({ messages: {
+                                                            count: user.rooms.filter(x => x.unread).length,
+                                                            read: [user_room.id]
+                                                        } }));
+                                                    }
+                                                } else if (!user_room.unread) {
+                                                    user_room.unread = true; save = true;
                                                     user.markModified('rooms');
                                                     io.to(user.id).emit('unread', ({ messages: {
                                                         count: user.rooms.filter(x => x.unread).length,
-                                                        read: [user_room.id]
+                                                        unread: [user_room.id]
                                                     } }));
                                                 }
-                                            } else if (!user_room.unread) {
-                                                user_room.unread = true; save = true;
-                                                user.markModified('rooms');
-                                                io.to(user.id).emit('unread', ({ messages: {
-                                                    count: user.rooms.filter(x => x.unread).length,
-                                                    unread: [user_room.id]
-                                                } }));
-                                            }
-                                            if (save) return user.save();
-                                            else return true;
-                                        }));
+                                                if (save) return user.save();
+                                                else return true;
+                                            }));
+                                        });
                                     });
                                 } else socket.emit('error', 'chat does not exist');
                             } else socket.emit('error', 'room does not exist');

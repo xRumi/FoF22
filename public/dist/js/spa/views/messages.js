@@ -1,7 +1,5 @@
 import Constructor from "./constructor.js";
 
-var old_people_list = [];
-
 const periods = {
     month: 30 * 24 * 60 * 60 * 1000,
     week: 7 * 24 * 60 * 60 * 1000,
@@ -12,6 +10,20 @@ const periods = {
 };
 
 const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const ttr = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;'
+};
+
+const attachment_limit = 10;
+
+let attachments = [],
+    old_people_list = [],
+    _ajax0 = false,
+    typing = false,
+    typing_timeout = undefined,
+    loading_more_messages = false;
 
 const people_list = (new_people_list) => {
     if (new_people_list && JSON.stringify(new_people_list) == JSON.stringify(old_people_list)) return false;
@@ -34,13 +46,18 @@ const people_list = (new_people_list) => {
                 <div class="_people-content">
                     <span class="_people-time">${time}</span>
                     <span class="_people-name">${x.name}</span>
-                    <p>${x.last_message}</p>
+                    <p>${x.last_message ? x.last_message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
                 </div>
             </div>
         `).on('click', (e) => {
+            attachments = [];
+            $('#message-input-file-text').text('No file selected');
+            $('.message-input-files-preview').html('');
             $('.chat').addClass('chat-active');
             $('.navbar').addClass('chat-active');
             $('#message-input').prop('disabled', true);
+            $('#message-input-files-button').prop('disabled', true);
+            $('.message-send-icon').hide();
             $('.load-more-messages .lds-dual-ring').hide();
             $('.load-more-messages').hide();
             $('.messages-list').html('');
@@ -59,11 +76,6 @@ const people_list = (new_people_list) => {
         });
     }));
 }
-
-var _ajax0 = false;
-var typing = false;
-var typing_timeout = undefined;
-var loading_more_messages = false;
 
 export default class extends Constructor {
     constructor(params) {
@@ -124,7 +136,16 @@ export default class extends Constructor {
                     <div class="messages-bottom">
                         <form autocomplete="off">
                             <input type="text" name="message-input" id="message-input" placeholder="type your message..." disabled>
-                            <button type="submit" class="message-submit" style="display: none;">Send</button>
+                            <button type="submit" style="outline: none; border: none; background-color: unset;">
+                                <i style="display: none;" class='bx bx-send message-send-icon'></i>
+                            </button>
+                            <div id="message-input-files">
+                                ${window.File && window.FileList && window.FileReader ? `
+                                    <input id="message-input-files-button" type="button" value="upload" disabled> <span id="message-input-file-text" style="margin-left: 5px; font-size: 13px;">No file selected</span>
+                                    <input type="file" style="display: none;" accept="image/*">
+                                ` : `<span style="color: grey;">does not support file upload</span>`}
+                            </div>
+                            <div class="message-input-files-preview"></div>
                         </form>
                     </div>
                 </div>
@@ -133,29 +154,45 @@ export default class extends Constructor {
             e.preventDefault();
             let input = $('#message-input'),
                 _message = input.val();
-            if (!_message || !client.messages.room_id) return false;
+            if ((!_message && !attachments.length) || !client.messages.room_id) return $('.message-send-icon').shake();
             input.val(''); let _id = Math.random().toString(36).substring(2, 15);
+            $('#message-input-file-text').text('No file selected');
+            $('.message-input-files-preview').html('');
             $('.messages-list').append(`
                 <div class="message outgoing" data-username="${client.username}">
                     <div class="message-content">
-                        <p id="${_id}" style="background-color: lightblue;">${_message.replace(/[&<>]/g, (t) => ttr[t] || t)}</p>
+                        <p id="${_id}" style="background-color: lightblue;">
+                            ${attachments.length ? attachments.map(x => `<img src="${x.base64}" />`).join('') : ''}
+                            ${_message ? _message.replace(/[&<>]/g, (t) => ttr[t] || t) : ''}
+                        </p>
                     </div>
                 </div>
             `);
-            send_message(_message, _id, ({ id, chat, _id }) => {
-                if (client.messages.room_id == id) {
-                    let message_content = $(`#${_id}`);
-                    if (message_content.length) {
-                        message_content.css('background-color', '#007bff');
-                        let message = message_content.parent().parent();
-                        message.attr({ 'data-username': chat.username, 'data-user-id': chat.user, 'data-id': chat.id, 'data-time': chat.time });
-                        let prev_message = message.prev()[0];
-                        let prev_message_time = prev_message ? prev_message.querySelector('.outgoing .message-time') : false;
-                        if (prev_message_time && prev_message_time.innerText && (parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 7 * 60 * 1000) prev_message_time.remove();
-                        message[0].querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${parse_message_time(chat.time)}</div>`);
+            send_message(_message, attachments.map(x => ({
+                name: x.name,
+                bytes: x.bytes,
+                type: x.type,
+                size: x.size
+            })), _id, (response) => {
+                if (response.error) $(`#${_id}`).remove();
+                else {
+                    const { id, chat, _id } = response;
+                    if (client.messages.room_id == id) {
+                        let message_content = $(`#${_id}`);
+                        if (message_content.length) {
+                            message_content.css('background-color', '#007bff');
+                            let message = message_content.parent().parent();
+                            message.attr({ 'data-username': chat.username, 'data-user-id': chat.user, 'data-id': chat.id, 'data-time': chat.time });
+                            let prev_message = message.prev()[0];
+                            let prev_message_time = prev_message ? prev_message.querySelector('.outgoing .message-time') : false;
+                            if (prev_message_time && prev_message_time.innerText && (parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 7 * 60 * 1000) prev_message_time.remove();
+                            message[0].querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${parse_message_time(chat.time)}</div>`);
+                            $(`._people[data-id="${id}"]`).find('._people-content p').text(chat.message ? chat.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>')
+                        }
                     }
                 }
             });
+            attachments = [];
             typing = false;
             socket.emit('messages-typing', false);
             $(".message:last-child")[0].scrollIntoView();
@@ -187,6 +224,60 @@ export default class extends Constructor {
             $('.load-more-messages .lds-dual-ring').css('display', 'inline-block');
             loading_more_messages = true;
             load_more_messages();
+        }).on('click', '#message-input-files input:button', (e) => {
+            e.preventDefault();
+            $(e.currentTarget).parent().find('input:file').trigger('click');
+        }).on('change', '#message-input-files input:file', (e) => {
+            let files = e.target.files;
+            for (let i = 0; i < files.length; i++) {
+                let file = files[i];
+                if (!file.type.match('image')) continue;
+                if (file.size > 5242880) {
+                    alert(`upload limit: 5mb; skipping ${file.name}`);
+                    continue;
+                } else if (attachments.some(x => x.name == file.name && file.type == x.type && file.size == x.size && x.lastModified == file.lastModified)) {
+                    alert(`duplicate file, skipping ${file.name}`);
+                    continue;
+                }
+                let reader_base64 = new FileReader();
+                let reader = new FileReader(), bytes;
+                reader.onload = (_e) => {
+                    bytes = new Uint8Array(_e.target.result)
+                    reader_base64.readAsDataURL(file);
+                }
+                reader_base64.onload = (_e) => {
+                    attachments.push({
+                        type: file.type,
+                        bytes,
+                        name: file.name,
+                        size: file.size,
+                        lastModified: file.lastModified,
+                        base64: _e.target.result
+                    });
+                    $('.message-input-files-preview').append(`<img src="${_e.target.result}" data-name="${file.name}" data-size="${file.size}" data-lastmodified="${file.lastModified}" data-type="${file.type}" />`);
+                    let attachment_length = attachments.length;
+                    if (attachment_length >= attachment_limit) {
+                        $('#message-input-files-button').prop('disabled', true);
+                        $('#message-input-file-text').text(`limit reached, click to remove`);
+                    } else $('#message-input-file-text').text(`${attachment_length} file${attachment_length > 1 ? 's' : ''} selected, click to remove`);
+                }
+                reader.readAsArrayBuffer(file);
+            }
+            $(e.currentTarget).val('');
+        }).on('click', '.message-input-files-preview', (e) => {
+            let that = $(e.target);
+            let attachment_index = attachments.findIndex(x => x.name == that.data('name') && x.type == that.data('type') && x.size == that.data('size') && x.lastModified == that.data('lastmodified'));
+            if (attachment_index > -1) {
+                attachments.splice(attachment_index, 1);
+                that.remove();
+                $('#message-input-files-button').prop('disabled', false);
+                let attachment_length = attachments.length;
+                $('#message-input-file-text').text(attachment_length ? `${attachment_length} file${attachment_length > 1 ? 's' : ''} selected, click to remove` : 'No file selected');
+            }
+        }).on('click', '.message-content p img', (e) => {
+            let that = $(e.currentTarget).clone();
+            $('.view-images').html(that);
+            $('.view-image').show();
         });
     }
 
@@ -208,12 +299,6 @@ export default class extends Constructor {
     }
 }
 
-const ttr = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;'
-};
-
 socket.on('receive-message', ({ id, chat, _id }) => {
     if (client.messages.room_id == id) {
         let message_content = $(`#${_id}`);
@@ -225,21 +310,28 @@ socket.on('receive-message', ({ id, chat, _id }) => {
             let prev_message_time = prev_message ? prev_message.querySelector('.outgoing .message-time') : false;
             if (prev_message_time && prev_message_time.innerText && (parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 7 * 60 * 1000) prev_message_time.remove();
             message[0].querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${parse_message_time(chat.time)}</div>`);
+            $(`._people[data-id="${id}"]`).find('._people-content p').text(chat.message ? chat.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>')
         } else {
             let prev_message = client.id == chat.user ? $('.message:last-child.outgoing')[0] : $('.message:last-child:not(.outgoing)')[0];
             let prev_message_time = prev_message ? prev_message.querySelector('.message-time') : false;
             if (prev_message_time && prev_message_time.innerText && Math.abs(parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 7 * 60 * 1000) prev_message_time.remove();
             $('.messages-list').append(`
-                <div class="message${client.id == chat.user ? ' outgoing' : $('.message:last-child').data('user-id') == chat.user ? ' stack-message' : ''}${!chat.message ? ' message-deleted' : ''}" data-username="${chat.username}" data-user-id="${chat.user}" data-id="${chat.id}" data-time="${chat.time}">
+                <div class="message${client.id == chat.user ? ' outgoing' : $('.message:last-child').data('user-id') == chat.user ? ' stack-message' : ''}${chat.deleted ? ' message-deleted' : ''}" data-username="${chat.username}" data-user-id="${chat.user}" data-id="${chat.id}" data-time="${chat.time}">
                     <div class="message-img">
                         <img src="/dist/img/users/${chat.user}/profile.png">
                     </div>
                     <div class="message-content">
-                        <p>${chat.message ? chat.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
+                        <p>
+                            ${!chat.deleted ? `
+                                ${chat.attachments ? chat.attachments.filter(x => x.type.match('image')).map(x => `<img src="${x.url}" />`).join('') : ''}
+                                ${chat.message.replace(/[&<>]/g, (t) => ttr[t] || t)}
+                            ` : '<i>This message was deleted</i>'}
+                        </p>
                         <div class="message-time">${parse_message_time(chat.time)}</div>
                     </div>
                 </div>
-            `)
+            `);
+            $(`._people[data-id="${id}"]`).find('._people-content p').text(chat.message ? chat.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>')
         }
     }
 });
@@ -335,12 +427,16 @@ function join_room(response) {
             for (let i = 0; i < messages.length; i++) {
                 let m = messages[i];
                 html.push(m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
-                    <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${!m.message ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
+                    <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${m.deleted ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
                         <div class="message-img">
                             <img src="/dist/img/users/${m.user}/profile.png">
                         </div>
                         <div class="message-content">
-                            <p>${m.message ? m.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
+                            <p>${!m.deleted ? `
+                                    ${m.attachments ? m.attachments.filter(x => x.type.match('image')).map(x => `<img src="${x.url}" />`).join('') : ''}
+                                    ${m.message.replace(/[&<>]/g, (t) => ttr[t] || t)}
+                                ` : '<i>This message was deleted</i>'}
+                            </p>
                         </div>
                     </div>
                 `);
@@ -349,6 +445,8 @@ function join_room(response) {
             message_time(html, (_html) => {
                 $('.messages-list').html(_html);
                 $('#message-input').prop('disabled', false);
+                $('#message-input-files-button').prop('disabled', false);
+                $('.message-send-icon').show();
                 if ($(".message:last-child")[0]) $(".message:last-child")[0].scrollIntoView();
             });
             if (mm) $('.load-more-messages').show();
@@ -358,11 +456,12 @@ function join_room(response) {
     }
 }
 
-function send_message(_message, _id, callback) {
+function send_message(_message, _attachments, _id, callback) {
     if (!client.messages.room_id) return false;
-    socket.emit('send-message', ({ id: client.messages.room_id, _message, _id }), (response) => {
-        if (response) callback(response);
-        else socket.emit('join-room', client.messages.room_id, () => send_message(_message, _id, callback));
+    socket.emit('send-message', ({ id: client.messages.room_id, _message, _id, _attachments }), (response) => {
+        if (response.success) callback(response);
+        else if (response.join_room) socket.emit('join-room', client.messages.room_id, () => send_message(_message, _attachments, _id, callback));
+        else if (response.error) callback({ error: response.error });
     });
 }
 
@@ -381,12 +480,16 @@ function load_more_messages() {
                 for (let i = 0; i < messages.length; i++) {
                     let m = messages[i];
                     html.push(m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
-                        <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${!m.message ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
+                        <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${m.deleted ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
                             <div class="message-img">
                                 <img src="/dist/img/users/${m.user}/profile.png">
                             </div>
                             <div class="message-content">
-                                <p>${m.message ? m.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
+                                <p>${!m.deleted ? `
+                                    ${m.attachments ? m.attachments.filter(x => x.type.match('image')).map(x => `<img src="${x.url}" />`).join('') : ''}
+                                    ${m.message.replace(/[&<>]/g, (t) => ttr[t] || t)}
+                                ` : '<i>This message was deleted</i>'}
+                                </p>
                             </div>
                         </div>
                     `);

@@ -20,7 +20,7 @@ module.exports = (client) => {
                             if (room.type == 'private') {
                                 _user = await client.database.functions.get_user(room.members[0] == req.user.id ? room.members[1] : room.members[0]);
                                 if (_user) {
-                                    name = _user.username;
+                                    name = _user.name || _user.username;
                                     image = `/dist/img/users/${_user.id}/profile.png`
                                 } else name = 'Not Found';
                             } else name = room.name;

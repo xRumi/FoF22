@@ -110,13 +110,25 @@
 	float: left;
 	margin: 0;
 	background: #efefef none repeat scroll 0 0;
-	border-radius: 10px;
+	border-radius: 8px;
 	color: #646464;
 	font-size: 14px;
-	padding: 10px;
+	padding: 8px;
 	margin-left: 8px;
 	width: fit-content;
-	word-break: break-word;
+	word-break: break-all;
+}
+
+.message-content p img {
+    width: 280px;
+    height: 280px;
+    display: block;
+    margin-bottom: 5px;
+    border-radius: 5px;
+}
+
+.message-content p span .message-content p img ~ .message-content p {
+    color: red;
 }
 
 .message-time {
@@ -297,6 +309,12 @@
 	margin-bottom: 30px;
 }
 
+.message-send-icon {
+    font-size: 27px;
+    margin-left: 12px;
+    position: relative;
+    top: 7px;
+}
 
 .message-deleted p {
 	background-color: #fff;
@@ -316,3 +334,21 @@
 	margin-bottom: 30px;
     margin-left: 10px;
 }
+
+#message-input-files {
+    margin: 10px;
+    margin-bottom: 0px;
+}
+
+.message-input-files-preview {
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+.message-input-files-preview img {
+    width: 50px;
+    height: 50px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+

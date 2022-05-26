@@ -37,7 +37,7 @@ module.exports = (client) => {
                 messages: req.user.rooms.filter(x => x.unread).length,
                 notifications: req.user.notifications.filter(x => x.unread).length,
                 menu: 0
-            } });
+            }, eruda: process.env.ERUDA ? true : false });
         } else res.status(403).redirect(`/login?ref=${req.originalUrl}`);
     });
 
@@ -49,7 +49,7 @@ module.exports = (client) => {
                 messages: req.user.rooms.filter(x => x.unread).length,
                 notifications: req.user.notifications.filter(x => x.unread).length,
                 menu: 0
-            } });
+            }, eruda: process.env.ERUDA ? true : false });
         } else res.status(403).redirect(`/login?ref=${req.originalUrl}`);
     });
 

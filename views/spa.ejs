@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="description" content="Friends of Friends 2022">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
         <link rel="stylesheet" href="/dist/css/spa/index.css">
         <link rel="stylesheet" href="/dist/css/spa/chat.css">
@@ -26,13 +26,26 @@
             </nav>
         </header>
 
-        <main id="app">
+        <div class="view-image" style="display: none;">
+            <div class="header-back">
+                <div class="header-back-icon" onclick="$(this).parent().parent().css('display', 'none');">
+                    <i class='bx bx-chevron-left'></i>
+                </div>
+                <p class="header-back-text">View Image</p>
+            </div>
+            <div class="view-images"></div>
+        </div>
 
-        </main>
+        <main id="app"></main>
+
         <script src="https://cdnjs.cloudflare.com/ajax/libs/nanobar/0.4.2/nanobar.min.js" integrity="sha512-1Al+dnfE+1gI7IBmpUZ8XnZ3l3Nv6cyA+XgdtlaptVNxJcWWRzHxOPzT+2pbp52qtXa2jkwk0MWYSmxslMsHCQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="/socket.io/socket.io.js"></script>
         <script src="/dist/js/spa/script.js"></script>
         <script type="module" src="/dist/js/spa/index.js"></script>
+        <% if (eruda) { -%>
+            <script src="//cdn.jsdelivr.net/npm/eruda"></script>
+            <script>eruda.init();</script>
+        <% } -%>
     </body>
 </html>
