@@ -29,22 +29,13 @@ const people_list = (new_people_list) => {
     if (new_people_list && JSON.stringify(new_people_list) == JSON.stringify(old_people_list)) return false;
     if (new_people_list) old_people_list = new_people_list;
     if (old_people_list && old_people_list.length && Array.isArray(old_people_list)) $('.people-list').html(old_people_list.map(x => {
-        let diff = Date.now() - x.time, time,
-            _time = new Date(parseInt(x.time));
-        if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
-        else if (diff < periods.day && _time.getDate() === today.getDate()) time = _time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
-        else {
-            let _time = new Date(x.time);
-            if (diff < periods.week) time = days[_time.getDay()];
-            else time = _time.toLocaleDateString();
-        }
         return $(`
             <div data-id="${x.id}" class="_people${client.messages.room_id == x.id ? ' _people-active' : ''}${x.unread ? ` _people-unread` : ''}">
                 <div class="_people-img">
                     <img src="${x.image}">
                 </div>
                 <div class="_people-content">
-                    <span class="_people-time">${time}</span>
+                    <span class="_people-time">${parse_message_time(x.time, true)}</span>
                     <span class="_people-name">${x.name}</span>
                     <p>${x.last_message ? x.last_message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
                 </div>
@@ -369,14 +360,14 @@ let today = new Date();
 
 let months = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ];
 
-function parse_message_time(message_time) {
+function parse_message_time(message_time, minimal) {
     let _time = new Date(message_time),
         diff = Math.abs(Date.now() - message_time), time;
     if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
     else if (diff < periods.day && _time.getDate() === today.getDate()) time = `Today at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
     else {
-        if (diff < periods.week) time = `${days[_time.getDay()]} at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`;
-        else time = `${_time.getDate()} ${months[_time.getMonth()]} at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}${_time.getFullYear() !== today.getFullYear() ? `, ${_time.getFullYear()}` : ''}`
+        if (diff < periods.week) time = `${days[_time.getDay()]}${!minimal ? ` at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}` : ``}`;
+        else time = `${_time.getDate()} ${months[_time.getMonth()]}${!minimal ? ` at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}` : ``}${_time.getFullYear() !== today.getFullYear() ? `, ${_time.getFullYear()}` : ''}`
     }
     return time;
 }
@@ -409,7 +400,6 @@ function message_time(html, callback) {
             }
         }
     }
-
     callback(Array.prototype.concat.apply([], messages_group));
 }
 
