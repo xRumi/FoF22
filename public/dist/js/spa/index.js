@@ -85,7 +85,11 @@ const router = async () => {
     if (view.before_new_render) before_new_render = view.before_new_render;
 };
 
-window.addEventListener("popstate", router);
+window.addEventListener("popstate", (e) => {
+    let view_image = $('.view-image');
+    if (view_image.is(':visible')) { view_image.hide(); e.preventDefault(); }
+    else router();
+});
 
 $('body').on('click', 'a[data-link]', e => {
     e.preventDefault();

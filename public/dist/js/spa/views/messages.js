@@ -267,6 +267,7 @@ export default class extends Constructor {
             }
         }).on('click', '.message-content p img', (e) => {
             let that = $(e.currentTarget).clone();
+            history.pushState(null, null, `/spa/messages/${client.messages.room_id}`);
             $('.view-images').html(that);
             $('.view-image').show();
         });
