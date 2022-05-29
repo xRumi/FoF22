@@ -18,7 +18,7 @@ module.exports = (client) => {
     const _limiter1 = rateLimit({
         windowMs: 24 * 60 * 60 * 1000,
         max: 15,
-        message: 'Too many requests'
+        message: 'Too many requests, blocked for a day'
     });
 
     router.post('/new', limiter1, _limiter1, async (req, res) => {
@@ -35,7 +35,7 @@ module.exports = (client) => {
                     subject: `Please verify your email address`,
                     html: `
                         <div style="font-size: 15px;">
-                            Please confirm your email address for registration by clicking the link below.
+                            Please confirm your email address for registration by clicking the link below. This link will expire in a day.
                         </div>
                         <br>
                         <a style="text-decoration: none;" href="https://fof22.me/register/confirm/?token=${_user.id}">https://fof22.me/register/confirm/?token=${_user.id}</a>
@@ -95,8 +95,8 @@ module.exports = (client) => {
     });
 
     const limiter2 = rateLimit({
-        windowMs: 60 * 1000,
-        max: 8,
+        windowMs: 30 * 1000,
+        max: 10,
         message: 'Too many requests',
     });
 
@@ -110,8 +110,8 @@ module.exports = (client) => {
                     _user.verified = true;
                     await _user.save();
                 }
-            } else res.redirect('/login');
-        } else res.redirect('/');
+            } else res.status(400).send('invaild token, is expired or not found');
+        } else res.status(400).send(`you are logged in as ${req.user.username}, logout and try again`);
     });
 
     const limiter3 = rateLimit({
@@ -120,7 +120,13 @@ module.exports = (client) => {
         message: 'Too many requests',
     });
 
-    router.post('/confirm/new', limiter3, async (req, res) => {
+    const _limiter3 = rateLimit({
+        windowMs: 24 * 60 * 60 * 1000,
+        max: 100,
+        message: 'Too many requests, blocked for a day'
+    });
+
+    router.post('/confirm/new', limiter3, _limiter3, async (req, res) => {
         let username = req.body.username?.toLowerCase(),
             name = req.body.name,
             _token = req.body.token,
@@ -135,7 +141,7 @@ module.exports = (client) => {
                 let user = await client.database.functions.create_user(username, _user.email, password, name);
                 if (user) {
                     await _user.remove();
-                    res.status(200).send('Password changed successfully, redirecting to login page in 5 seconds');  
+                    res.status(200).send('Password changed successfully, redirecting to login page in 3 seconds');  
                 } else res.status(400).send('Error activating account, try again later');
             } else res.status(400).send('Invalid token was provided');
         } else res.status(400).send('Invalid data was provided');

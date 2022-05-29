@@ -37,7 +37,7 @@ const people_list = (new_people_list) => {
                 <div class="_people-content">
                     <span class="_people-time">${parse_message_time(x.time, true)}</span>
                     <span class="_people-name">${x.name}</span>
-                    <p>${x.last_message ? x.last_message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>'}</p>
+                    <p>${!x.deleted ? `${x.has_attachment ? `<span style="color: darkred;">(attachment${x.has_attachment > 1 ? 's' : ''})</span> ` : ''}${x.last_message ? x.last_message.replace(/[&<>]/g, (t) => ttr[t] || t) : ''}` : '<i>This message was deleted</i>'}</p>
                 </div>
             </div>
         `).on('click', (e) => {
@@ -153,7 +153,7 @@ export default class extends Constructor {
                 <div class="message outgoing" data-username="${client.username}">
                     <div class="message-content">
                         <p id="${_id}" style="background-color: lightblue;">
-                            ${attachments.length ? attachments.map(x => `<img src="${x.base64}" />`).join('') : ''}
+                            ${attachments.length ? attachments.map(x => `<img src="${x.base64}" data-name="${x.name}" />`).join('') : ''}
                             ${_message ? _message.replace(/[&<>]/g, (t) => ttr[t] || t) : ''}
                         </p>
                     </div>
@@ -267,8 +267,9 @@ export default class extends Constructor {
             }
         }).on('click', '.message-content p img', (e) => {
             let that = $(e.currentTarget).clone();
-            history.pushState(null, null, `/spa/messages/${client.messages.room_id}`);
+            history.pushState(null, null, window.location.href.replace(window.location.origin, ""));
             $('.view-images').html(that);
+            $('.view-image-header-text').text(that.data('name'));
             $('.view-image').show();
         });
     }
@@ -315,7 +316,7 @@ socket.on('receive-message', ({ id, chat, _id }) => {
                     <div class="message-content">
                         <p>
                             ${!chat.deleted ? `
-                                ${chat.attachments ? chat.attachments.filter(x => x.type.match('image')).map(x => `<img src="${x.url}" />`).join('') : ''}
+                                ${chat.attachments ? chat.attachments.filter(x => x.type.match('image')).map(x => `<img src="${x.url}" data-name="${x.name}" />`).join('') : ''}
                                 ${chat.message.replace(/[&<>]/g, (t) => ttr[t] || t)}
                             ` : '<i>This message was deleted</i>'}
                         </p>
@@ -424,7 +425,7 @@ function join_room(response) {
                         </div>
                         <div class="message-content">
                             <p>${!m.deleted ? `
-                                    ${m.attachments ? m.attachments.filter(x => x.type.match('image')).map(x => `<img src="${x.url}" />`).join('') : ''}
+                                    ${m.attachments ? m.attachments.filter(x => x.type.match('image')).map(x => `<img src="${x.url}" data-name="${x.name}" />`).join('') : ''}
                                     ${m.message.replace(/[&<>]/g, (t) => ttr[t] || t)}
                                 ` : '<i>This message was deleted</i>'}
                             </p>
@@ -477,7 +478,7 @@ function load_more_messages() {
                             </div>
                             <div class="message-content">
                                 <p>${!m.deleted ? `
-                                    ${m.attachments ? m.attachments.filter(x => x.type.match('image')).map(x => `<img src="${x.url}" />`).join('') : ''}
+                                    ${m.attachments ? m.attachments.filter(x => x.type.match('image')).map(x => `<img src="${x.url}" data-name="${x.name}" />`).join('') : ''}
                                     ${m.message.replace(/[&<>]/g, (t) => ttr[t] || t)}
                                 ` : '<i>This message was deleted</i>'}
                                 </p>

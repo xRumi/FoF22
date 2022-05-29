@@ -171,16 +171,19 @@ module.exports.sockets = (io, client) => {
                                     }
 
                                     const process_file = async (attachment) => {
-                                        if (attachment && attachment.type?.match('image') && attachment.size == attachment.bytes?.length) {
+                                        if (attachment && attachment.name && attachment.type?.match('image') && attachment.size == attachment.bytes?.length) {
+                                            attachment.name = attachment.name.substring(0, 100);
                                             return new Promise((resolve, reject) => {
-                                                let __id = Math.random().toString(36).substring(2, 15);
+                                                let __id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+                                                let attachment_extension = attachment.name.includes('.') ? attachment.name.split('.').pop() : false;
+                                                let attachment_path_inside_room = __id + (attachment_extension?.length < 8 ? `.${attachment_extension}` : '');
                                                 let buffer = Buffer.from(attachment.bytes);
-                                                fs.writeFile(`${room_img_path}/${__id}_${attachment.name}`, buffer, (err, result) => {
+                                                fs.writeFile(`${room_img_path}/${attachment_path_inside_room}`, buffer, (err, result) => {
                                                     if (!err) resolve({
                                                         name: attachment.name,
                                                         type: attachment.type,
                                                         size: attachment.size,
-                                                        url: `/dist/img/rooms/${room.id}/${__id}_${attachment.name}`
+                                                        url: `/dist/img/rooms/${room.id}/${attachment_path_inside_room}`
                                                     });
                                                     else reject();
                                                 });

@@ -21,7 +21,7 @@ module.exports = (client) => {
     const _limiter1 = rateLimit({
         windowMs: 24 * 60 * 60 * 1000,
         max: 15,
-        message: 'Too many requests'
+        message: 'Too many requests, blocked for a day'
     });
 
     router.post('/recover-password/new', limiter1, _limiter1, async (req, res) => {
@@ -36,7 +36,7 @@ module.exports = (client) => {
                     subject: `Reset your password`,
                     html: `
                         <div style="font-size: 15px;">
-                            Reset your account password by clicking the link below.
+                            Reset your account password by clicking the link below. This link will expire in a day.
                         </div>
                         <br>
                         <a style="text-decoration: none;" href="https://fof22.me/reset-password/?token=${token.id}">https://fof22.me/reset-password/?token=${token.id}</a>
@@ -77,9 +77,9 @@ module.exports = (client) => {
                         await token.remove();
                         res.redirect('/login');
                     }
-                } else res.redirect('/login');
-            } else res.redirect('/login');
-        } else res.redirect('/');
+                } else res.status(400).send('token is invaild');
+            } else res.status(400).send('invaild token, is expired or not found');
+        } else res.status(400).send(`you are logged in as ${req.user.username}, logout and try again`);
     });
 
     const limiter3 = rateLimit({
@@ -88,7 +88,13 @@ module.exports = (client) => {
         message: 'Too many requests',
     });
 
-    router.post('/reset-password/post', limiter3, async (req, res) => {
+    const _limiter3 = rateLimit({
+        windowMs: 24 * 60 * 60 * 1000,
+        max: 100,
+        message: 'Too many requests, blocked for a day'
+    });
+
+    router.post('/reset-password/post', limiter3, _limiter3, async (req, res) => {
         let _token = req.body.token,
             password = req.body.password;
         if (_token && password?.length >= 8 && ObjectId.isValid(_token)) {
@@ -104,7 +110,7 @@ module.exports = (client) => {
                         let filter = {'session':{'$regex': '.*"user":"'+user.username+'".*'}};
                         Session.deleteMany(filter);
                         await user.save();
-                        res.status(200).send('Password changed successfully, redirecting to login page in 5 seconds');
+                        res.status(200).send('Password changed successfully, redirecting to login page in 3 seconds');
                     }
                 } else {
                     await token.remove();

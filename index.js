@@ -14,7 +14,7 @@ const passport = require('passport'),
 const path = require('path');
 app.set('trust proxy', true);
 
-mongoose.connect('mongodb+srv://main:iVAFZ0z5YDcHf5jm@cluster0.pcm42.mongodb.net/main?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
+mongoose.connect(`mongodb+srv://main:iVAFZ0z5YDcHf5jm@cluster0.pcm42.mongodb.net/${process.env.DEV ? 'dev' : 'main'}?retryWrites=true&w=majority`, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
     console.log('MongoDB database connected');
 }).catch((err) => {
     return console.log(`MongoDB database error: ${err}`);

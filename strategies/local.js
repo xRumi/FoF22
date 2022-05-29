@@ -12,10 +12,7 @@ module.exports = {
         passport.deserializeUser(async (id, done) => {
             const user = await client.database.functions.get_user(id);
             if (user) done(null, user);
-            else {
-                console.log('nooooo, something went wrong in local.js');
-                done(null, false);
-            }
+            else done(null, false);
         });
 
         passport.use(

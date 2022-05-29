@@ -30,8 +30,10 @@ module.exports = (client) => {
                                 name,
                                 image: image || `/dist/img/users/61d001de9b64b8c435985da9/profile.png`,
                                 time: last_message?.time,
-                                last_message: last_message?.message || 'This message was deleted',
-                                unread: user_room_unread
+                                last_message: last_message?.message,
+                                unread: user_room_unread,
+                                deleted: last_message?.deleted,
+                                has_attachment: last_message?.attachments?.length
                             });
                         }
                     }

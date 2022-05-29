@@ -1,7 +1,7 @@
 const token = new URLSearchParams(window.location.search).get('token');
 $('#sub-btn').click(function() {
     if (!is_valid()) return false;
-    $('#sub-btn').prop("disabled", true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Reseting');
+    $('#sub-btn').prop("disabled", true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
     const password = $("#password").val();
     $.ajax({
         type: 'POST',
@@ -13,8 +13,8 @@ $('#sub-btn').click(function() {
         timeout: 30000,
         success: function(result, textStatus, xhr) {
             $('.alert-section').html(`<div class="alert alert-success" role="alert">${result}</div>`);
-            $('#sub-btn').html('Success').addClass('btn-success').css('opacity', '1');
-            setTimeout(() => { window.location.replace('/login'); }, 5000);
+            $('#sub-btn').html('done').addClass('btn-success').css('opacity', '1');
+            setTimeout(() => { window.location.replace('/login'); }, 3000);
         },
         error: function(xhr, textStatus, errorThrown) {
             $('.alert-section').html(`<div class="alert alert-danger" role="alert">${xhr.responseText || 'Something went wrong! Try again later.'}</div>`);
