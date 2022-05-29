@@ -23,7 +23,13 @@ module.exports = mongoose.model("user", new mongoose.Schema({
     } },
 
     created_at: { type: Date, default: Date.now },
-    status: { type: String, default: 'active' },
+    deleted_at: { type: Date, default: null },
+    delete_requested_at: { type: Date, deafult: null },
+    deactived_at: { type: Date, default: null },
+    account_status: { type: String, default: 'active' },
+
+    presence_type: { type: String, default: 'friends-only' },
+    hide_presence: { type: Boolean, default: false },
 
     friends: { type: Array, default: [] },
     rooms: { type: Array, default: [] },

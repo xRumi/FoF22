@@ -101,7 +101,7 @@ module.exports = (client) => {
     router.post('/deactive', async (req, res) => {
         if (req.user) {
             if (req.body.password === req.user.password) {
-                req.user.status = 'deactive';
+                req.user.account_status = 'deactive';
                 await req.user.save();
                 await req.session.destroy();
                 res.status(200).send( 'account deactivated, re-login to cancel' );
@@ -114,7 +114,7 @@ module.exports = (client) => {
     router.post('/delete', async (req, res) => {
         if (req.user) {
             if (req.body.password === req.user.password) {
-                req.user.status = 'delete';
+                req.user.account_status = 'delete';
                 req.user.delete_time = new Date((new Date()) + 86400000);
                 await req.user.save();
                 await req.session.destroy();

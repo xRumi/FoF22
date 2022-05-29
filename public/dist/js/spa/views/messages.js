@@ -37,7 +37,10 @@ const people_list = (new_people_list) => {
                 <div class="_people-content">
                     <span class="_people-time">${parse_message_time(x.time, true)}</span>
                     <span class="_people-name">${x.name}</span>
-                    <p>${!x.deleted ? `${x.has_attachment ? `<span style="color: darkred;">(attachment${x.has_attachment > 1 ? 's' : ''})</span> ` : ''}${x.last_message ? x.last_message.replace(/[&<>]/g, (t) => ttr[t] || t) : ''}` : '<i>This message was deleted</i>'}</p>
+                    <p>${!x.deleted ? `${x.has_attachment ? 
+                        `<i class="bx bx-paperclip"></i> ` : ''}
+                        <span>${x.last_message ? x.last_message.replace(/[&<>]/g, (t) => ttr[t] || t) : ''}</span>` : '<i>This message was deleted</i>'}
+                    </p>
                 </div>
             </div>
         `).on('click', (e) => {
@@ -111,8 +114,12 @@ export default class extends Constructor {
                         </div>
                         <p class="messages-header-back-text header-back-text"></p>
                     </div>
+                    <div class="messages-info" style="display: none;">
+                        <div class="messages-info-text"></div>
+                        <i class="bx bx-dots-vertical"></i>
+                    </div>
                     <div class="load-more-messages" style="display: none;">
-                        See More Messages
+                        See Older Messages
                         <div class="lds-dual-ring" style="display: none;"></div>
                     </div>
                     <div class="messages-list scrollbar">
@@ -178,7 +185,10 @@ export default class extends Constructor {
                             let prev_message_time = prev_message ? prev_message.querySelector('.outgoing .message-time') : false;
                             if (prev_message_time && prev_message_time.innerText && (parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 7 * 60 * 1000) prev_message_time.remove();
                             message[0].querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${parse_message_time(chat.time)}</div>`);
-                            $(`._people[data-id="${id}"]`).find('._people-content p').text(chat.message ? chat.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>')
+                            $(`._people[data-id="${id}"]`).find('._people-content p').html(`${!chat.deleted ? `${chat.attachments && chat.attachments.length ? 
+                                `<i class="bx bx-paperclip"></i> ` : ''}
+                                <span>${chat.message ? chat.message.replace(/[&<>]/g, (t) => ttr[t] || t) : ''}</span>` : '<i>This message was deleted</i>'}
+                            `);
                         }
                     }
                 }
@@ -303,7 +313,6 @@ socket.on('receive-message', ({ id, chat, _id }) => {
             let prev_message_time = prev_message ? prev_message.querySelector('.outgoing .message-time') : false;
             if (prev_message_time && prev_message_time.innerText && (parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 7 * 60 * 1000) prev_message_time.remove();
             message[0].querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${parse_message_time(chat.time)}</div>`);
-            $(`._people[data-id="${id}"]`).find('._people-content p').text(chat.message ? chat.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>')
         } else {
             let prev_message = client.id == chat.user ? $('.message:last-child.outgoing')[0] : $('.message:last-child:not(.outgoing)')[0];
             let prev_message_time = prev_message ? prev_message.querySelector('.message-time') : false;
@@ -324,8 +333,11 @@ socket.on('receive-message', ({ id, chat, _id }) => {
                     </div>
                 </div>
             `);
-            $(`._people[data-id="${id}"]`).find('._people-content p').text(chat.message ? chat.message.replace(/[&<>]/g, (t) => ttr[t] || t) : '<i>This message was deleted</i>')
         }
+        $(`._people[data-id="${id}"]`).find('._people-content p').html(`${!chat.deleted ? `${chat.attachments && chat.attachments.length ? 
+            `<i class="bx bx-paperclip"></i> ` : ''}
+            <span>${chat.message ? chat.message.replace(/[&<>]/g, (t) => ttr[t] || t) : ''}</span>` : '<i>This message was deleted</i>'}
+        `);
     }
 });
 
@@ -362,14 +374,14 @@ let today = new Date();
 
 let months = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ];
 
-function parse_message_time(message_time, minimal) {
+function parse_message_time(message_time, minimal, need_prefix) {
     let _time = new Date(message_time),
         diff = Math.abs(Date.now() - message_time), time;
     if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
-    else if (diff < periods.day && _time.getDate() === today.getDate()) time = `Today at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
+    else if (diff < periods.day && _time.getDate() === today.getDate()) time = `${!minimal ? `Today at ` : ''}${need_prefix ? 'at ' : ''}${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
     else {
-        if (diff < periods.week) time = `${days[_time.getDay()]}${!minimal ? ` at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}` : ``}`;
-        else time = `${_time.getDate()} ${months[_time.getMonth()]}${!minimal ? ` at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}` : ``}${_time.getFullYear() !== today.getFullYear() ? `, ${_time.getFullYear()}` : ''}`
+        if (diff < periods.week) time = `${need_prefix ? 'on ' : ''}${days[_time.getDay()]}${!minimal ? ` at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}` : ``}`;
+        else time = `${need_prefix ? 'on ' : ''}${_time.getDate()} ${months[_time.getMonth()]}${!minimal ? ` at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}` : ``}${_time.getFullYear() !== today.getFullYear() ? `, ${_time.getFullYear()}` : ''}`
     }
     return time;
 }
@@ -411,7 +423,7 @@ function join_room(response) {
         if (client.messages.room_id == id) $('.messages-list').append(error);
         $('.messages-list .lds-dual-ring').hide();
     } else {
-        let { messages, id, name, mm } = response;
+        let { chat_data, messages, id, name, mm } = response;
         if (client.messages.room_id == id) {
             document.title = name;
             $('.messages-header-back-text').text(name);
@@ -419,7 +431,7 @@ function join_room(response) {
             for (let i = 0; i < messages.length; i++) {
                 let m = messages[i];
                 html.push(m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
-                    <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${m.deleted ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
+                    <div class="message${client.id !== m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${m.deleted ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
                         <div class="message-img">
                             <img src="/dist/img/users/${m.user}/profile.png">
                         </div>
@@ -435,6 +447,8 @@ function join_room(response) {
                 lm = m;
             }
             message_time(html, (_html) => {
+                messages_info_header_text(chat_data);
+                $('.messages-info-text').text()
                 $('.messages-list').html(_html);
                 $('#message-input').prop('disabled', false);
                 $('#message-input-files-button').prop('disabled', false);
@@ -455,6 +469,19 @@ function send_message(_message, _attachments, _id, callback) {
         else if (response.join_room) socket.emit('join-room', client.messages.room_id, () => send_message(_message, _attachments, _id, callback));
         else if (response.error) callback({ error: response.error });
     });
+}
+
+function messages_info_header_text(chat_data) {
+    if (chat_data.is_private) {
+        let other_member = chat_data.members.find(x => x.id !== client.id);
+        if (other_member) $('.messages-info-text').html(other_member ?
+            other_member.status == 'online' ?
+                `<span style="color: green;">online</span>` :
+                other_member.last_online ? 
+                `active ${parse_message_time(other_member.last_online, true)}` :
+                `offline`
+            : `offline`).parent().show();
+    }
 }
 
 function load_more_messages() {

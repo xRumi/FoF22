@@ -102,7 +102,7 @@ module.exports = (client) => {
             if (token && token.expire_at > Date.now()) {
                 let user = await client.database.functions.get_user(token.user_id);
                 if (user) {
-                    if (user.status == 'deleted') res.status(400).send('You can\'t change password of a deleted account');
+                    if (user.account_status == 'deleted') res.status(400).send('You can\'t change password of a deleted account');
                     else {
                         await token.remove();
                         user.password = password;

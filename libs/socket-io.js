@@ -9,7 +9,7 @@ module.exports.sockets = (io, client) => {
         if (user) {
             socket.join(user.id);
             socket.user_id = user.id;
-            client.cache.functions.update_user({ username: user.username, status: 'online' });
+            client.cache.functions.update_user(user.id, { status: 'online' });
             socket.on('autocomplete', async (term, callback) => {
                 if (!is_function(callback)) return false;
                 if (term) {
@@ -102,13 +102,22 @@ module.exports.sockets = (io, client) => {
                                             read: [user_room.id]
                                         } }));
                                     }
-                                    callback({ user: user.id, messages, id, name: name ? name : 'unknown', mm: chat.messages.length > 7 ? true : false });
+                                    client.cache.functions.get_many_user(room.members, (error, result = []) => {
+                                        if (error) console.log('[socket-io.js] get_many_user callback error');
+                                        let members = room.type == 'private' ? result : null;
+                                        callback({ chat_data: {
+                                            is_private: room.type == 'private' && room.members.length < 3,
+                                            total_member: room.members.length,
+                                            members,
+                                        }, user: user.id, messages, id, name: name || 'unknown', mm: chat.messages.length > 7 });
+                                    });
                                 });
                             }
                         } else callback({ id, error: '<p>Oops! Chat Not Be Found</p><p>Sorry but the chat room you are looking for does not exist, have been removed. id changed or is temporarily unavailable</p>' });
                     } else callback({ id, error: '<p>Oops! Chat Not Be Found</p><p>Sorry but the chat room you are looking for does not exist, have been removed. id changed or is temporarily unavailable</p>' });
                 }
             });
+            /* TODO: socket.on('get-room-member') */
             socket.on('load-more-messages', async (id, callback) => {
                 if (!is_function(callback)) return false;
                 if (id && id.length > 8) {
@@ -287,7 +296,7 @@ module.exports.sockets = (io, client) => {
                 }
             });
             socket.on('disconnect', async () => {
-                client.cache.functions.update_user({ username: user.username, status: 'offline' });
+                client.cache.functions.update_user(user.id, { status: 'offline', last_online: Date.now() });
             });
         } else socket.emit('redirect', '/login?ref=messages');
     });

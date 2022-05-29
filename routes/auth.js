@@ -30,17 +30,17 @@ module.exports = (client) => {
                     user.login_retry = 0;
                     await user.save();
                 }
-                if (user.status == 'active') return res.status(200).json({ message: 'user logged in', returnTo });
-                else if (user.status == 'deactive') {
-                    user.status = 'active';
+                if (user.account_status == 'active') return res.status(200).json({ message: 'user logged in', returnTo });
+                else if (user.account_status == 'deactive') {
+                    user.accounr_status = 'active';
                     await user.save();
                     return res.status(200).json({ message: 'account activated', returnTo });
-                } else if (user.status == 'delete') {
-                    user.status = 'active';
-                    user.delete_time = null;
+                } else if (user.account_status == 'delete') {
+                    user.account_status = 'active';
+                    user.delete_requested_at = null;
                     await user.save();
                     return res.status(200).json({ message: 'account deletion cancelled', returnTo });
-                } else if (user.status == 'deleted') return res.status(400).send( 'account already deleted' );
+                } else if (user.account_status == 'deleted') return res.status(400).send( 'account already deleted' );
                 else {
                     console.log(user);
                     return res.status(200).json({ message: 'account status unknown', returnTo });

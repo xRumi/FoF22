@@ -66,6 +66,12 @@
 	width: 70%;
 }
 
+._people-content p i {
+    float: left;
+    font-size: 16px;
+    margin-right: 3px;
+}
+
 ._people-img {
     width: 45px;
     height: 45px;
@@ -294,8 +300,8 @@
 	font-size: 15px;
 	cursor: pointer;
     padding: 10px;
-    border-bottom: solid 1px;
-    background-color: #f8f8f8;
+    border-bottom: solid 1px grey;
+    color: #007fff;
 }
 
 .system-message {
@@ -352,3 +358,19 @@
     margin-bottom: 5px;
 }
 
+.messages-info {
+    border-bottom: solid 1px grey;
+    padding: 10px;
+}
+
+.messages-info-text {
+    font-size: 14px;
+    color: grey;
+    display: inline;
+}
+
+.messages-info i {
+    float: right;
+    font-size: 25px;
+    transform: translateY(-4px);
+}
