@@ -431,7 +431,7 @@ function join_room(response) {
             for (let i = 0; i < messages.length; i++) {
                 let m = messages[i];
                 html.push(m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
-                    <div class="message${client.id !== m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${m.deleted ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
+                    <div class="message${client.id === m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${m.deleted ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
                         <div class="message-img">
                             <img src="/dist/img/users/${m.user}/profile.png">
                         </div>
