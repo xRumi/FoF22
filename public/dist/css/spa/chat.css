@@ -117,7 +117,6 @@
 	margin: 0;
 	background: #efefef none repeat scroll 0 0;
 	border-radius: 8px;
-	color: #646464;
 	font-size: 14px;
 	padding: 8px;
 	margin-left: 8px;
@@ -125,16 +124,12 @@
 	word-break: break-all;
 }
 
-.message-content p img {
+.message-content img {
     max-width: 280px;
     max-height: 280px;
     display: block;
     margin-bottom: 5px;
     border-radius: 5px;
-}
-
-.message-content p span .message-content p img ~ .message-content p {
-    color: red;
 }
 
 .message-time {
@@ -373,4 +368,12 @@
     float: right;
     font-size: 25px;
     transform: translateY(-4px);
+}
+
+.pending-message > .message-content > img {
+    opacity: 0.5;
+}
+
+.pending-message > .message-content > p {
+    background-color: lightblue;
 }

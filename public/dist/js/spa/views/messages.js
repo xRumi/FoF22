@@ -157,12 +157,10 @@ export default class extends Constructor {
             $('#message-input-file-text').text('No file selected');
             $('.message-input-files-preview').html('');
             $('.messages-list').append(`
-                <div class="message outgoing" data-username="${client.username}">
+                <div id="${_id}" class="message outgoing pending-message" data-username="${client.username}">
                     <div class="message-content">
-                        <p id="${_id}" style="background-color: lightblue;">
-                            ${attachments.length ? attachments.map(x => `<img src="${x.base64}" data-name="${x.name}" />`).join('') : ''}
-                            ${_message ? _message.replace(/[&<>]/g, (t) => ttr[t] || t) : ''}
-                        </p>
+                        ${attachments.length ? attachments.map(x => `<img src="${x.base64}" data-name="${x.name}" />`).join('') : ''}
+                        ${_message ? '<p>' + _message.replace(/[&<>]/g, (t) => ttr[t] || t) + '</p>' : ''}
                     </div>
                 </div>
             `);
@@ -176,10 +174,9 @@ export default class extends Constructor {
                 else {
                     const { id, chat, _id } = response;
                     if (client.messages.room_id == id) {
-                        let message_content = $(`#${_id}`);
-                        if (message_content.length) {
-                            message_content.css('background-color', '#007bff');
-                            let message = message_content.parent().parent();
+                        let message = $(`#${_id}`);
+                        if (message.length) {
+                            message.removeClass('pending-message');
                             message.attr({ 'data-username': chat.username, 'data-user-id': chat.user, 'data-id': chat.id, 'data-time': chat.time });
                             let prev_message = message.prev()[0];
                             let prev_message_time = prev_message ? prev_message.querySelector('.outgoing .message-time') : false;
@@ -275,7 +272,7 @@ export default class extends Constructor {
                 let attachment_length = attachments.length;
                 $('#message-input-file-text').text(attachment_length ? `${attachment_length} file${attachment_length > 1 ? 's' : ''} selected, click to remove` : 'No file selected');
             }
-        }).on('click', '.message-content p img', (e) => {
+        }).on('click', '.message-content img', (e) => {
             let that = $(e.currentTarget).clone();
             history.pushState(null, null, window.location.href.replace(window.location.origin, ""));
             $('.view-images').html(that);
@@ -304,10 +301,9 @@ export default class extends Constructor {
 
 socket.on('receive-message', ({ id, chat, _id }) => {
     if (client.messages.room_id == id) {
-        let message_content = $(`#${_id}`);
-        if (message_content.length) {
-            message_content.css('background-color', '#007bff');
-            let message = message_content.parent().parent();
+        let message = $(`#${_id}`);
+        if (message.length) {
+            message.removeClass('pending-message');
             message.attr({ 'data-username': chat.username, 'data-user-id': chat.user, 'data-id': chat.id, 'data-time': chat.time });
             let prev_message = message.prev()[0];
             let prev_message_time = prev_message ? prev_message.querySelector('.outgoing .message-time') : false;
@@ -323,12 +319,10 @@ socket.on('receive-message', ({ id, chat, _id }) => {
                         <img src="/dist/img/users/${chat.user}/profile.png">
                     </div>
                     <div class="message-content">
-                        <p>
-                            ${!chat.deleted ? `
-                                ${chat.attachments ? chat.attachments.filter(x => x.type.match('image')).map(x => `<img src="${x.url}" data-name="${x.name}" />`).join('') : ''}
-                                ${chat.message.replace(/[&<>]/g, (t) => ttr[t] || t)}
-                            ` : '<i>This message was deleted</i>'}
-                        </p>
+                        ${!chat.deleted ? `
+                            ${chat.attachments ? chat.attachments.filter(x => x.type.match('image')).map(x => `<img src="${x.url}" data-name="${x.name}" />`).join('') : ''}
+                            ${chat.message ? '<p>' + chat.message.replace(/[&<>]/g, (t) => ttr[t] || t) + '</p>' : ''}
+                        ` : `<p><i>This message was deleted</i>`}
                         <div class="message-time">${parse_message_time(chat.time)}</div>
                     </div>
                 </div>
@@ -436,11 +430,10 @@ function join_room(response) {
                             <img src="/dist/img/users/${m.user}/profile.png">
                         </div>
                         <div class="message-content">
-                            <p>${!m.deleted ? `
-                                    ${m.attachments ? m.attachments.filter(x => x.type.match('image')).map(x => `<img src="${x.url}" data-name="${x.name}" />`).join('') : ''}
-                                    ${m.message.replace(/[&<>]/g, (t) => ttr[t] || t)}
-                                ` : '<i>This message was deleted</i>'}
-                            </p>
+                            ${!m.deleted ? `
+                                ${m.attachments ? m.attachments.filter(x => x.type.match('image')).map(x => `<img src="${x.url}" data-name="${x.name}" />`).join('') : ''}
+                                ${m.message ? '<p>' + m.message.replace(/[&<>]/g, (t) => ttr[t] || t) + '</p>' : ''}
+                            ` : `<p><i>This message was deleted</i>`}
                         </div>
                     </div>
                 `);
@@ -504,11 +497,10 @@ function load_more_messages() {
                                 <img src="/dist/img/users/${m.user}/profile.png">
                             </div>
                             <div class="message-content">
-                                <p>${!m.deleted ? `
+                                ${!m.deleted ? `
                                     ${m.attachments ? m.attachments.filter(x => x.type.match('image')).map(x => `<img src="${x.url}" data-name="${x.name}" />`).join('') : ''}
-                                    ${m.message.replace(/[&<>]/g, (t) => ttr[t] || t)}
-                                ` : '<i>This message was deleted</i>'}
-                                </p>
+                                    ${m.message ? '<p>' + m.message.replace(/[&<>]/g, (t) => ttr[t] || t) + '</p>' : ''}
+                                ` : `<p><i>This message was deleted</i>`}
                             </div>
                         </div>
                     `);
