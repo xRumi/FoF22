@@ -52,6 +52,7 @@ const people_list = (new_people_list) => {
             $('#message-input').prop('disabled', true);
             $('#message-input-files-button').prop('disabled', true);
             $('.message-send-icon').hide();
+            $('.messages-info').hide();
             $('.load-more-messages .lds-dual-ring').hide();
             $('.load-more-messages').hide();
             $('.messages-list').html('');
@@ -316,7 +317,7 @@ socket.on('receive-message', ({ id, chat, _id }) => {
             $('.messages-list').append(`
                 <div class="message${client.id == chat.user ? ' outgoing' : $('.message:last-child').data('user-id') == chat.user ? ' stack-message' : ''}${chat.deleted ? ' message-deleted' : ''}" data-username="${chat.username}" data-user-id="${chat.user}" data-id="${chat.id}" data-time="${chat.time}">
                     <div class="message-img">
-                        <img src="/dist/img/users/${chat.user}/profile.png">
+                        <img src="/dist/img/users/${chat.user}/profile.png" onclick="$.fn.navigateTo('/spa/profile/${chat.user}');">
                     </div>
                     <div class="message-content">
                         ${!chat.deleted ? `
@@ -427,7 +428,7 @@ function join_room(response) {
                 html.push(m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
                     <div class="message${client.id === m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${m.deleted ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
                         <div class="message-img">
-                            <img src="/dist/img/users/${m.user}/profile.png">
+                            <img src="/dist/img/users/${m.user}/profile.png" onclick="$.fn.navigateTo('/spa/profile/${m.user}');">
                         </div>
                         <div class="message-content">
                             ${!m.deleted ? `
@@ -441,7 +442,6 @@ function join_room(response) {
             }
             message_time(html, (_html) => {
                 messages_info_header_text(chat_data);
-                $('.messages-info-text').text()
                 $('.messages-list').html(_html);
                 $('#message-input').prop('disabled', false);
                 $('#message-input-files-button').prop('disabled', false);
@@ -494,7 +494,7 @@ function load_more_messages() {
                     html.push(m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
                         <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${m.deleted ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
                             <div class="message-img">
-                                <img src="/dist/img/users/${m.user}/profile.png">
+                                <img src="/dist/img/users/${m.user}/profile.png" onclick="$.fn.navigateTo('/spa/profile/${m.user}');">
                             </div>
                             <div class="message-content">
                                 ${!m.deleted ? `
