@@ -1,13 +1,15 @@
 const nanobar = new Nanobar(),
     socket = io();
+
+const body = $('body');
     
 const client = {
     messages: {
         room_id: null,
     },
-    id: null,
-    username: null,
-    name: null
+    id: body.data('id'),
+    username: body.data('username'),
+    name: body.data('name')
 };
 
 var before_new_render = null;
