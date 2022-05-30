@@ -53,7 +53,7 @@ const people_list = (new_people_list) => {
             $('#message-input-files-button').prop('disabled', true);
             $('.message-send-icon').hide();
             $('.messages-info').hide();
-            $('.load-more-messages .lds-dual-ring').hide();
+            $('.load-more-messages .spinner').hide();
             $('.load-more-messages').hide();
             $('.messages-list').html('');
             $('._people-active').removeClass('_people-active');
@@ -105,7 +105,9 @@ export default class extends Constructor {
                 <div class="people">
                     <div class="people-header"></div>
                     <div class="people-list scrollbar">
-                        <div class="lds-dual-ring"></div>
+                        <svg class="spinner" style="width: 30px; margin-left: 30px; margin-top: 20px;" viewBox="0 0 50 50">
+                            <circle class="spinner-path" cx="25" cy="25" r="20" fill="none" stroke-width="3"></circle>
+                        </svg>
                     </div>
                 </div>
                 <div class="messages">
@@ -121,16 +123,14 @@ export default class extends Constructor {
                     </div>
                     <div class="load-more-messages" style="display: none;">
                         See Older Messages
-                        <div class="lds-dual-ring" style="display: none;"></div>
+                        <svg class="spinner" style="width: 20px; height: 20px; margin-left: 10px; display: none;" viewBox="0 0 50 50">
+                            <circle class="spinner-path" style="stroke: black;" cx="25" cy="25" r="20" fill="none" stroke-width="3"></circle>
+                        </svg>
                     </div>
-                    <div class="messages-list scrollbar">
-                        <div class="lds-dual-ring"></div>
-                    </div>
+                    <div class="messages-list scrollbar"></div>
                     <div class="messages-typing message" style="display: none">
                         <div class="message-img"></div>
-                        <div class="message-content">
-                            <p><b>Rumi</b> is typing..</p>
-                        </div>
+                        <div class="message-content"></div>
                     </div>
                     <div class="messages-bottom">
                         <form autocomplete="off">
@@ -220,7 +220,7 @@ export default class extends Constructor {
             $('.navbar').removeClass('chat-active');
         }).on('click', '.load-more-messages', e => {
             if (loading_more_messages) return false;
-            $('.load-more-messages .lds-dual-ring').css('display', 'inline-block');
+            $('.load-more-messages .spinner').show();
             loading_more_messages = true;
             load_more_messages();
         }).on('click', '#message-input-files input:button', (e) => {
@@ -416,7 +416,7 @@ function join_room(response) {
     if (response.error) {
         let { id, error } = response;
         if (client.messages.room_id == id) $('.messages-list').append(error);
-        $('.messages-list .lds-dual-ring').hide();
+        $('.messages-list .spinner').hide();
     } else {
         let { chat_data, messages, id, name, mm } = response;
         if (client.messages.room_id == id) {
@@ -479,7 +479,7 @@ function messages_info_header_text(chat_data) {
 
 function load_more_messages() {
     if (!client.messages.room_id) {
-        $('.load-more-messages .lds-dual-ring').hide();
+        $('.load-more-messages .spinner').hide();
         return false;
     }
     socket.emit('load-more-messages', $('.message')[0].getAttribute('data-id'), (response) => {
@@ -508,9 +508,9 @@ function load_more_messages() {
                 }
                 message_time(html, (_html) => {
                     $('.messages-list').prepend(_html);
-                    $('.load-more-messages .lds-dual-ring').hide();
+                    $('.load-more-messages .spinner').hide();
                 });
-            } else $('.load-more-messages .lds-dual-ring').hide();
+            } else $('.load-more-messages .spinner').hide();
             if (!mm) $('.load-more-messages').hide();
         }
     });

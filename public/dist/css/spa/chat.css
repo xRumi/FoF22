@@ -244,46 +244,6 @@
 	flex-direction: row-reverse;
 }
 
-.lds-dual-ring {
-	margin-top: 20px;
-	display: flex;
-	justify-content: center;
-}
-
-.lds-dual-ring:after {
-	content: " ";
-	display: block;
-	width: 30px;
-	height: 30px;
-	margin: 8px;
-	border-radius: 50%;
-	border: 2px solid #fff;
-	border-color: gray transparent gray transparent;
-	animation: lds-dual-ring 1.2s linear infinite;
-}
-
-@keyframes lds-dual-ring {
-	0% {
-		transform: rotate(0deg);
-	}
-
-	100% {
-		transform: rotate(360deg);
-	}
-}
-
-.load-more-messages .lds-dual-ring {
-	margin-top: unset;
-	display: inline-block;
-}
-
-.load-more-messages .lds-dual-ring::after {
-	width: 20px;
-	height: 20px;
-	border-width: 2px;
-	margin: 0 0 -5px 10px;
-}
-
 .stack-message .message-img {
 	visibility: hidden;
 }

@@ -87,15 +87,11 @@ export default class extends Constructor {
                         `;
                     }
                     $('.pc-user-info-body').html(profile_data_raw || '<div style="padding: 10px;">Nothing to show</div>');
-                    $('.profile .lds-dual-ring').hide();
                     $('.profile-content').show();
                     nanobar.go(100);
                 },
                 error: function(xhr, textStatus, errorThrown) {
-                    if (xhr.status == 404) {
-                        $('.profile-content').html(xhr.responseText).show();
-                        $('.profile .lds-dual-ring').hide();
-                    }
+                    if (xhr.status == 404) $('.profile-content').html(xhr.responseText).show();
                     _ajax0 = false;
                     nanobar.go(100);
                 },
@@ -116,7 +112,6 @@ export default class extends Constructor {
                     </div>
                     <p class="header-back-text"></p>
                 </div>
-                <div class="lds-dual-ring"></div>
                 <div class="profile-content" style="display: none;">
                     <div class="pc-main">
                         <div class="pc-user-cover">
