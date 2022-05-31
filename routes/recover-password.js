@@ -77,8 +77,8 @@ module.exports = (client) => {
                         await token.remove();
                         res.redirect('/login');
                     }
-                } else res.status(400).send('token is invaild');
-            } else res.status(400).send('invaild token, is expired or not found');
+                } else res.status(400).send('token is invalid');
+            } else res.status(400).send('invalid token, is expired or not found');
         } else res.status(400).send(`you are logged in as ${req.user.username}, logout and try again`);
     });
 

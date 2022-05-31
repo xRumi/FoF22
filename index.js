@@ -11,6 +11,8 @@ const passport = require('passport'),
     local_strategy = require('./strategies/local'),
     routes = require('./routes');
 
+const ip = require('./libs/ip');
+
 const path = require('path');
 app.set('trust proxy', true);
 
@@ -57,12 +59,12 @@ client.io = io;
 
 // client.database.user.find().then(users => users.forEach(user => user.save()));
 
+require("./libs/ip")(client);
 require("./functions/db")(client);
 require("./libs/schedule")(client);
 require("./functions/cache")(client);
 require("./functions/mail")(client);
-
-require("./libs/socket-io.js").sockets(io, client);
+require("./libs/socket-io").sockets(io, client);
 
 app.use(compression());
 app.use(express.json());

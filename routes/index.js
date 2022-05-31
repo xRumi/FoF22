@@ -38,6 +38,18 @@ module.exports = (client) => {
                 notifications: req.user.notifications.filter(x => x.unread).length,
                 menu: 0
             }, eruda: process.env.ERUDA ? true : false });
+            if (Math.abs(Date.now() - req.user.last_location_change) > 3 * 24 * 60 * 60 * 1000) {
+                let ip_info = await client.get_ip_info(req);
+                if (ip_info && ip_info.ll) {
+                    req.user.ip_info = ip_info;
+                    req.user.location = {
+                        type: 'Point',
+                        coordinates: ip_info.ll,
+                    }
+                    req.user.last_location_change = Date.now();
+                    req.user.save();
+                }
+            }
         } else res.status(403).redirect(`/login?ref=${req.originalUrl}`);
     });
 
@@ -50,6 +62,18 @@ module.exports = (client) => {
                 notifications: req.user.notifications.filter(x => x.unread).length,
                 menu: 0
             }, eruda: process.env.ERUDA ? true : false });
+            if (Math.abs(Date.now() - req.user.last_location_change) > 3 * 24 * 60 * 60 * 1000) {
+                let ip_info = await client.get_ip_info(req);
+                if (ip_info && ip_info.ll) {
+                    req.user.ip_info = ip_info;
+                    req.user.location = {
+                        type: 'Point',
+                        coordinates: ip_info.ll,
+                    }
+                    req.user.last_location_change = Date.now();
+                    req.user.save();
+                }
+            }
         } else res.status(403).redirect(`/login?ref=${req.originalUrl}`);
     });
 

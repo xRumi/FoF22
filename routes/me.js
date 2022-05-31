@@ -50,19 +50,7 @@ module.exports = (client) => {
                 }
                 res.sendStatus(200);
             } else {
-                req.user.login_retry++; let force_logout = false;
-                if (req.user.login_retry > 5 && req.user.login_retry < 8) {
-                    req.session.destroy();
-                    force_logout = true;
-                } else if (req.user.login_retry > 10) {
-                    req.session.destroy();
-                    let filter = {'session':{'$regex': '.*"user":"'+req.user.username+'".*'}};
-                    Session.deleteMany(filter);
-                    force_logout = true;
                 }
-                await req.user.save();
-                res.status(400).send(force_logout ? 'force_logout' : `incorrect(${req.user.login_retry})`);
-            }
         } else res.status(403).send('forbidden');
     });
 
@@ -75,6 +63,7 @@ module.exports = (client) => {
                 if (new_pass.length > 5 && new_pass.length < 21) {
                     if (new_pass === req.user.password) res.status(406).send('new password is the same as the previous one');
                     else {
+                        if (req.user.login_retry) req.user.login_retry = 0;
                         req.user.password = new_pass;
                         await req.user.save();
                         await req.session.destroy();
@@ -83,7 +72,20 @@ module.exports = (client) => {
                         res.status(200).send('password changed successfully');
                     }
                 } else res.status(400).send ('invalid data');
-            } else res.status(401).send('password is incorrect');
+            } else {
+                req.user.login_retry++; let force_logout = false;
+                if (req.user.login_retry > 5 && req.user.login_retry < 8) {
+                    req.session.destroy();
+                    force_logout = true;
+                } else if (req.user.login_retry > 10) {
+                    req.session.destroy();
+                    let filter = {'session':{'$regex': '.*"user":"'+req.user.username+'".*'}};
+                    Session.deleteMany(filter);
+                    force_logout = true;
+                }
+                await req.user.save();
+                res.status(400).send(force_logout ? 'force_logout' : `incorrect password (${Math.abs(5 - req.user.login_retry)})`);
+            }
         } else res.status(403).send('forbidden');
     });
 

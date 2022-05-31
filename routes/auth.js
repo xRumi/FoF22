@@ -26,26 +26,31 @@ module.exports = (client) => {
             req.logIn(user, async (err) => {
                 if (req.body.remember == 'false') req.session.cookie.expires = false;
                 if (err) return res.status(400).send( err );
-                if (user.login_retry) {
-                    user.login_retry = 0;
-                    await user.save();
-                }
-                if (user.account_status == 'active') return res.status(200).json({ message: 'user logged in', returnTo });
+                if (user.login_retry) user.login_retry = 0;
+                let save = false;
+                if (user.account_status == 'active') res.status(200).json({ message: 'user logged in', returnTo });
                 else if (user.account_status == 'deactive') {
-                    user.accounr_status = 'active';
-                    await user.save();
-                    return res.status(200).json({ message: 'account activated', returnTo });
+                    user.accounr_status = 'active'; save = true;
+                    res.status(200).json({ message: 'account activated', returnTo });
                 } else if (user.account_status == 'delete') {
-                    user.account_status = 'active';
+                    user.account_status = 'active'; save = true;
                     user.delete_requested_at = null;
-                    await user.save();
-                    return res.status(200).json({ message: 'account deletion cancelled', returnTo });
+                    res.status(200).json({ message: 'account deletion cancelled', returnTo });
                 } else if (user.account_status == 'deleted') return res.status(400).send( 'account already deleted' );
-                else {
-                    console.log(user);
-                    return res.status(200).json({ message: 'account status unknown', returnTo });
+                if (user.account_status !== 'deleted' && Math.abs(Date.now() - user.last_location_change) > 2 * 24 * 60 * 60 * 1000) {
+                    let ip_info = await client.get_ip_info(req);
+                    if (ip_info && ip_info.ll) {
+                        user.ip_info = ip_info;
+                        user.location = {
+                            type: 'Point',
+                            coordinates: ip_info.ll,
+                        }
+                        user.last_location_change = Date.now();
+                        save = true;
+                    }
                 }
-            })
+                if (save) await user.save();
+            });
         })(req, res, next);
     });
 

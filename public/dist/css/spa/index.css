@@ -326,6 +326,8 @@ img {
 	font-size: 45px;
 	float: left;
 	position: relative;
+    height: 60px;
+    width: 60px;
 }
 
 .header-back-text {
@@ -544,7 +546,7 @@ img {
 	margin-top: 40px;
 }
 
-.fr-req-header {
+.fr-req-header, .fr-nearby-header {
     padding: 10px;
     font-size: 14px;
     background-color: #07c;
@@ -552,45 +554,60 @@ img {
     color: white;
 }
 
-.fr-req-item {
+.fr-req-item, .fr-nearby-item {
     padding: 5px;
-    height: 55px;
+    height: 85px;
     background-color: light;
     border-bottom: solid 1px lightgrey;
 }
 
-.fr-req-img {
-    width: 40px;
-    height: 40px;
+.fr-req-show-more, .fr-nearby-show-more {
+    padding: 8px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.fr-req-img, .fr-nearby-img {
+    width: 50px;
+    height: 50px;
     overflow: hidden;
     border-radius: 50%;
     float: left;
+    margin-top: 5px;
 }
 
-.fr-req-content {
-    float: left;
-    margin-left: 5px;
+.fr-req-time {
+    float: right;
+    margin: 10px;
+}
+
+.fr-req-content, .fr-nearby-content {
+    margin-left: 66px;
+    margin-top: 5px;
+}
+
+.fr-req-content div, .fr-nearby-content div {
+    font-size: 13px;
+}
+
+.fr-req-content span, .fr-nearby-content span {
+    font-size: 11px;
+    color: grey;
+    display: block;
     margin-top: 3px;
 }
 
-.fr-req-content span {
-    font-size: 11px;
-    color: grey;
+.fr-req-btn-group, .fr-nearby-btn-group {
+    margin-top: 5px;
+    float: left;
+    margin-left: 10px;
 }
 
-.fr-req-btn-group {
-    margin-top: 7px;
-    float: right;
-	margin-right: 10px;
-}
-
-.fr-req-btn-group button {
+.fr-req-btn-group button, .fr-nearby-btn-group button {
     margin-left: 5px;
     border: 1px solid transparent;
     border-radius: 3px;
-    box-sizing: border-box;
     cursor: pointer;
-    display: inline-block;
     outline: none;
     padding: 4px 0.4em;
     position: relative;
@@ -667,7 +684,7 @@ img {
 
 /* account change-password start */
 
-.account-change-password {
+.account-change-password-form {
 	margin: auto;
     width: 780px;
     height: auto;
@@ -675,17 +692,17 @@ img {
 	margin-top: 40px;
 }
 
-.account-change-password-header {
-	padding: 10px;
-    font-size: 14px;
-    background-color: #07c;
-    padding-left: 10px;
-    color: white;
-	display: block;
+.account-change-password-form label {
+    display: block;
+}
+
+.account-change-password-form input {
+    margin-bottom: 10px;
+    width: 100%;
 }
 
 @media screen and (max-width: 800px) {
-    .account-change-password {
+    .account-change-password-form {
         width: 100%;
 		margin-top: 0;
     }

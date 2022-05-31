@@ -37,12 +37,19 @@ function init(id, username, name) {
 let n_time = new Date();
 
 const periods = {
+    year: 12 * 30 * 24 * 60 * 60 * 1000,
     month: 30 * 24 * 60 * 60 * 1000,
     week: 7 * 24 * 60 * 60 * 1000,
     day: 24 * 60 * 60 * 1000,
     hour: 60 * 60 * 1000,
     minute: 60 * 1000,
     second: 1000
+};
+const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const ttr = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;'
 };
 
 setTimeout(() => setInterval(() => {

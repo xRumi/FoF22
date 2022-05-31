@@ -4,20 +4,174 @@ module.exports = (client) => {
 
     router.get('/fetch', async (req, res) => {
         if (req.user) {
-            Promise.all(req.user.friend_requests.filter(x => x.type == 'pending').map(x => client.database.functions.get_user(x.target))).then(users => {
+            let request_limit = 10;
+            let _requests = req.user.friend_requests.filter(x => x.type == 'pending');
+            Promise.all(_requests.slice(0, request_limit).map(x => client.database.functions.get_user(x.target))).then(users => {
                 let requests = [];
                 for (let i = 0; i < users.length; i++) {
                     let user = users[i];
+                    let is_req_has_less_friends = req.user.friends.length < user.friends.length;
+                    let mutual_friends = is_req_has_less_friends ? req.user.friends.filter(x => user.friends.includes(x)) : user.friends.filter(x => req.user.friends.includes(x));
                     requests.push({
                         id: user.id,
                         username: user.username,
                         name: user.name,
+                        mutual: {
+                            sample: mutual_friends.slice(0, 3),
+                            count: mutual_friends.length
+                        },
                         created_at: req.user.friend_requests.find(x => x.type == 'pending' && x.target == user.id)?.created_at,
                     });
                 }
-                res.status(200).send(requests);
+                let ip_info = req.user.ip_info;
+                if (ip_info && ip_info.ll) {
+                    client.database.user.find({
+                        $and: [
+                            { created_at: { $lte: Date.now() } },
+                            { _id: { $ne: req.user.id } },
+                            { _id: { $nin: [
+                                ...req.user.friends,
+                                ...req.user.friend_requests.map(x => x.target),
+                                ...req.user.exclude_nearby,
+                                    ] }
+                            },
+                            {
+                                location: {
+                                    $nearSphere: {
+                                        $geometry: {
+                                            type: "Point",
+                                            coordinates: ip_info.ll,
+                                        },
+                                        $maxDistance: 10000,
+                                    },
+                                }
+                            }
+                        ]
+                    }).limit(request_limit).then(_users => {
+                        let nearby = [];
+                        for (let i = 0; i < _users.length; i++) {
+                            let _user = _users[i];
+                            nearby.push({
+                                id: _user.id,
+                                username: _user.username,
+                                name: _user.name,
+                            });
+                        }
+                        res.status(200).send({ requests, nearby, total_request_count: _requests.length });
+                    }).catch(err => {
+                        console.log(err);
+                        res.status(500).send('error finding nearby users');
+                    });
+                } else res.status(200).send({ requests, total_request_count: _requests.length });
             });
         } else res.status(403).send('forbidden');
+    });
+
+    router.get('/requests', async (req, res) => {
+        if (req.user) {
+            if (!(req.query.created_at?.length > 12)) return res.sendStatus(400);
+            let request_limit = 10;
+            let _requests = req.user.friend_requests.filter(x => x.type == 'pending');
+            if (_requests.length) {
+                let last_request = _requests.findIndex(x => x.created_at == req.query.created_at);
+                if (last_request == -1) return res.sendStatus(400);
+                Promise.all(_requests.slice(last_request + 1, request_limit).map(x => client.database.functions.get_user(x.target))).then(users => {
+                    let requests = [];
+                    for (let i = 0; i < users.length; i++) {
+                        let user = users[i];
+                        let is_req_has_less_friends = req.user.friends.length < user.friends.length;
+                        let mutual_friends = is_req_has_less_friends ? req.user.friends.filter(x => user.friends.includes(x)) : user.friends.filter(x => req.user.friends.includes(x));
+                        requests.push({
+                            id: user.id,
+                            username: user.username,
+                            name: user.name,
+                            mutual: {
+                                sample: mutual_friends.slice(0, 3),
+                                count: mutual_friends.length
+                            },
+                            created_at: req.user.friend_requests.find(x => x.type == 'pending' && x.target == user.id)?.created_at,
+                        });
+                    }
+                    res.status(200).send({ requests, total_request_count: _requests.length });
+                });
+            } else res.status(200).send([]);
+        } else res.status(403).send('forbidden');
+    });
+
+    router.get('/nearby', async (req, res) => {
+        if (req.user) {
+            if (!(req.query.created_at?.length > 12)) return res.sendStatus(400);
+            let ip_info = req.user.ip_info;
+            if (ip_info && ip_info.ll) {
+                let request_limit = 10;
+                client.database.user.find({
+                    $and: [
+                        { created_at: { $lte: req.query.created_at } },
+                        { _id: { $ne: req.user.id } },
+                        { _id: { $nin: [
+                            ...req.user.friends,
+                            ...req.user.friend_requests.map(x => x.target),
+                            ...req.user.exclude_nearby,
+                                ] }
+                        },
+                        {
+                            location: {
+                                $nearSphere: {
+                                    $geometry: {
+                                        type: "Point",
+                                        coordinates: ip_info.ll,
+                                    },
+                                    $maxDistance: 10000,
+                                },
+                            }
+                        }
+                    ]
+                }).limit(request_limit).then(users => {
+                    let nearby = [];
+                    for (let i = 0; i < users.length; i++) {
+                        let user = users[i];
+                        nearby.push({
+                            id: user.id,
+                            username: user.username,
+                            name: user.name,
+                        });
+                    }
+                    res.status(200).send(nearby);
+                }).catch(err => {
+                    console.log(err);
+                    res.status(500).send('error finding nearby users');
+                });
+            } else res.status(400).send('try again later');
+        } else res.sendStatus(403);
+    });
+
+    router.post('/nearby/remove', async (req, res) => {
+        if (req.user) {
+            let _user = req.body.user;
+            let user = await client.database.functions.get_user(_user);
+            if (user && user.id !== req.user.id) {
+                if (!req.user.exclude_nearby.includes(user.id)) {
+                    req.user.exclude_nearby.push(user.id);
+                    req.user.save();
+                    res.sendStatus(200);
+                } else res.sendStatus(200);
+            } else res.sendStatus(400);
+        } else res.sendStatus(403);
+    });
+
+    router.post('/nearby/undo-remove', async (req, res) => {
+        if (req.user) {
+            let _user = req.body.user;
+            let user = await client.database.functions.get_user(_user);
+            if (user && user.id !== req.user.id) {
+                let index = req.user.exclude_nearby.indexOf(user.id);
+                if (index > -1) {
+                    req.user.exclude_nearby.splice(index, 1);
+                    req.user.save();
+                    res.sendStatus(200);
+                } else res.sendStatus(200);
+            } else res.sendStatus(400);
+        } else res.sendStatus(403);
     });
 
     router.post('/add', async (req, res) => {
@@ -37,6 +191,10 @@ module.exports = (client) => {
                         created_at: Date.now(),
                         unread: true
                     });
+                    client.io.to(user.id).emit('unread', ({ friends: {
+                        count: user.friend_requests.filter(x => x.unread).length,
+                        unread: [req.user.id]
+                    } }));
                     user.markModified('friend_requests');
                     req.user.markModified('friend_requests');
                     await user.save();
@@ -92,7 +250,7 @@ module.exports = (client) => {
                     } else res.sendStatus(200);
                 }
             } else res.sendStatus(400);
-        } else res.status(403).send('forbidden');
+        } else res.sendStatus(403);
     });
 
     router.post('/cancel', async (req, res) => {

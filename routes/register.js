@@ -110,7 +110,7 @@ module.exports = (client) => {
                     _user.verified = true;
                     await _user.save();
                 }
-            } else res.status(400).send('invaild token, is expired or not found');
+            } else res.status(400).send('invalid token, is expired or not found');
         } else res.status(400).send(`you are logged in as ${req.user.username}, logout and try again`);
     });
 
@@ -140,7 +140,16 @@ module.exports = (client) => {
                 if (user_exists) return res.status(400).send('Username is not available');
                 let user = await client.database.functions.create_user(username, _user.email, password, name);
                 if (user) {
+                    let ip_info = await client.get_ip_info(req);
+                    if (ip_info && ip_info.ll) {
+                        user.ip_info = ip_info;
+                        user.location = {
+                            type: 'Point',
+                            coordinates: ip_info.ll,
+                        }
+                    }
                     await _user.remove();
+                    await user.save();
                     res.status(200).send('Password changed successfully, redirecting to login page in 3 seconds');  
                 } else res.status(400).send('Error activating account, try again later');
             } else res.status(400).send('Invalid token was provided');

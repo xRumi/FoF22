@@ -1,23 +1,6 @@
 import Constructor from "./constructor.js";
 
-const periods = {
-    month: 30 * 24 * 60 * 60 * 1000,
-    week: 7 * 24 * 60 * 60 * 1000,
-    day: 24 * 60 * 60 * 1000,
-    hour: 60 * 60 * 1000,
-    minute: 60 * 1000,
-    second: 1000
-};
-
-const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const ttr = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;'
-};
-
 const attachment_limit = 10;
-
 let attachments = [],
     old_people_list = [],
     _ajax0 = false,
@@ -123,7 +106,7 @@ export default class extends Constructor {
                     </div>
                     <div class="load-more-messages" style="display: none;">
                         See Older Messages
-                        <svg class="spinner" style="width: 20px; height: 20px; margin-left: 10px; display: none;" viewBox="0 0 50 50">
+                        <svg class="spinner" style="width: 20px; height: 20px; margin-left: 10px; position: relative; margin-bottom: -5px; display: none;" viewBox="0 0 50 50">
                             <circle class="spinner-path" style="stroke: black;" cx="25" cy="25" r="20" fill="none" stroke-width="3"></circle>
                         </svg>
                     </div>
@@ -369,14 +352,14 @@ let today = new Date();
 
 let months = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ];
 
-function parse_message_time(message_time, minimal, need_prefix) {
+function parse_message_time(message_time, minimal) {
     let _time = new Date(message_time),
         diff = Math.abs(Date.now() - message_time), time;
     if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
-    else if (diff < periods.day && _time.getDate() === today.getDate()) time = `${!minimal ? `Today at ` : ''}${need_prefix ? 'at ' : ''}${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
+    else if (diff < periods.day && _time.getDate() === today.getDate()) time = `${!minimal ? `Today at ` : ''}${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
     else {
-        if (diff < periods.week) time = `${need_prefix ? 'on ' : ''}${days[_time.getDay()]}${!minimal ? ` at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}` : ``}`;
-        else time = `${need_prefix ? 'on ' : ''}${_time.getDate()} ${months[_time.getMonth()]}${!minimal ? ` at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}` : ``}${_time.getFullYear() !== today.getFullYear() ? `, ${_time.getFullYear()}` : ''}`
+        if (diff < periods.week) time = `${days[_time.getDay()]}${!minimal ? ` at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}` : ``}`;
+        else time = `${_time.getDate()} ${months[_time.getMonth()]}${!minimal ? ` at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}` : ``}${_time.getFullYear() !== today.getFullYear() ? `, ${_time.getFullYear()}` : ''}`
     }
     return time;
 }
@@ -471,10 +454,16 @@ function messages_info_header_text(chat_data) {
             other_member.status == 'online' ?
                 `<span style="color: green;">online</span>` :
                 other_member.last_online ? 
-                `active ${parse_message_time(other_member.last_online, true)}` :
+                `active ${active_ago(other_member.last_online)}` :
                 `offline`
             : `offline`).parent().show();
     }
+}
+
+function active_ago(time_) {
+    let _time = new Date(time_),
+        diff = Math.abs(Date.now() - _time);
+    return Math.floor(diff / periods.day) ? Math.floor(diff / periods.day) + 'd ago' : Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
 }
 
 function load_more_messages() {
