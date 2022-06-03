@@ -106,7 +106,7 @@ export default class extends Constructor {
                     </div>
                     <div class="load-more-messages" style="display: none;">
                         See Older Messages
-                        <svg class="spinner" style="width: 20px; height: 20px; margin-left: 10px; position: relative; margin-bottom: -5px; display: none;" viewBox="0 0 50 50">
+                        <svg class="spinner" style="width: 20px; height: 20px; margin-left: 10px; position: relative; margin-bottom: -6px; display: none;" viewBox="0 0 50 50">
                             <circle class="spinner-path" style="stroke: black;" cx="25" cy="25" r="20" fill="none" stroke-width="3"></circle>
                         </svg>
                     </div>
