@@ -127,11 +127,12 @@
 }
 
 .message-content img {
-    max-width: 280px;
-    max-height: 280px;
+    width: 180px;
+    height: 180px;
     display: block;
     margin-bottom: 5px;
-    border-radius: 5px;
+    border-radius: 10px;
+    border: solid 1px lightgrey;
 }
 
 .message-time {
