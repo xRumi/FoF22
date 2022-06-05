@@ -45,6 +45,6 @@ module.exports = mongoose.model("user", new mongoose.Schema({
         coordinates: [],
     },
     exclude_nearby: { type: Array, default: [] },
-    last_location_change: { type: Date, default: Date.now() }
+    last_location_change: { type: Date }
 
 }).index({ location: "2dsphere" }) );

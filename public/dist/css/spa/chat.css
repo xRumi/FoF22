@@ -97,10 +97,8 @@
 }
 
 .message-img {
-	min-width: 40px;
-	min-height: 40px;
-    max-width: 40px;
-    max-height: 40px;
+	width: 40px;
+	height: 40px;
 	overflow: hidden;
 	border-radius: 50%;
 	position: relative;
@@ -130,10 +128,17 @@
 .message-content img {
     max-width: 180px;
     max-height: 180px;
+    height: auto;
     display: block;
-    margin-bottom: 5px;
-    border-radius: 10px;
+    margin: 2.5px 5px 2.5px 0;
+    border-radius: 6px;
     border: solid 1px lightgrey;
+    float: left;
+}
+
+.outgoing .message-content img {
+    float: right;
+    margin: 2.5px 0 2.5px 5px;
 }
 
 .message-time {
@@ -144,7 +149,7 @@
 	margin-bottom: 8px;
 }
 
-.outgoing .message-time, .outgoing .message-content img {
+.outgoing .message-time {
 	float: right;
 }
 
