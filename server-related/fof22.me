@@ -1,9 +1,10 @@
 server {
+
     listen 80 default_server;
     listen [::]:80 default_server;
 
-    listen 443 ssl http2 default_server;
-    listen [::]:443 ssl http2 default_server;
+    listen 443 ssl default_server;
+    listen [::]:443 ssl default_server;
 
     include /etc/nginx/allow-cloudflare-only.conf;
 
@@ -23,11 +24,11 @@ server {
     }
 
     location /dist {
-        root /root/FoF22/public;
+        root /home/rumi/FoF22/public;
     }
 
-    location /plugins {
-        root /root/FoF22/public;
+    location /uploads {
+        root /rumi/FoF22/public;
     }
 
 }

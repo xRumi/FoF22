@@ -14,7 +14,7 @@ const nearby_people_list = (new_nearby_friends_list, callback) => {
         return $(`
             <div class="fr-nearby-item">
                 <div class="fr-nearby-img">
-                    <img src="/dist/img/users/${x.id}/profile.png">
+                    <img src="/uploads/users/${x.id}/profile.png">
                 </div>
                 <div class="fr-nearby-content">
                     <div>${x.name || 'No Username'}</div>
@@ -40,7 +40,7 @@ const req_people_list = (new_friends_list, callback) => {
         return $(`
             <div class="fr-req-item">
                 <div class="fr-req-img">
-                    <img src="/dist/img/users/${x.id}/profile.png">
+                    <img src="/uploads/users/${x.id}/profile.png">
                 </div>
                 <div class="fr-req-time">${fr_req_time(x.created_at)}</div>
                 <div class="fr-req-content">

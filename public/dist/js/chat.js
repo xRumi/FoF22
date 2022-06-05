@@ -11,7 +11,7 @@ socket.on('messages', ({ messages, room_id, title }) => {
         messages.forEach(x => {
 	        html.push(`<div class="chat__wrapper">
 	            <div class="chat__container ${current_user == x.user ? 'chat__own' : 'chat__other'}">
-	                ${current_user !== x.user ? `<img class="chat__icon" src="/dist/img/users/${x.user}/profile.png">` : ``}
+	                ${current_user !== x.user ? `<img class="chat__icon" src="/uploads/users/${x.user}/profile.png">` : ``}
 	                <div class="${current_user == x.user ? 'chat__own__bubble chat__own' : 'chat__other__bubble chat__other'}">
 	                    ${x.message}
 	                </div>
@@ -37,7 +37,7 @@ socket.on('messages', ({ messages, room_id, title }) => {
 socket.on('message', x => {
     $('.chat__msgs').append(`<div class="chat__wrapper">
         <div class="chat__container ${current_user == x.user ? 'chat__own' : 'chat__other'}">
-            ${current_user !== x.user ? `<img class="chat__icon" src="/dist/img/users/${x.user}/profile.png">` : ``}
+            ${current_user !== x.user ? `<img class="chat__icon" src="/uploads/users/${x.user}/profile.png">` : ``}
             <div class="${current_user == x.user ? 'chat__own__bubble chat__own' : 'chat__other__bubble chat__other'}">
                 ${x.message}
             </div>

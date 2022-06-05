@@ -66,10 +66,10 @@
                         <%- error -%>
                     <% } else { -%>
                         <div class="pc-main">
-                            <div class="pc-user-cover"<%=user_data.has_cover ? ` style="background-image: /dist/img/users/${user_data.id}/cover.png;"` : ``%>>
+                            <div class="pc-user-cover"<%=user_data.has_cover ? ` style="background-image: /uploads/users/${user_data.id}/cover.png;"` : ``%>>
                                 <div class="pc-user">
                                     <div class="pc-user-img">
-                                        <img src="<%=user_data.has_profile_picture ? `/dist/img/users/${user_data.id}/profile.png` : `/dist/img/default-profile.png`%>" alt="not found">
+                                        <img src="<%=user_data.has_profile_picture ? `/uploads/users/${user_data.id}/profile.png` : `/dist/img/default-profile.png`%>" alt="not found">
                                     </div>
                                     <div class="pc-user-name">
                                         <div><%=user_data.name%></div>

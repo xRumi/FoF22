@@ -46,7 +46,7 @@ export default class extends Constructor {
                         console.log(`search for ${text}`);
                     }
                     socket.emit('autocomplete', text, (result) => {
-                        let names = result.names ? result.names.map(x => x = `<a href="/spa/profile/${x.id}" data-link><li><div><img src="/dist/img/users/${x.id}/profile.png"></div><p>${x.name}</p></li></a>`) : false;
+                        let names = result.names ? result.names.map(x => x = `<a href="/spa/profile/${x.id}" data-link><li><div><img src="/uploads/users/${x.id}/profile.png"></div><p>${x.name}</p></li></a>`) : false;
                         if (names) {
                             $('.search-input').addClass("active-search");
                             $('.search-input .autocom-box').html(names);

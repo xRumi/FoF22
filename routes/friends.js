@@ -230,13 +230,26 @@ module.exports = (client) => {
                                 navigateTo: `/spa/profile/${req.user.id}`,
                                 unread: true,
                             });
+                            console.log('send two');
                             client.io.to(req.user.id).emit('unread', ({ notifications: {
                                 count: req.user.notifications.filter(x => x.unread).length,
-                                unread: [id0]
+                                unread: [{
+                                    id: id0,
+                                    user_id: user.id,
+                                    header: 'Friend Request Accepted',
+                                    title: `You are now friends with <b>${user.username}</b>, say Hi to your new friend!`,
+                                    navigateTo: `/spa/profile/${user.id}`,
+                                }]
                             } }));
                             client.io.to(user.id).emit('unread', ({ notifications: {
                                 count: user.notifications.filter(x => x.unread).length,
-                                unread: [id1]
+                                unread: [{
+                                    id: id1,
+                                    user_id: req.user.id,
+                                    header: 'Friend Request Accepted',
+                                    title: `You are now friends with <b>${req.user.username}</b>, say Hi to your new friend!`,
+                                    navigateTo: `/spa/profile/${user.id}`,
+                                }]
                             } }));
                             user.markModified('notifications');
                             req.user.markModified('notifications');
@@ -308,13 +321,26 @@ module.exports = (client) => {
                             time: Date.now(),
                             navigateTo: `/spa/profile/${req.user.id}`
                         });
+                        console.log('send one')
                         client.io.to(req.user.id).emit('unread', ({ notifications: {
                             count: req.user.notifications.filter(x => x.unread).length,
-                            unread: [id0]
+                            unread: [{
+                                id: id0,
+                                user_id: user.id,
+                                header: 'Friend Request Accepted',
+                                title: `You are now friends with <b>${user.username}</b>, say Hi to your new friend!`,
+                                navigateTo: `/spa/profile/${user.id}`,
+                            }]
                         } }));
                         client.io.to(user.id).emit('unread', ({ notifications: {
                             count: user.notifications.filter(x => x.unread).length,
-                            unread: [id1]
+                            unread: [{
+                                id: id1,
+                                user_id: req.user.id,
+                                header: 'Friend Request Accepted',
+                                title: `You are now friends with <b>${req.user.username}</b>, say Hi to your new friend!`,
+                                navigateTo: `/spa/profile/${req.user.id}`,
+                            }]
                         } }));
                         user.markModified('notifications');
                         req.user.markModified('notifications');

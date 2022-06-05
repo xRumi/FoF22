@@ -21,14 +21,14 @@ module.exports = (client) => {
                                 _user = await client.database.functions.get_user(room.members[0] == req.user.id ? room.members[1] : room.members[0]);
                                 if (_user) {
                                     name = _user.name || _user.username;
-                                    image = `/dist/img/users/${_user.id}/profile.png`
+                                    image = `/uploads/users/${_user.id}/profile.png`
                                 } else name = 'Not Found';
                             } else name = room.name;
                             let user_room_unread = req.user.rooms.find(z => z.id == room.id)?.unread;
                             data.push({
                                 id: room.id,
                                 name,
-                                image: image || `/dist/img/users/61d001de9b64b8c435985da9/profile.png`,
+                                image: image || `/uploads/users/61d001de9b64b8c435985da9/profile.png`,
                                 time: last_message?.time,
                                 last_message: last_message?.message,
                                 unread: user_room_unread,

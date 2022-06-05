@@ -61,12 +61,22 @@ setTimeout(() => setInterval(() => {
     });
 }, 60000), (60 - n_time.getSeconds()) * 1000);
 
+const alert = new Alert();
+
 socket.on('unread', unread => {
     Object.keys(unread).forEach(key => {
         $(`#nav__link__${key} .nav__alart`).text(unread[key].count || '');
         if (key == 'messages') {
             if (unread[key].unread) unread[key].unread.forEach(m => $(`._people[data-id=${m}]`).addClass('_people-unread'));
             if (unread[key].read) unread[key].read.forEach(m => $(`._people[data-id=${m}]`).removeClass('_people-unread'));
+        } else if (key == 'notifications') {
+            let unreads = unread[key].unread;
+            unreads.forEach(unread_info => alert.render({
+                head: unread_info.header,
+                content: unread_info.title,
+                click_to_close: true,
+                delay: 5000
+            }));
         }
     });
 });

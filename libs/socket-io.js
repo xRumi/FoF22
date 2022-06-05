@@ -172,7 +172,7 @@ module.exports.sockets = (io, client) => {
                             if (room?.members?.includes(user.id)) {
                                 let chat = await client.database.chat.findById(room.chat_id);
                                 if (chat) {
-                                    let room_img_path = path.join(__dirname, `/../public/dist/img/rooms/${room.id}`);
+                                    let room_img_path = path.join(__dirname, `/../public/uploads/rooms/${room.id}`);
                                     if (_attachments.length) {
                                         if (!fs.existsSync(room_img_path)) fs.mkdir(room_img_path, { recursive: true }, (err) => {
                                             if (err) throw err;
@@ -192,7 +192,7 @@ module.exports.sockets = (io, client) => {
                                                         name: attachment.name,
                                                         type: attachment.type,
                                                         size: attachment.size,
-                                                        url: `/dist/img/rooms/${room.id}/${attachment_path_inside_room}`
+                                                        url: `/uploads/rooms/${room.id}/${attachment_path_inside_room}`
                                                     });
                                                     else reject();
                                                 });
