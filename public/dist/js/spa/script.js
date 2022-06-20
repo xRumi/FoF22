@@ -2,14 +2,13 @@ const nanobar = new Nanobar(),
     socket = io();
 
 const body = $('body');
-    
 const client = {
     messages: {
         room_id: null,
     },
     id: body.data('id'),
     username: body.data('username'),
-    name: body.data('name')
+    name: body.data('name'),
 };
 
 var before_new_render = null;
@@ -49,7 +48,12 @@ const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", 
 const ttr = {
     '&': '&amp;',
     '<': '&lt;',
-    '>': '&gt;'
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+    '/': '&#x2F;',
+    '`': '&#x60;',
+    '=': '&#x3D;'
 };
 
 setTimeout(() => setInterval(() => {

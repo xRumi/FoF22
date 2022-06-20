@@ -47,12 +47,12 @@ module.exports = (client) => {
                                 }
                             }
                         ]
-                    }).limit(request_limit).then(_users => {
+                    }).limit(request_limit).lean().then(_users => {
                         let nearby = [];
                         for (let i = 0; i < _users.length; i++) {
                             let _user = _users[i];
                             nearby.push({
-                                id: _user.id,
+                                id: _user._id,
                                 username: _user.username,
                                 name: _user.name,
                             });
@@ -126,12 +126,12 @@ module.exports = (client) => {
                             }
                         }
                     ]
-                }).limit(request_limit).then(users => {
+                }).limit(request_limit).lean().then(users => {
                     let nearby = [];
                     for (let i = 0; i < users.length; i++) {
                         let user = users[i];
                         nearby.push({
-                            id: user.id,
+                            id: user._id,
                             username: user.username,
                             name: user.name,
                         });
@@ -195,8 +195,8 @@ module.exports = (client) => {
                         count: user.friend_requests.filter(x => x.unread).length,
                         unread: [req.user.id]
                     } }));
-                    user.markModified('friend_requests');
-                    req.user.markModified('friend_requests');
+                    user.mark_modified(`friend_requests[${user.friend_requests.length - 1}]`);
+                    req.user.mark_modified(`friend_requests[${req.user.friend_requests.length - 1}]`);
                     await user.save();
                     await req.user.save();
                     res.sendStatus(200);
@@ -208,7 +208,7 @@ module.exports = (client) => {
                             let from_request = user.friend_requests.findIndex(x => x.target === req.user.id && x.type == 'request');
                             if (from_request > -1) {
                                 user.friend_requests.splice(from_request, 1);
-                                user.markModified('friend_requests');
+                                user.mark_modified(`friend_requests`);
                             }
                             req.user.friends.push(user.id);
                             user.friends.push(req.user.id);
@@ -221,6 +221,7 @@ module.exports = (client) => {
                                 time: Date.now(),
                                 navigateTo: `/spa/profile/${user.id}`,
                                 unread: true,
+                                image: `/uploads/users/${user.id}/profile.png`,
                             });
                             user.notifications.push({
                                 id: id1,
@@ -229,8 +230,8 @@ module.exports = (client) => {
                                 time: Date.now(),
                                 navigateTo: `/spa/profile/${req.user.id}`,
                                 unread: true,
+                                image: `/uploads/users/${req.user.id}/profile.png`,
                             });
-                            console.log('send two');
                             client.io.to(req.user.id).emit('unread', ({ notifications: {
                                 count: req.user.notifications.filter(x => x.unread).length,
                                 unread: [{
@@ -251,11 +252,11 @@ module.exports = (client) => {
                                     navigateTo: `/spa/profile/${user.id}`,
                                 }]
                             } }));
-                            user.markModified('notifications');
-                            req.user.markModified('notifications');
-                            req.user.markModified('friend_requests');
-                            user.markModified('friends');
-                            req.user.markModified('friends');
+                            user.mark_modified(`notifications[${user.notifications.length - 1}]`);
+                            req.user.mark_modified(`notifications[${req.user.notifications.length - 1}]`);
+                            req.user.mark_modified(`friend_requests`);
+                            user.mark_modified(`friends[${user.friends.length - 1}]`);
+                            req.user.mark_modified(`friends[${req.user.friends.length - 1}]`);
                             await req.user.save();
                             await user.save();
                             res.sendStatus(200);
@@ -282,8 +283,8 @@ module.exports = (client) => {
                     req.user.friend_requests.splice(is_request, 1);
                     let from_request = user.friend_requests.findIndex(x => x.target === req.user.id);
                     if (from_request > -1) user.friend_requests.splice(from_request, 1);
-                    user.markModified('friend_requests');
-                    req.user.markModified('friend_requests');
+                    user.mark_modified('friend_requests');
+                    req.user.mark_modified('friend_requests');
                     await req.user.save();
                     await user.save();
                     res.sendStatus(200);
@@ -312,16 +313,18 @@ module.exports = (client) => {
                             user_id: user.id,
                             title: `You are now friends with <b>${user.username}</b>`,
                             time: Date.now(),
-                            navigateTo: `/spa/profile/${user.id}`
+                            navigateTo: `/spa/profile/${user.id}`,
+                            image: `/uploads/users/${user.id}/profile.png`,
                         });
                         user.notifications.push({
                             id: id1,
                             user_id: req.user.id,
                             title: `<b>${req.user.username}</b> has accepted your friend request, say Hi to your new friend`,
                             time: Date.now(),
-                            navigateTo: `/spa/profile/${req.user.id}`
+                            navigateTo: `/spa/profile/${req.user.id}`,
+                            image: `/uploads/users/${req.user.id}/profile.png`,
                         });
-                        console.log('send one')
+                        /*
                         client.io.to(req.user.id).emit('unread', ({ notifications: {
                             count: req.user.notifications.filter(x => x.unread).length,
                             unread: [{
@@ -332,6 +335,7 @@ module.exports = (client) => {
                                 navigateTo: `/spa/profile/${user.id}`,
                             }]
                         } }));
+                        */
                         client.io.to(user.id).emit('unread', ({ notifications: {
                             count: user.notifications.filter(x => x.unread).length,
                             unread: [{
@@ -342,12 +346,12 @@ module.exports = (client) => {
                                 navigateTo: `/spa/profile/${req.user.id}`,
                             }]
                         } }));
-                        user.markModified('notifications');
-                        req.user.markModified('notifications');
-                        user.markModified('friend_requests');
-                        req.user.markModified('friend_requests');
-                        user.markModified('friends');
-                        req.user.markModified('friends');
+                        user.mark_modified(`notifications[${user.notifications.length - 1}]`);
+                        req.user.mark_modified(`notifications[${req.user.notifications.length - 1}]`);
+                        req.user.mark_modified(`friend_requests`);
+                        user.mark_modified(`friends[${user.friends.length - 1}]`);
+                        req.user.mark_modified(`friends[${req.user.friends.length - 1}]`);
+                        user.mark_modified('friend_requests');
                         await req.user.save();
                         await user.save();
                         res.sendStatus(200);
@@ -366,8 +370,8 @@ module.exports = (client) => {
                     _friend = user.friends.indexOf(req.user.id);
                 if (friend > -1) req.user.friends.splice(friend, 1);
                 if (_friend > -1) user.friends.splice(_friend, 1);
-                user.markModified('friends');
-                req.user.markModified('friends');
+                user.mark_modified('friends');
+                req.user.mark_modified('friends');
                 await req.user.save();
                 await user.save();
                 res.sendStatus(200);
@@ -376,5 +380,4 @@ module.exports = (client) => {
     });
 
     return router;
-
 }

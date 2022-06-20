@@ -16,7 +16,7 @@ module.exports = (client) => {
 
     router.get('/', async (req, res) => {
         res.render("index");
-    }) 
+    });
     router.use('/auth', auth(client));
     router.use('/', profile(client));
     router.use('/friends', friends(client));
@@ -36,7 +36,7 @@ module.exports = (client) => {
                 friends: req.user.friend_requests.filter(x => x.unread).length,
                 messages: req.user.rooms.filter(x => x.unread).length,
                 notifications: req.user.notifications.filter(x => x.unread).length,
-                menu: 0
+                menu: 0,
             }, eruda: process.env.ERUDA ? true : false });
             if (Math.abs(Date.now() - req.user.last_location_change) > 3 * 24 * 60 * 60 * 1000) {
                 let ip_info = await client.get_ip_info(req);
@@ -47,6 +47,7 @@ module.exports = (client) => {
                         coordinates: ip_info.ll,
                     }
                     req.user.last_location_change = Date.now();
+                    req.user.mark_modified('last_location_change');
                     req.user.save();
                 }
             }
@@ -60,7 +61,7 @@ module.exports = (client) => {
                 friends: req.user.friend_requests.filter(x => x.unread).length,
                 messages: req.user.rooms.filter(x => x.unread).length,
                 notifications: req.user.notifications.filter(x => x.unread).length,
-                menu: 0
+                menu: 0,
             }, eruda: process.env.ERUDA ? true : false });
             if (Math.abs(Date.now() - req.user.last_location_change) > 3 * 24 * 60 * 60 * 1000) {
                 let ip_info = await client.get_ip_info(req);
@@ -71,13 +72,13 @@ module.exports = (client) => {
                         coordinates: ip_info.ll,
                     }
                     req.user.last_location_change = Date.now();
+                    req.user.mark_modified('last_location_change');
                     req.user.save();
                 }
             }
         } else res.status(403).redirect(`/login?ref=${req.originalUrl}`);
     });
-
-
+ 
     router.get('/login', async (req, res) => {
         if (!req.user) res.render("login");
         else res.redirect('/spa');
@@ -89,5 +90,4 @@ module.exports = (client) => {
     });
 
     return router;
-
 }

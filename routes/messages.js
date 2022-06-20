@@ -28,7 +28,7 @@ module.exports = (client) => {
                             data.push({
                                 id: room.id,
                                 name,
-                                image: image || `/uploads/users/61d001de9b64b8c435985da9/profile.png`,
+                                image: image || '',
                                 time: last_message?.time,
                                 last_message: last_message?.message,
                                 unread: user_room_unread,
@@ -44,5 +44,4 @@ module.exports = (client) => {
     });
 
     return router;
-
 }

@@ -21,20 +21,26 @@ module.exports = (client) => {
         const returnTo = req.query.ref ? req.query.ref : '/';
         if (req.user) res.status(200).json({ message: 'user already logged in', returnTo });
         else passport.authenticate('local', (err, user, info) => {
-            if (err) return res.status(400).send( err );
+            if (err) return res.status(400).send('Something went wrong, try again later');
             if (!user) return res.status(401).send( 'username or password is incorrect' );
             req.logIn(user, async (err) => {
-                if (req.body.remember == 'false') req.session.cookie.expires = false;
-                if (err) return res.status(400).send( err );
+                if (err) return res.status(400).send('Something went wrong, try again later');
+                if (req.body.remember == 'false') {
+                    req.session.cookie.expires = false;
+                    req.session.save();
+                }
+                client.redis.sadd(`sessions:${user.id}`, req.session.id);
                 if (user.login_retry) user.login_retry = 0;
                 let save = false;
                 if (user.account_status == 'active') res.status(200).json({ message: 'user logged in', returnTo });
                 else if (user.account_status == 'deactive') {
-                    user.accounr_status = 'active'; save = true;
+                    user.account_status = 'active'; save = true;
+                    user.mark_modified(`account_status`);
                     res.status(200).json({ message: 'account activated', returnTo });
                 } else if (user.account_status == 'delete') {
                     user.account_status = 'active'; save = true;
                     user.delete_requested_at = null;
+                    user.mark_modified('account_status|delete_requested_at');
                     res.status(200).json({ message: 'account deletion cancelled', returnTo });
                 } else if (user.account_status == 'deleted') return res.status(400).send( 'account already deleted' );
                 if (user.account_status !== 'deleted' && Math.abs(Date.now() - user.last_location_change) > 2 * 24 * 60 * 60 * 1000) {
@@ -46,7 +52,7 @@ module.exports = (client) => {
                             coordinates: ip_info.ll,
                         }
                         user.last_location_change = Date.now();
-                        save = true;
+                        user.mark_modified(`ip_info|location`); save = true;
                     }
                 }
                 if (save) await user.save();

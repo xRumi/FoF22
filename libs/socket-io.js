@@ -67,7 +67,7 @@ module.exports.sockets = (io, client) => {
                     if (ObjectId.isValid(id)) {
                         const room = await client.database.functions.get_room(id);
                         if (room) {
-                            const chat = await client.database.chat.findById(room.chat_id);
+                            const chat = await client.database.functions.get_chat(room.chat_id);
                             if (chat) {
                                 if (socket.room_id != room.id) {
                                     socket.leave(socket.room_id);
@@ -86,7 +86,7 @@ module.exports.sockets = (io, client) => {
                                         if (_friend) name = _friend.name || _friend.username;
                                     }
                                 } else name = room.name;
-                                let messages = chat.messages.slice(-7);
+                                let messages = chat.messages.slice(-7).filter(x => x);
                                 Promise.all(messages.map(message => client.database.functions.get_user(message.user))).then(users => {
                                     for (let i = 0; i < users.length; i++) {
                                         let user = users[i];
@@ -96,7 +96,7 @@ module.exports.sockets = (io, client) => {
                                     let user_room = user.rooms.find(x => x.id == room.id);
                                     if (user_room && user_room.unread) {
                                         user_room.unread = false;
-                                        user.markModified('rooms'); user.save();
+                                        user.mark_modified('rooms'); user.save();
                                         io.to(user.id).emit('unread', ({ messages: {
                                             count: user.rooms.filter(x => x.unread).length,
                                             read: [user_room.id]
@@ -170,7 +170,7 @@ module.exports.sockets = (io, client) => {
                         if (user.rooms.some(x => x.id == id)) {
                             let room = await client.database.functions.get_room(socket.room_id);
                             if (room?.members?.includes(user.id)) {
-                                let chat = await client.database.chat.findById(room.chat_id);
+                                let chat = await client.database.functions.get_chat(room.chat_id);
                                 if (chat) {
                                     let room_img_path = path.join(__dirname, `/../public/uploads/rooms/${room.id}`);
                                     if (_attachments.length) {
@@ -211,6 +211,7 @@ module.exports.sockets = (io, client) => {
                                             attachments
                                         };
                                         chat.messages.push(chat_data);
+                                        chat.mark_modified(`messages[${chat.messages.length - 1}]`);
                                         await chat.save();
                                         chat_data.username = user.username;
                                         
@@ -239,7 +240,7 @@ module.exports.sockets = (io, client) => {
                                                     user.rooms.push({
                                                         id: room.id
                                                     }); save = true;
-                                                    user.markModified('rooms');
+                                                    user.mark_modified('rooms');
                                                 }
                                                 if (user.rooms[0]?.id !== room.id) {
                                                     let user_room_index = user.rooms.findIndex(x => x.id == room.id);
@@ -247,14 +248,14 @@ module.exports.sockets = (io, client) => {
                                                         let _user_room = user.rooms[user_room_index];
                                                         user.rooms.splice(user_room_index, 1); save = true;
                                                         user.rooms.unshift(_user_room);
-                                                        user.markModified('rooms');
+                                                        user.mark_modified('rooms');
                                                     }
                                                 }
                                                 let user_room = user.rooms.find(x => x.id == room.id);
                                                 if (room_members.includes(user.id)) {
                                                     if (user_room && user_room.unread) {
                                                         user_room.unread = false; save = true;
-                                                        user.markModified('rooms');
+                                                        user.mark_modified('rooms');
                                                         io.to(user.id).emit('unread', ({ messages: {
                                                             count: user.rooms.filter(x => x.unread).length,
                                                             read: [user_room.id]
@@ -262,7 +263,7 @@ module.exports.sockets = (io, client) => {
                                                     }
                                                 } else if (!user_room.unread) {
                                                     user_room.unread = true; save = true;
-                                                    user.markModified('rooms');
+                                                    user.mark_modified('rooms');
                                                     io.to(user.id).emit('unread', ({ messages: {
                                                         count: user.rooms.filter(x => x.unread).length,
                                                         unread: [user_room.id]
@@ -282,15 +283,20 @@ module.exports.sockets = (io, client) => {
             socket.on('delete-message', async ({ id, _id }, callback) => {
                 if (!is_function(callback)) return false;
                 if (_id && id?.length > 8 && _id === socket.room_id) {
-                    let chat = await client.database.chat.findById(socket.chat_id);
+                    let chat = await client.database.functions.get_chat(socket.chat_id);
                     if (chat.room_id == socket.room_id) {
-                        let a = chat.messages.find(x => x.id == id);
-                        if (a) {
-                            a.message = null;
-                            chat.markModified('messages');
-                            await chat.save();
-                            callback({ id, done: true });
-                            socket.broadcast.to(socket.room_id).emit('update-message', { id: socket.room_id, chat: a });
+                        let _a = chat.messages.findIndex(x => x.id == id);
+                        if (_a > -1) {
+                            let a = chat.messages[_a];
+                            if (!a.deleted) {
+                                a.deleted = true;
+                                a.message = null;
+                                a.attachments = [];
+                                chat.mark_modified(`messages[${_a}]`);
+                                await chat.save();
+                                callback({ id, done: true });
+                                socket.broadcast.to(socket.room_id).emit('update-message', { id: socket.room_id, chat: a });
+                            } else callback({ id, done: false });
                         } else callback({ id, done: false });
                     }
                 }

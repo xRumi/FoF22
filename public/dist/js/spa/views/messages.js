@@ -379,7 +379,7 @@ function message_time(html, callback) {
         if (messages_group[i].constructor !== Array) continue;
         else if (messages_group[i].length == 1) {
             let message = messages_group[i][0];
-            message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${parse_message_time(parseInt(message.dataset.time))}</div>`);
+            message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">seen • ${parse_message_time(parseInt(message.dataset.time))}</div>`);
         } else {
             for (let j = 0; j < messages_group[i].length; j++) {
                 let message = messages_group[i][j];

@@ -7,28 +7,46 @@ const compression = require('compression'),
 
 const passport = require('passport'),
     mongoose = require("mongoose"),
-    mongo_store = require('connect-mongo'),
+    redis_store = require('connect-redis')(session),
     local_strategy = require('./strategies/local'),
     routes = require('./routes');
 
 const ip = require('./libs/ip');
 
+const Redis = require('ioredis'),
+    redis = new Redis(process.env.REDIS_CLOUD ? {
+        port: 11017,
+        host: 'redis-11017.c250.eu-central-1-1.ec2.cloud.redislabs.com',
+        username: 'default',
+        password: 'fdIiQeGANkVleapx3YnvND60zQiJAtXc'
+    } : {});
+
+redis.on('connect', () => {
+    console.log('[Redis] connected');
+    redis.call('FT.INFO', 'users').catch(() => redis.call(
+        'FT.CREATE', 'users', 'ON', 'JSON',
+        'PREFIX', '1', 'user:', 'SCHEMA',
+        '$.username', 'AS', 'username', 'TEXT',
+        '$.email', 'AS', 'email', 'TEXT')
+        .then(() => console.log('[Redis] users query index created'))
+        .catch(err => console.log(`[Redis] ${err}`)));
+}).on('error', err => console.log(`[Redis] ${err}`));
+
 const path = require('path');
 app.set('trust proxy', true);
 
-mongoose.connect(`mongodb+srv://main:iVAFZ0z5YDcHf5jm@cluster0.pcm42.mongodb.net/${process.env.DEV ? 'dev' : 'main'}?retryWrites=true&w=majority`, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
-    console.log('MongoDB database connected');
-}).catch((err) => {
-    return console.log(`MongoDB database error: ${err}`);
-});
+mongoose.connect(`mongodb+srv://main:iVAFZ0z5YDcHf5jm@cluster0.pcm42.mongodb.net/${process.env.DEV ? 'dev' : 'main'}?retryWrites=true&w=majority`, { useNewUrlParser: true, useUnifiedTopology: true }).then(() =>
+    console.log('[MongoDB] connected')).catch((err) => 
+    console.log(`[MongoDB] error: ${err}`));
 
 const session_store = session({
     secret: '1p@d20&f#JtceK0jso,!h9&,7N@7@?',
     cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 },
     resave: false,
     saveUninitialized: false,
-    store: mongo_store.create({ mongoUrl: 'mongodb+srv://main:iVAFZ0z5YDcHf5jm@cluster0.pcm42.mongodb.net/main?retryWrites=true&w=majority' }),
-    unset: 'destroy'
+    store: new redis_store({ client: redis, prefix: 'session:' }),
+    unset: 'destroy',
+    name: 'auth'
 });
 
 io.use(function(socket, next) {
@@ -56,6 +74,7 @@ client.cache.functions = {};
 client.cache.users = new Map();
 
 client.io = io;
+client.redis = redis;
 
 // client.database.user.find().then(users => users.forEach(user => user.save()));
 
@@ -76,23 +95,49 @@ app.set("views", path.join(__dirname, "/views"));
 
 if (process.env.EXPRESS_STATIC) {
     app.use(express.static(path.join(__dirname, "/public")));
-    console.log('Serving static files through express route');
+    console.log('[Express] serving static files');
 }
 
 app.use(session_store);
-
 app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/', routes(client));
 
-app.get('*', (req, res) => {
-    res.render('404');
+app.get('/uploads/users/:id/profile.png', async (req, res) => {
+    let id = req.params.id;
+    let user = await client.database.functions.get_user(id);
+    if (user) {
+        try {
+            if (user.profile_picture) res.sendFile(path.join(__dirname, `/public/uploads/users/${user.id}/profile.png`));
+            else res.sendFile(path.join(__dirname, '/public/dist/img/default-profile.png'));
+        } catch (err) { res.sendStatus(404); };
+    } else res.sendStatus(404);
 });
 
-const server = http.listen(process.env.PORT || 3000, () => {
-    console.log('server is running on port', server.address().port);
+app.get('/uploads/users/:id/cover.png', async (req, res) => {
+    let id = req.params.id;
+    let user = await client.database.functions.get_user(id);
+    if (user) {
+        try {
+            if (user.cover_picture) res.sendFile(path.join(__dirname, `/public/uploads/users/${user.id}/cover.png`));
+            else res.sendFile(path.join(__dirname, '/public/dist/img/default-cover.png'));
+        } catch (err) { res.sendStatus(404); };
+    } else res.sendStatus(404);
 });
+
+app.get('*', (req, res) => res.render('404'));
+
+const server = http.listen(process.env.PORT || 3000, () =>
+    console.log('[Express] on port', server.address().port));
 
 local_strategy.init(client, app);
 client.database.functions.schedule();
+
+process.stdin.on('data', async data => {
+    let input = data.toString().trim();
+    if (input == 'clear') console.clear();
+    else if (input.split(' ')[0] == 'js') (new Promise((resolve) => resolve(eval(input.split(' ').slice(1).join(' ')))))
+        .then(console.log)
+        .catch(console.log);
+});

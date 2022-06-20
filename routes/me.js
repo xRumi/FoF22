@@ -1,6 +1,4 @@
 const router = require('express').Router();
-const Session = require('../models/Session.js');
-
 const rateLimit = require('express-rate-limit');
 
 const limiter1 = rateLimit({
@@ -46,6 +44,7 @@ module.exports = (client) => {
             if (pass === req.user.password) {
                 if (req.user.login_retry) {
                     req.user.login_retry = 0;
+                    req.user.mark_modified('login_retry');
                     await req.user.save();
                 }
                 res.sendStatus(200);
@@ -65,10 +64,10 @@ module.exports = (client) => {
                     else {
                         if (req.user.login_retry) req.user.login_retry = 0;
                         req.user.password = new_pass;
+                        req.user.mark_modified('password');
                         await req.user.save();
                         await req.session.destroy();
-                        let filter = {'session':{'$regex': '.*"user":"'+req.user.username+'".*'}};
-                        Session.deleteMany(filter);
+                        await client.database.functions.delete_all_sessions(req.user.id);
                         res.status(200).send('password changed successfully');
                     }
                 } else res.status(400).send ('invalid data');
@@ -79,10 +78,10 @@ module.exports = (client) => {
                     force_logout = true;
                 } else if (req.user.login_retry > 10) {
                     req.session.destroy();
-                    let filter = {'session':{'$regex': '.*"user":"'+req.user.username+'".*'}};
-                    Session.deleteMany(filter);
+                    await client.database.functions.delete_all_sessions(req.user.id);
                     force_logout = true;
                 }
+                req.user.mark_modified('login_retry');
                 await req.user.save();
                 res.status(400).send(force_logout ? 'force_logout' : `incorrect password (${Math.abs(5 - req.user.login_retry)})`);
             }
@@ -93,22 +92,21 @@ module.exports = (client) => {
         if (req.user) {
             if (req.body.password === req.user.password) {
                 await req.session.destroy();
-                res.status(200).send( 'force logout success' );
-                let filter = {'session':{'$regex': '.*"user":"'+req.user.username+'".*'}};
-                Session.deleteMany(filter);
-            } else res.status(401).send( 'password is incorrect' );
-        } else res.status(403).send( 'forbidden' );
+                await client.database.functions.delete_all_sessions(req.user.id);
+                res.status(200).send('force logout success');
+            } else res.status(401).send('password is incorrect');
+        } else res.status(403).send('forbidden');
     });
 
     router.post('/deactive', async (req, res) => {
         if (req.user) {
             if (req.body.password === req.user.password) {
                 req.user.account_status = 'deactive';
+                req.user.mark_modified('account_status');
                 await req.user.save();
                 await req.session.destroy();
+                await client.database.functions.delete_all_sessions(req.user.id);
                 res.status(200).send( 'account deactivated, re-login to cancel' );
-                let filter = {'session':{'$regex': '.*"user":"'+req.user.username+'".*'}};
-                Session.deleteMany(filter);
             } else res.status(401).send( 'password is incorrect' );
         } else res.status(403).send( 'forbidden' );
     });
@@ -118,15 +116,14 @@ module.exports = (client) => {
             if (req.body.password === req.user.password) {
                 req.user.account_status = 'delete';
                 req.user.delete_time = new Date((new Date()) + 86400000);
+                req.user.mark_modified('account_status|delete_time');
                 await req.user.save();
                 await req.session.destroy();
+                await client.database.functions.delete_all_sessions(req.user.id);
                 res.status(200).send( 'account will be deleted in 24 hours, re-login to cancel' );
-                let filter = {'session':{'$regex': '.*"user":"'+req.user.username+'".*'}};
-                Session.deleteMany(filter);
             } else res.status(401).send( 'password is incorrect' );
         } else res.status(403).send( 'forbidden' );
     });
 
     return router;
-
 }

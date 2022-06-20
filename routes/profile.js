@@ -24,8 +24,6 @@ module.exports = (client) => {
                     email: user.email,
                     created_at: user.created_at,
                     friends: user.friends,
-                    has_cover: fs.existsSync(`../public/uploads/users/${user.id}/cover.png`),
-                    has_profile_picture: fs.existsSync(`../public/uploads/users/${user.id}/profile.png`),
                     profile_data
                 }});
             } else res.render("./no-login-spa/profile", { error: `<div style="padding: 50px;"><div style="font-size: 20px;">Oops! User Not Be Found</div><div style="color: lightgray; margin-top: 5px;">Sorry but the user you are looking for does not exist, have been removed. id changed or is temporarily unavailable</div></div>` });
@@ -69,8 +67,6 @@ module.exports = (client) => {
                     email: user.email,
                     created_at: user.created_at,
                     friends: user.friends,
-                    has_cover: fs.existsSync(`../public/uploads/users/${user.id}/cover.png`),
-                    has_profile_picture: fs.existsSync(`../public/uploads/users/${user.id}/profile.png`),
                     is_my_friend: user.friends.includes(req.user.id),
                     is_friend_requested: req.user.friend_requests.some(x => x.target == user.id && x.type == 'request'),
                     is_friend_pending: req.user.friend_requests.some(x => x.target == user.id && x.type == 'pending'),
@@ -81,5 +77,4 @@ module.exports = (client) => {
     });
 
     return router;
-
 }

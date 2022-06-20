@@ -22,8 +22,8 @@ export default class extends Constructor {
                     user_data = result;
                     _ajax0 = false;
                     $('.profile-header p').text(user_data.name);
-                    if (user_data.has_cover) $('.pc-user-cover').css('background-image', `/uploads/users/${user_data.id}/cover.png`);
-                    if (user_data.has_profile_picture) $('.pc-user-img img').attr('src', `/uploads/users/${user_data.id}/profile.png`);
+                    $('.pc-user-cover').css('background-image', `uploads/users/${user_data.id}/cover.png`);
+                    $('.pc-user-img img').attr('src', `/uploads/users/${user_data.id}/profile.png`);
                     $('.pc-user-name div').text(user_data.name);
                     $('.pc-user-name span').text(`@${user_data.username}`);
                     let pc_user_btn_group = [];

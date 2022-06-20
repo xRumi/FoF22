@@ -14,7 +14,6 @@ module.exports = (client) => {
     });
 
     router.get("/autocomplete", async (req, res) => {
-        console.log(req.query);
         if (req.query.term) {
             let result = {
                 names: null,
@@ -31,18 +30,5 @@ module.exports = (client) => {
         } else res.sendStatus(400);
     });
 
-    /*
-    router.get('/user', async (req, res) => {
-        if (req.user) {
-            const key = req.query.key;
-            console.log(key);
-            const result = Array.from(client.database_cache.users).filter(x => x[1]?.username?.includes(key))?.map(x => x[1].username);
-            if (result.length) res.end(JSON.stringify(result));
-            else res.end(JSON.stringify([]))
-        } else res.redirect('/login');
-    });
-    */
-
     return router;
-
 }

@@ -1,5 +1,4 @@
 const router = require('express').Router();
-const Session = require('../models/Session.js');
 const humanize_duration = require("humanize-duration");
 const ObjectId = require("mongodb").ObjectId;
 
@@ -52,6 +51,7 @@ module.exports = (client) => {
                 }, (done) => {
                     if (done) {
                         token.mailed++;
+                        token.mark_modified('mailed');
                         token.save();
                         res.sendStatus(200);
                     } else res.sendStatus(400);
@@ -107,8 +107,8 @@ module.exports = (client) => {
                         await token.remove();
                         user.password = password;
                         await req.session.destroy();
-                        let filter = {'session':{'$regex': '.*"user":"'+user.username+'".*'}};
-                        Session.deleteMany(filter);
+                        await client.database.functions.delete_all_sessions(user.id);
+                        user.mark_modified('password');
                         await user.save();
                         res.status(200).send('Password changed successfully, redirecting to login page in 3 seconds');
                     }

@@ -29,7 +29,7 @@ const notifications_list = (new_notifications) => {
         return $(`
             <div class="notifications-item${x.unread ? ' nic-unread' : ''}">
                 <div class="notifications-item-img">
-                    <img src="/uploads/users/${x.user_id}/profile.png">
+                    <img src="${x.image}">
                 </div>
                 <div class="notifications-item-content">
                     <div class="nic-title">${x.title}, say Hi to your new friend!</div>
