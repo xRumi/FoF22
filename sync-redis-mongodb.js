@@ -93,7 +93,7 @@ redis.on('connect', async () => {
                 '$.email', 'AS', 'email', 'TEXT')
                 .then(() => console.log('[Redis] users query index created'))
                 .catch(err => console.log(`[Redis] ${err}`)));
-            sync_interval = setInterval(sync, 5000);
+            sync_interval = setInterval(sync, 5 * 60 * 1000);
             process.stdout.write(promot_opt);
         }).catch((err) => {
             console.log(err);
@@ -128,7 +128,7 @@ async function sync(force) {
                     user.markModified(modified[i].split('[')[0]);
                 }
             }
-            await redis.srem('modified:users', users.id);
+            await redis.srem('modified:users', user.id);
             await redis.call('JSON.SET', `user:${_id}`, '$.modified', `null`);
             return user.save();
         } else return false;
