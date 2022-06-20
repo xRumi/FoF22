@@ -103,29 +103,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/', routes(client));
-
-app.get('/uploads/users/:id/profile.png', async (req, res) => {
-    let id = req.params.id;
-    let user = await client.database.functions.get_user(id);
-    if (user) {
-        try {
-            if (user.profile_picture) res.sendFile(path.join(__dirname, `/public/uploads/users/${user.id}/profile.png`));
-            else res.sendFile(path.join(__dirname, '/public/dist/img/default-profile.png'));
-        } catch (err) { res.sendStatus(404); };
-    } else res.sendStatus(404);
-});
-
-app.get('/uploads/users/:id/cover.png', async (req, res) => {
-    let id = req.params.id;
-    let user = await client.database.functions.get_user(id);
-    if (user) {
-        try {
-            if (user.cover_picture) res.sendFile(path.join(__dirname, `/public/uploads/users/${user.id}/cover.png`));
-            else res.sendFile(path.join(__dirname, '/public/dist/img/default-cover.png'));
-        } catch (err) { res.sendStatus(404); };
-    } else res.sendStatus(404);
-});
-
 app.get('*', (req, res) => res.render('404'));
 
 const server = http.listen(process.env.PORT || 3000, () =>

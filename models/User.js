@@ -13,9 +13,6 @@ module.exports = mongoose.model("user", new mongoose.Schema({
     //            category: 'bio/myself/contact' };
     profile_data: { type: Object },
 
-    profile_picture: { type: Boolean },
-    profile_cover: { type: Boolean },
-
     created_at: { type: Date, default: Date.now },
     deleted_at: { type: Date },
     delete_requested_at: { type: Date },

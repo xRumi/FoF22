@@ -143,7 +143,7 @@ export default class extends Constructor {
             $('.messages-list').append(`
                 <div id="${_id}" class="message outgoing pending-message" data-username="${client.username}">
                     <div class="message-content">
-                        ${attachments.length ? attachments.map(x => `<img src="${x.base64}" data-name="${x.name}" />`).join('') : ''}
+                        ${attachments.length ? attachments.map(x => `<img src="${x.base64}" data-bytes="${x.bytes}" data-name="${x.name}" data-size="${x.size}" data-lastmodified="${x.lastModified}" data-type="${x.type}" />`).join('') : ''}
                         ${_message ? '<p>' + _message.replace(/[&<>]/g, (t) => ttr[t] || t) + '</p>' : ''}
                     </div>
                 </div>
@@ -236,7 +236,7 @@ export default class extends Constructor {
                         lastModified: file.lastModified,
                         base64: _e.target.result
                     });
-                    $('.message-input-files-preview').append(`<img src="${_e.target.result}" data-name="${file.name}" data-size="${file.size}" data-lastmodified="${file.lastModified}" data-type="${file.type}" />`);
+                    $('.message-input-files-preview').append(`<img src="${_e.target.result}" data-bytes="${file.bytes}" data-name="${file.name}" data-size="${file.size}" data-lastmodified="${file.lastModified}" data-type="${file.type}" />`);
                     let attachment_length = attachments.length;
                     if (attachment_length >= attachment_limit) {
                         $('#message-input-files-button').prop('disabled', true);
@@ -379,7 +379,7 @@ function message_time(html, callback) {
         if (messages_group[i].constructor !== Array) continue;
         else if (messages_group[i].length == 1) {
             let message = messages_group[i][0];
-            message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">seen • ${parse_message_time(parseInt(message.dataset.time))}</div>`);
+            message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${parse_message_time(parseInt(message.dataset.time))}</div>`);
         } else {
             for (let j = 0; j < messages_group[i].length; j++) {
                 let message = messages_group[i][j];
