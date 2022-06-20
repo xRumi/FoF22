@@ -27,6 +27,15 @@ server {
         root /home/rumi/FoF22/public;
     }
 
+    location ~ ^/uploads/users/[0-9a-z]+/profile.png {
+        root /home/rumi/FoF22/public;
+        try_files $uri @noprofile;
+    }
+
+    location @noprofile {
+        rewrite ^ https://fof22.me/dist/img/default-profile.png;
+    }
+
     location /uploads {
         root /home/rumi/FoF22/public;
     }
