@@ -36,6 +36,16 @@ server {
         rewrite ^ https://fof22.me/dist/img/default-profile.png;
     }
 
+    location ~ ^/uploads/users/[0-9a-z]+/cover.png {
+        root /home/rumi/FoF22/public;
+        try_files $uri @nocover;
+    }
+
+    location @nocover {
+        rewrite ^ https://fof22.me/dist/img/default-cover.png;
+    }
+
+
     location /uploads {
         root /home/rumi/FoF22/public;
     }
