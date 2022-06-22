@@ -103,6 +103,26 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/', routes(client));
+
+if (process.env.DEV) {
+
+    const fs = require('fs');
+
+    app.get('/uploads/users/:id/profile.png', async (req, res) => {
+        let id = req.params.id;
+        if (fs.existsSync(path.join(__dirname, `/uploads/users/${id}/profile.png`)))
+            res.sendFile(path.join(__dirname, `/public/uploads/users/${id}/profile.png`));
+        else res.sendFile(path.join(__dirname, '/public/dist/img/default-profile.png'));
+    });
+
+    app.get('/uploads/users/:id/cover.png', async (req, res) => {
+        let id = req.params.id;
+        if (fs.existsSync(path.join(__dirname, `/uploads/users/${id}/cover.png`)))
+            res.sendFile(path.join(__dirname, `/public/uploads/users/${id}/cover.png`));
+        else res.sendFile(path.join(__dirname, '/public/dist/img/default-cover.png'));
+    });
+}
+
 app.get('*', (req, res) => res.render('404'));
 
 const server = http.listen(process.env.PORT || 3000, () =>

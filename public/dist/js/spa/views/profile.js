@@ -28,7 +28,7 @@ export default class extends Constructor {
                     $('.pc-user-name span').text(`@${user_data.username}`);
                     let pc_user_btn_group = [];
                     if (user_data.id == client.id) pc_user_btn_group.push($(`<button class="pc-user-edit" type="submit" role="button">Edit Profile</button>`).on('click', () => {
-                        console.log('edit profile');
+                        $('.pc-user-btn-group button').append(``)
                     }));
                     else {
                         if (user_data.is_my_friend) pc_user_btn_group.push($(`<button class="pc-user-remove-friend" type="submit" role="button">Remove Friend</button>`).on('click', (e) => remove_friend(e, user_data)));
@@ -117,7 +117,8 @@ export default class extends Constructor {
                         <div class="pc-user-cover">
                             <div class="pc-user">
                                 <div class="pc-user-img">
-                                    <img src="/dist/img/default-profile.png" alt="not found">
+                                    <img src="/dist/img/default-profile.png" alt="not found"> 
+                                    <i class='bx bx-edit'></i>
                                 </div>
                                 <div class="pc-user-name">
                                     <div>User</div>

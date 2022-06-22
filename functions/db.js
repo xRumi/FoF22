@@ -20,6 +20,7 @@ module.exports = (client) => {
                 await redis_user.set(user.id, user);
             } else return false;
         }
+        if (!user.modified) user.modified = '';
         user.mark_modified = (path) => user.modified += `${path}|`;
         user.save = async (callback) => {
             await redis_user.set(user.id, user)
@@ -130,8 +131,8 @@ module.exports = (client) => {
         set: async (id, obj) => await client.redis.call('JSON.SET', `chat:${id}`, '$', JSON.stringify(obj)),
     };
     client.database.functions.create_room = async ( name, members, _u, type = 'private' ) => {
-        const room = new client.database.room({ name, members, type });
-        const chat = new client.database.chat({ room_id: room.id });
+        let room = new client.database.room({ name, members, type });
+        let chat = new client.database.chat({ room_id: room.id });
         room.chat_id = chat.id;
         await room.save();
         await chat.save();
