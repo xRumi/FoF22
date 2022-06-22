@@ -129,7 +129,7 @@ async function sync(force) {
                 }
             }
             await redis.srem('modified:users', user.id);
-            await redis.call('JSON.SET', `user:${_id}`, '$.modified', `null`);
+            await redis.call('JSON.SET', `user:${_id}`, '$.modified', `""`);
             return user.save();
         } else return false;
     }));
@@ -148,7 +148,7 @@ async function sync(force) {
                 }
             }
             await redis.srem('modified:rooms', room.id);
-            await redis.call('JSON.SET', `room:${_id}`, '$.modified', `null`);
+            await redis.call('JSON.SET', `room:${_id}`, '$.modified', `""`);
             return room.save();
         } else return false;
     }));
@@ -167,7 +167,7 @@ async function sync(force) {
                 }
             }
             await redis.srem('modified:chat', chat.id);
-            await redis.call('JSON.SET', `chat:${_id}`, '$.modified', `null`);
+            await redis.call('JSON.SET', `chat:${_id}`, '$.modified', `""`);
             return chat.save();
         } else return false;
     }));
