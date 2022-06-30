@@ -10,7 +10,7 @@ module.exports = (client) => {
     router.get('/fetch', async (req, res) => {
         if (req.user) {
             Promise.all(req.user.rooms.map(x => client.database.functions.get_room(x.id))).then(rooms => {
-                Promise.all(rooms.map(room => client.database.chat.findById(room.chat_id))).then(async chats => {
+                Promise.all(rooms.map(room => client.database.functions.get_chat(room.chat_id))).then(async chats => {
                     let data = [];
                     for (var i = 0; i < rooms.length; i++) {
                         let room = rooms[i];
