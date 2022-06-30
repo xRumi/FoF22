@@ -48,13 +48,13 @@ export default class extends Constructor {
                     }
                     $('.pc-user-btn-group').html(pc_user_btn_group);
                     let profile_data_obj = {
-                        "bio": {
-                            header: 'Biological Information',
-                            raw: '',
-                        },
                         "myself": {
                             header: 'About MySelf',
                             raw: ''
+                        },
+                        "bio": {
+                            header: 'Biological Information',
+                            raw: '',
                         },
                         "contact": {
                             header: 'Contact Information',
@@ -67,7 +67,7 @@ export default class extends Constructor {
                             profile_data_obj[value.category].raw += value.category == 'myself' ? value.value :
                             `
                                 <tr>
-                                    <th>${key}:</th>
+                                    <th>${key}</th>
                                     <td>${Array.isArray(value.value) ? value.value.join(', ') : value.value}</td>
                                 </tr>
                             `
@@ -94,6 +94,7 @@ export default class extends Constructor {
                     if (xhr.status == 404) $('.profile-content').html(xhr.responseText).show();
                     _ajax0 = false;
                     nanobar.go(100);
+                    console.log(errorThrown)
                 },
             });
         }
@@ -155,7 +156,7 @@ export default class extends Constructor {
 
 function add_friend(e, user_data) {
     let that = $(e.target);
-    that.prop('disabled', true).text('Sending').css('opacity', '0.5');
+    that.prop('disabled', true).text('Adding Friend').css('opacity', '0.5');
     $.ajax({
         type: 'POST',
         url: `/friends/add`,
