@@ -349,12 +349,11 @@ socket.on('update-message', ({ id, chat }) => {
     }
 });
 
-socket.on('room-seen-message', ({ id, seen_by }) => {
+socket.on('seen-message', ({ id, seen_by }) => {
     let tm = $(`.outgoing[data-id=${id}]`);
     if (tm.length) {
-        if (is_private && seen_by.includes(is_private)) {
+        if (is_private && seen_by.includes(is_private)) 
             tm.find('.message-time').prepend(`<b>seen</b> • `);
-        }
     }
 });
 

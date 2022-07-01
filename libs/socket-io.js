@@ -10,6 +10,12 @@ module.exports.sockets = (io, client) => {
             socket.join(user.id);
             socket.user_id = user.id;
             client.cache.functions.update_user(user.id, { status: 'online' });
+            if (user.hide_presence) {
+                if (user.presence_status !== 'offline')
+                    client.redis.call('JSON.SET', `user:${user.id}`, `$.presence_status`, 'offline');
+            } else {
+                if (user.presence_status !== 'online')
+            }
             socket.on('autocomplete', async (term, callback) => {
                 if (!is_function(callback)) return false;
                 if (term) {
@@ -97,7 +103,7 @@ module.exports.sockets = (io, client) => {
                                     if (!last_message.seen_by.includes(user.id)) {
                                         last_message.seen_by.push(user.id);
                                         chat.mark_modified(`messages[${chat.messages.length - 1}]`); chat.save();
-                                        io.to(socket.room_id).emit('room-seen-message', { id: last_message.id, seen_by: last_message.seen_by });
+                                        io.to(socket.room_id).emit('seen-message', { id: last_message.id, seen_by: last_message.seen_by });
                                     }
                                     let user_room = user.rooms.find(x => x.id == room.id);
                                     if (user_room && user_room.unread) {
@@ -283,7 +289,7 @@ module.exports.sockets = (io, client) => {
                                                 else return true;
                                             })).then(() => {
                                                 if (last_message.seen_by?.length) 
-                                                    io.to(socket.room_id).emit('room-seen-message', { id: last_message.id, seen_by: last_message.seen_by });
+                                                    io.to(socket.room_id).emit('seen-message', { id: last_message.id, seen_by: last_message.seen_by });
                                             });
                                         });
                                     });
