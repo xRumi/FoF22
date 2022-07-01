@@ -6,7 +6,8 @@ let attachments = [],
     _ajax0 = false,
     typing = false,
     typing_timeout = undefined,
-    loading_more_messages = false;
+    loading_more_messages = false,
+    is_private;
 
 const people_list = (new_people_list) => {
     if (new_people_list && JSON.stringify(new_people_list) == JSON.stringify(old_people_list)) return false;
@@ -164,7 +165,7 @@ export default class extends Constructor {
                             message.attr({ 'data-username': chat.username, 'data-user-id': chat.user, 'data-id': chat.id, 'data-time': chat.time });
                             let prev_message = message.prev()[0];
                             let prev_message_time = prev_message ? prev_message.querySelector('.outgoing .message-time') : false;
-                            if (prev_message_time && prev_message_time.innerText && (parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 7 * 60 * 1000) prev_message_time.remove();
+                            if (prev_message_time && prev_message_time.innerText && (parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 7 * 60 * 1000) prev_message_time.style.display = 'none';
                             message[0].querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${parse_message_time(chat.time)}</div>`);
                             $(`._people[data-id="${id}"]`).find('._people-content p').html(`${!chat.deleted ? `${chat.attachments && chat.attachments.length ? 
                                 `<i class="bx bx-paperclip"></i> ` : ''}
@@ -291,12 +292,12 @@ socket.on('receive-message', ({ id, chat, _id }) => {
             message.attr({ 'data-username': chat.username, 'data-user-id': chat.user, 'data-id': chat.id, 'data-time': chat.time });
             let prev_message = message.prev()[0];
             let prev_message_time = prev_message ? prev_message.querySelector('.outgoing .message-time') : false;
-            if (prev_message_time && prev_message_time.innerText && (parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 7 * 60 * 1000) prev_message_time.remove();
+            if (prev_message_time && prev_message_time.innerText && (parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 7 * 60 * 1000) prev_message_time.style.display = 'none';
             message[0].querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${parse_message_time(chat.time)}</div>`);
         } else {
             let prev_message = client.id == chat.user ? $('.message:last-child.outgoing')[0] : $('.message:last-child:not(.outgoing)')[0];
             let prev_message_time = prev_message ? prev_message.querySelector('.message-time') : false;
-            if (prev_message_time && prev_message_time.innerText && Math.abs(parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 7 * 60 * 1000) prev_message_time.remove();
+            if (prev_message_time && prev_message_time.innerText && Math.abs(parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 7 * 60 * 1000) prev_message_time.style.display = 'none';
             $('.messages-list').append(`
                 <div class="message${client.id == chat.user ? ' outgoing' : $('.message:last-child').data('user-id') == chat.user ? ' stack-message' : ''}${chat.deleted ? ' message-deleted' : ''}" data-username="${chat.username}" data-user-id="${chat.user}" data-id="${chat.id}" data-time="${chat.time}">
                     <div class="message-img">
@@ -348,6 +349,15 @@ socket.on('update-message', ({ id, chat }) => {
     }
 });
 
+socket.on('room-seen-message', ({ id, seen_by }) => {
+    let tm = $(`.outgoing[data-id=${id}]`);
+    if (tm.length) {
+        if (is_private && seen_by.includes(is_private)) {
+            tm.find('.message-time').prepend(`<b>seen</b> • `);
+        }
+    }
+});
+
 let today = new Date();
 
 let months = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ];
@@ -364,17 +374,15 @@ function parse_message_time(message_time, minimal) {
     return time;
 }
 
-function message_time(html, callback) {
-
-    let messages = $(html.join('')).filter('.message, .system-message').toArray();
-
+function message_time(html, callback, last_message = {}) {
+    let messages = $(html.join('')).filter('.message, .system-message').toArray(), seen_by = '';
     let messages_group = messages.reduce((p, c, i, a) => {
         if (c.classList.contains('system-message')) p.push(c);
         else if (a[i - 1] && c.classList.contains('outgoing') === a[i - 1].classList.contains('outgoing')) p[p.length - 1].constructor === Array ? p[p.length - 1].push(c) : p.push([c]);
         else p.push(a[i + 1] && c.classList.contains('outgoing') === a[i + 1].classList.contains('outgoing') ? [c] : [c]);
         return p;
     }, []);
-
+    if (is_private && last_message.seen_by && last_message.seen_by.length && last_message.user == client.id) seen_by = is_seen(last_message, is_private);
     for (let i = 0; i < messages_group.length; i++) {
         if (messages_group[i].constructor !== Array) continue;
         else if (messages_group[i].length == 1) {
@@ -388,11 +396,17 @@ function message_time(html, callback) {
                 if (next_message) {
                     if (Math.abs(parseInt(message.dataset.time) - parseInt(next_message.dataset.time)) > 7 * 60 * 1000)
                         message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
-                } else message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
+                } else message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${seen_by || ''}${time}</div>`);
             }
         }
     }
     callback(Array.prototype.concat.apply([], messages_group));
+}
+
+function is_seen(last_message, other_member) {
+    if (last_message.seen_by.includes(other_member)) {
+        return '<b>seen</b> • ';
+    }
 }
 
 function join_room(response) {
@@ -423,14 +437,14 @@ function join_room(response) {
                 `);
                 lm = m;
             }
+            messages_info_header_text(chat_data);
             message_time(html, (_html) => {
-                messages_info_header_text(chat_data);
                 $('.messages-list').html(_html);
                 $('#message-input').prop('disabled', false);
                 $('#message-input-files-button').prop('disabled', false);
                 $('.message-send-icon').show();
                 if ($(".message:last-child")[0]) $(".message:last-child")[0].scrollIntoView();
-            });
+            }, messages[messages.length - 1]);
             if (mm) $('.load-more-messages').show();
             $(`._people[data-id="${id}"]`).css('background-color', '');
             nanobar.go(100);
@@ -449,7 +463,7 @@ function send_message(_message, _attachments, _id, callback) {
 
 function messages_info_header_text(chat_data) {
     if (chat_data.is_private) {
-        let other_member = chat_data.members.find(x => x.id !== client.id);
+        let other_member = chat_data.members.find(x => x.id !== client.id); is_private = other_member ? other_member.id : false;
         if (other_member) $('.messages-info-text').html(other_member ?
             other_member.status == 'online' ?
                 `<span style="color: green;">online</span>` :
@@ -498,7 +512,7 @@ function load_more_messages() {
                 message_time(html, (_html) => {
                     $('.messages-list').prepend(_html);
                     $('.load-more-messages .spinner').hide();
-                });
+                }, {});
             } else $('.load-more-messages .spinner').hide();
             if (!mm) $('.load-more-messages').hide();
         }

@@ -93,6 +93,12 @@ module.exports.sockets = (io, client) => {
                                         let message = messages.find(x => x.user == user.id);
                                         if (message) message.username = user.username;
                                     }
+                                    let last_message = chat.messages[chat.messages.length - 1]
+                                    if (!last_message.seen_by.includes(user.id)) {
+                                        last_message.seen_by.push(user.id);
+                                        chat.mark_modified(`messages[${chat.messages.length - 1}]`); chat.save();
+                                        io.to(socket.room_id).emit('room-seen-message', { id: last_message.id, seen_by: last_message.seen_by });
+                                    }
                                     let user_room = user.rooms.find(x => x.id == room.id);
                                     if (user_room && user_room.unread) {
                                         user_room.unread = false;
@@ -178,7 +184,6 @@ module.exports.sockets = (io, client) => {
                                             if (err) throw err;
                                         });
                                     }
-
                                     const process_file = async (attachment) => {
                                         if (attachment && attachment.name && attachment.type?.match('image') && attachment.size == attachment.bytes?.length) {
                                             attachment.name = attachment.name.substring(0, 100);
@@ -199,9 +204,7 @@ module.exports.sockets = (io, client) => {
                                             });
                                         } else return false;
                                     }
-
                                     Promise.all(_attachments.map(attachment => process_file(attachment))).then(async attachments => {
-                                    
                                         let chat_data = {
                                             id: Math.random().toString(36).substring(2, 15),
                                             user: user.id,
@@ -233,6 +236,9 @@ module.exports.sockets = (io, client) => {
                                             if (room_member_socket?.user_id) room_members.push(room_member_socket.user_id);
                                         }
                                         
+                                        let last_message_index = chat.messages.length - 1,
+                                            last_message = chat.messages[last_message_index];
+                                        
                                         Promise.all(room.members.map(user => client.database.functions.get_user(user))).then(users => {
                                             Promise.all(users.filter(x => x).map(user => {
                                                 let save = false;
@@ -253,6 +259,10 @@ module.exports.sockets = (io, client) => {
                                                 }
                                                 let user_room = user.rooms.find(x => x.id == room.id);
                                                 if (room_members.includes(user.id)) {
+                                                    if (!last_message.seen_by.includes(user.id)) {
+                                                        last_message.seen_by.push(user.id);
+                                                        chat.mark_modified(`messages[${last_message_index}]`); chat.save();
+                                                    }
                                                     if (user_room && user_room.unread) {
                                                         user_room.unread = false; save = true;
                                                         user.mark_modified('rooms');
@@ -271,7 +281,10 @@ module.exports.sockets = (io, client) => {
                                                 }
                                                 if (save) return user.save();
                                                 else return true;
-                                            }));
+                                            })).then(() => {
+                                                if (last_message.seen_by?.length) 
+                                                    io.to(socket.room_id).emit('room-seen-message', { id: last_message.id, seen_by: last_message.seen_by });
+                                            });
                                         });
                                     });
                                 } else socket.emit('error', 'chat does not exist');

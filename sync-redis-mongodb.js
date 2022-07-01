@@ -155,7 +155,7 @@ async function sync(force) {
     let chats = await redis.smembers('modified:chats');
     if (chats && chats.length) Promise.all(chats.map(async _id => {
         let chat_raw = await redis.call('JSON.GET', `chat:${_id}`); if (!chat_raw) return false;
-        let _chat = JSON.parse(chat_raw); let modified = _chat.modified?.split('|').filter(x => x);
+        let _chat = JSON.parse(chat_raw); let modified = [...new Set(_chat.modified?.split('|').filter(x => x))];
         if (modified && modified.length) {
             let chat = await Chat.findById(_id);
             if (!chat) return false;
