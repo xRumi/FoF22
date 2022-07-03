@@ -98,6 +98,7 @@ $('body').on('click', 'a[data-link]', e => {
 
 $.fn.navigateTo = navigateTo;
 $.fn.router = router;
+$.fn.shortcuts = {};
 
 $.fn.go_back = (fallback) => {
     let prev_page = window.location.href;

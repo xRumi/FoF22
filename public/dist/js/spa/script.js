@@ -1,10 +1,11 @@
 const nanobar = new Nanobar(),
-    socket = io();
+    socket = io.connect();
 
 const body = $('body');
 const client = {
     messages: {
         room_id: null,
+        npr: false
     },
     id: body.data('id'),
     username: body.data('username'),
@@ -56,15 +57,6 @@ const ttr = {
     '=': '&#x3D;'
 };
 
-setTimeout(() => setInterval(() => {
-    if (client.messages.room_id) $('.messages-list .message .message-time').toArray().forEach(x => {
-        let message = x.parentNode.parentNode,
-            diff = Date.now() - parseInt(message.dataset.time), time;
-        if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
-        if (time) x.innerText = time;
-    });
-}, 60000), (60 - n_time.getSeconds()) * 1000);
-
 const alert = new Alert();
 
 socket.on('unread', unread => {
@@ -73,6 +65,7 @@ socket.on('unread', unread => {
         if (key == 'messages') {
             if (unread[key].unread) unread[key].unread.forEach(m => $(`._people[data-id=${m}]`).addClass('_people-unread'));
             if (unread[key].read) unread[key].read.forEach(m => $(`._people[data-id=${m}]`).removeClass('_people-unread'));
+            if (unread[key].npr && !client.messages.npr) client.messages.npr;
         } else if (key == 'notifications') {
             let unreads = unread[key].unread;
             unreads.forEach(unread_info => alert.render({
@@ -83,11 +76,4 @@ socket.on('unread', unread => {
             }));
         }
     });
-});
-
-socket.on('messages-typing-response', ({ room_id, typing }) => {
-    if (room_id == client.messages.room_id) {
-        if (typing.length) $('.messages-typing').show().find('.message-content p').html(typing.map(x => `<b>${x}</b>`).join(', ') + ' is typing..');
-        else $('.messages-typing').hide().find('.message-content p').html('');
-    }
 });

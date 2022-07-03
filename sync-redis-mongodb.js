@@ -1,3 +1,4 @@
+require('dotenv').config();
 const mongoose = require("mongoose"),
     Redis = require("ioredis"),
     redis = new Redis(process.env.REDIS_CLOUD ? {

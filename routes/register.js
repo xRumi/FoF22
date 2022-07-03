@@ -30,7 +30,7 @@ module.exports = (client) => {
                 if (_user) return res.status(400).send('Email address is not available');
                 _user = new client.database._user({ email });
                 client.mail.send({
-                    from: `FoF22 <no-reply@fof22.me>`,
+                    from: `FoF22 <supportfof22.me>`,
                     to: email,
                     subject: `Please verify your email address`,
                     html: `
@@ -62,7 +62,7 @@ module.exports = (client) => {
                     let diff = _user.mailed ? Date.now() - _user.created_at : 6 * 60 * 1000;
                     if (diff > 2 * 60 * 1000) {
                         client.mail.send({
-                            from: `FoF22 <no-reply@fof22.me>`,
+                            from: `FoF22 <support@fof22.me>`,
                             to: email,
                             subject: `Please verify your email address`,
                             html: `

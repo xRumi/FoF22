@@ -4,10 +4,9 @@ const attachment_limit = 10;
 let attachments = [],
     old_people_list = [],
     _ajax0 = false,
-    typing = false,
-    typing_timeout = undefined,
     loading_more_messages = false,
-    is_private;
+    is_private,
+    members = [];
 
 const people_list = (new_people_list) => {
     if (new_people_list && JSON.stringify(new_people_list) == JSON.stringify(old_people_list)) return false;
@@ -56,31 +55,35 @@ const people_list = (new_people_list) => {
     }));
 }
 
+function fetch_people() {
+    if (!_ajax0) {
+        _ajax0 = true;
+        nanobar.go(30);
+        $.ajax({
+            type: 'GET',
+            url: `/messages/fetch`,
+            timeout: 30000,
+            success: function(result, textStatus, xhr) {
+                if (!result.length) $('.people-list').html(`<span style="position: absolute; margin: 25px; color: red;">Empty</span>`);
+                else people_list(result);
+                _ajax0 = false;
+                nanobar.go(100);
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                /* do something */
+                _ajax0 = false;
+            },
+        });
+    }
+}
+
 export default class extends Constructor {
     constructor(params) {
         super(params);
         this.id = params.id;
         this.setTitle('Messages');
-        navbar('#nav__link__messages', true);
-        if (!_ajax0) {
-            _ajax0 = true;
-            nanobar.go(30);
-            $.ajax({
-                type: 'GET',
-                url: `/messages/fetch`,
-                timeout: 30000,
-                success: function(result, textStatus, xhr) {
-                    if (!result.length) $('.people-list').html(`<span style="position: absolute; margin: 25px; color: red;">Empty</span>`);
-                    else people_list(result);
-                    _ajax0 = false;
-                    nanobar.go(100);
-                },
-                error: function(xhr, textStatus, errorThrown) {
-                    /* do something */
-                    _ajax0 = false;
-                },
-            });
-        }
+        navbar('#nav__link__messages', true); 
+        fetch_people();
     }
 
     async render() {
@@ -112,14 +115,10 @@ export default class extends Constructor {
                         </svg>
                     </div>
                     <div class="messages-list scrollbar"></div>
-                    <div class="messages-typing message" style="display: none">
-                        <div class="message-img"></div>
-                        <div class="message-content"></div>
-                    </div>
                     <div class="messages-bottom">
                         <form autocomplete="off">
                             <input type="text" name="message-input" id="message-input" placeholder="type your message..." disabled>
-                            <button type="submit" style="outline: none; border: none; background-color: unset;">
+                            <button type="submit" style="outline: none; border: none; background-color: unset; margin-left: -5px;">
                                 <i style="display: none;" class='bx bx-send message-send-icon'></i>
                             </button>
                             <div id="message-input-files">
@@ -172,29 +171,13 @@ export default class extends Constructor {
                                 <span>${chat.message ? chat.message.replace(/[&<>]/g, (t) => ttr[t] || t) : ''}</span>` : '<i>This message was deleted</i>'}
                             `);
                         }
+                        $('.message.outgoing:not(:last-child) .message-time:contains("seen")').toArray().forEach(x => x.innerText = x.innerText.replace('seen • ', ''));
                     }
                 }
             });
             attachments = [];
-            typing = false;
-            socket.emit('messages-typing', false);
             $(".message:last-child")[0].scrollIntoView();
             return false;
-        }).on('keypress', '#message-input', e => {
-            if (!typing) {
-                typing = true;
-                socket.emit('messages-typing', true);
-                typing_timeout = setTimeout(() => {
-                    typing = false;
-                    socket.emit('messages-typing', false);
-                }, 3000);
-            } else {
-                clearTimeout(typing_timeout);
-                typing_timeout = setTimeout(() => {
-                    typing = false;
-                    socket.emit('messages-typing', false);
-                }, 3000);
-            }
         }).on('click', '.header-back-icon', e => {
             history.pushState(null, null, `/spa/messages`);
             socket.emit('leave-room', client.messages.room_id);
@@ -267,12 +250,14 @@ export default class extends Constructor {
     }
 
     async after_render() {
-        people_list();
+        if (client.messages.npr) people_list();
+        else fetch_people();
         if (this.id) {
             $('.chat').addClass('chat-active');
             $('.navbar').addClass('chat-active');
             client.messages.room_id = this.id;
-            socket.emit('join-room', this.id, (response) => join_room(response));
+            if (socket.connected) socket.emit('join-room', this.id, (response) => join_room(response));
+            else setTimeout(() => socket.emit('join-room', this.id, (response) => join_room(response)), 1000);
         }
     }
 
@@ -313,6 +298,7 @@ socket.on('receive-message', ({ id, chat, _id }) => {
                 </div>
             `);
         }
+        if (chat.user == client.id) $('.message.outgoing:not(:last-child) .message-time:contains("seen")').toArray().forEach(x => x.innerText = x.innerText.replace('seen • ', ''));
         $(`._people[data-id="${id}"]`).find('._people-content p').html(`${!chat.deleted ? `${chat.attachments && chat.attachments.length ? 
             `<i class="bx bx-paperclip"></i> ` : ''}
             <span>${chat.message ? chat.message.replace(/[&<>]/g, (t) => ttr[t] || t) : ''}</span>` : '<i>This message was deleted</i>'}
@@ -322,7 +308,7 @@ socket.on('receive-message', ({ id, chat, _id }) => {
 
 /*
     *** deletes a message ***
-    
+
     socket.emit('delete-message', { id: message.data('id'), _id: client.messages.room_id}, ({ id, done }) => {
         let message = $(`[data-id="${id}"]`);
         let message_content_p = message.find('.message-content p');
@@ -333,6 +319,17 @@ socket.on('receive-message', ({ id, chat, _id }) => {
     });
 
 */
+
+socket.on('member-presence-update', ({ id, username, name, status, date }) => {
+    if (is_private) {
+        if (id !== client.id) {
+            messages_info_header_text({
+                is_private: true,
+                members: [{ id, username, name, status, date }]
+            });
+        }
+    }
+});
 
 socket.on('update-message', ({ id, chat }) => {
     if (client.messages.room_id == id) {
@@ -395,11 +392,11 @@ function message_time(html, callback, last_message = {}) {
                 if (next_message) {
                     if (Math.abs(parseInt(message.dataset.time) - parseInt(next_message.dataset.time)) > 7 * 60 * 1000)
                         message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
-                } else message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${seen_by || ''}${time}</div>`);
+                } else message.querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-time">${time}</div>`);
             }
         }
     }
-    callback(Array.prototype.concat.apply([], messages_group));
+    callback(Array.prototype.concat.apply([], messages_group), seen_by);
 }
 
 function is_seen(last_message, other_member) {
@@ -409,7 +406,7 @@ function is_seen(last_message, other_member) {
 }
 
 function join_room(response) {
-    if (response.error) {
+    nanobar.go(60); if (response.error) {
         let { id, error } = response;
         if (client.messages.room_id == id) $('.messages-list').append(error);
         $('.messages-list .spinner').hide();
@@ -437,8 +434,9 @@ function join_room(response) {
                 lm = m;
             }
             messages_info_header_text(chat_data);
-            message_time(html, (_html) => {
+            message_time(html, (_html, seen_by) => {
                 $('.messages-list').html(_html);
+                $('.messages-list .message:last-child.outgoing .message-time').prepend(seen_by || '');
                 $('#message-input').prop('disabled', false);
                 $('#message-input-files-button').prop('disabled', false);
                 $('.message-send-icon').show();
@@ -463,15 +461,31 @@ function send_message(_message, _attachments, _id, callback) {
 function messages_info_header_text(chat_data) {
     if (chat_data.is_private) {
         let other_member = chat_data.members.find(x => x.id !== client.id); is_private = other_member ? other_member.id : false;
-        if (other_member) $('.messages-info-text').html(other_member ?
+        if (other_member) $('.messages-info-text').attr({ 'data-id': other_member.id ,'data-status': other_member.status, 'data-date': other_member.date }).html(other_member ?
             other_member.status == 'online' ?
                 `<span style="color: green;">online</span>` :
-                other_member.last_online ? 
-                `active ${active_ago(other_member.last_online)}` :
+                other_member.date ? 
+                `active ${active_ago(other_member.date)}` :
                 `offline`
             : `offline`).parent().show();
     }
 }
+
+setTimeout(() => setInterval(() => {
+    if (client.messages.room_id) {
+        $('.messages-list .message .message-time').toArray().forEach(x => {
+            let message = x.parentNode.parentNode,
+                diff = Date.now() - parseInt(message.dataset.time), time;
+            if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
+            if (time) {
+                if (x.innerHTML.includes('seen')) x.innerHTML = `<b>seen</b> • ${time}`;
+                else x.innerText = time;
+            }
+        });
+        let mit = $('.messages-info-text[data-status=offline]');
+        if (mit.length) messages_info_header_text({ is_private, members: [{ id: mit.data('id'), status: mit.data('status'), date: mit.data('date') }] });
+    }
+}, 60000), (60 - n_time.getSeconds()) * 1000);
 
 function active_ago(time_) {
     let _time = new Date(time_),
@@ -517,3 +531,4 @@ function load_more_messages() {
         }
     });
 }
+

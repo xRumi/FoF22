@@ -43,7 +43,7 @@
 	margin-top: 3px;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	width: 55%;
+	width: 60%;
 	white-space: nowrap;
 }
 
@@ -111,6 +111,7 @@
 	vertical-align: top;
 	width: auto;
 	max-width: 88%;
+    margin-left: 5px;
 }
 
 .message-content p {
@@ -166,7 +167,7 @@
 }
 
 #message-input {
-	width: 55%;
+	width: calc(100% - 70px);
 	letter-spacing: 1.1px;
 	outline: 0;
 	font-size: 14px;
@@ -193,9 +194,13 @@
 		display: none;
 	}
 
-	#message-input {
+    ._people-name {
+        width: 80%;
+    }
+
+	/* #message-input {
 		width: 80%;
-	}
+	} */
 }
 
 .chat-active .messages {
@@ -242,7 +247,7 @@
 }
 
 .message {
-	width: 100%;
+	/* width: 100%; */
 	display: flex;
 }
 
@@ -278,6 +283,10 @@
 .messages-bottom form {
 	margin-left: 10px;
 	margin-bottom: 30px;
+}
+
+.messages-bottom {
+    margin-top: 30px;
 }
 
 .message-send-icon {

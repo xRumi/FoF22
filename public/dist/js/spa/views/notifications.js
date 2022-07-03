@@ -53,8 +53,8 @@ export default class extends Constructor {
                 url: `/notifications/fetch`,
                 timeout: 30000,
                 success: function(result, textStatus, xhr) {
-                    if (!result.length) $('.notifications-list').html(`<span style="position: absolute; margin: 25px; color: red;">Empty</span>`);
-                    else notifications_list(result);
+                    if (!result.mm && !result.notifications.length) $('.notifications-list').html(`<span style="position: absolute; margin: 25px; color: red;">Empty</span>`);
+                    else notifications_list(result.notifications);
                     _ajax0 = false;
                     nanobar.go(100);
                 },

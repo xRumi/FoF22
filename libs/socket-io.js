@@ -9,12 +9,16 @@ module.exports.sockets = (io, client) => {
         if (user) {
             socket.join(user.id);
             socket.user_id = user.id;
-            client.cache.functions.update_user(user.id, { status: 'online' });
             if (user.hide_presence) {
-                if (user.presence_status !== 'offline')
-                    client.redis.call('JSON.SET', `user:${user.id}`, `$.presence_status`, 'offline');
+                if (user.presence.status !== 'offline') {
+                    client.redis.call('JSON.SET', `user:${user.id}`, `$.presence.status`, '"offline"');
+                    io.to(user.room.map(x => x.id)).emit('member-presence-update', { id: user.id, username: user.username, name: user.name, status: 'offline', date: Date.now() });
+                }
             } else {
-                if (user.presence_status !== 'online')
+                if (user.presence.status !== 'online') {
+                    client.redis.call('JSON.SET', `user:${user.id}`, '$.presence', `{"status":"online","date":${Date.now()}}`);
+                    io.to(user.rooms.map(x => x.id)).emit('member-presence-update', { id: user.id, username: user.username, name: user.name, status: 'online', date: Date.now() });
+                }
             }
             socket.on('autocomplete', async (term, callback) => {
                 if (!is_function(callback)) return false;
@@ -64,7 +68,6 @@ module.exports.sockets = (io, client) => {
                 socket.leave(socket.room_id);
                 socket.room_id = null;
                 socket.chat_id = null;
-                socket.typing = null;
             });
             socket.on('join-room', async (id, callback) => {
                 if (!is_function(callback)) return false;
@@ -80,7 +83,6 @@ module.exports.sockets = (io, client) => {
                                     socket.join(room.id);
                                     socket.room_id = room.id;
                                     socket.chat_id = room.chat_id;
-                                    socket.typing = [];
                                 }
                                 let name;
                                 if (room.type == 'private') {
@@ -114,19 +116,23 @@ module.exports.sockets = (io, client) => {
                                             read: [user_room.id]
                                         } }));
                                     }
-                                    client.cache.functions.get_many_user(room.members, (error, result = []) => {
-                                        if (error) console.log('[socket-io.js] get_many_user callback error');
-                                        let members = room.type == 'private' ? result : null;
+                                    Promise.all(room.members.map(member => client.database.functions.get_user(member))).then(members => {
+                                        let result = [];
+                                        for (let i = 0; i < members.length; i++) {
+                                            let member = members[i];
+                                            if (member.hide_presence) result.push({ id: member.id, username: user.username, name: member.name, status: 'offline' });
+                                            else result.push({ id: member.id, username: user.username, name: member.name, status: member.presence.status, date: member.presence.date });
+                                        }
                                         callback({ chat_data: {
-                                            is_private: room.type == 'private' && room.members.length < 3,
+                                            is_private: room.type == 'private',
                                             total_member: room.members.length,
-                                            members,
+                                            members: result,
                                         }, user: user.id, messages, id, name: name || 'unknown', mm: chat.messages.length > 7 });
                                     });
                                 });
                             }
-                        } else callback({ id, error: '<p>Oops! Chat Not Be Found</p><p>Sorry but the chat room you are looking for does not exist, have been removed. id changed or is temporarily unavailable</p>' });
-                    } else callback({ id, error: '<p>Oops! Chat Not Be Found</p><p>Sorry but the chat room you are looking for does not exist, have been removed. id changed or is temporarily unavailable</p>' });
+                        } else callback({ id, error: '<p style="margin-left: 10px;">Oops! Chat Not Be Found</p><p style="margin-left: 10px;">Sorry but the chat room you are looking for does not exist, have been removed. id changed or is temporarily unavailable</p>' });
+                    } else callback({ id, error: '<p style="margin-left: 10px;">Oops! Chat Not Be Found</p><p style="margin-left: 10px;">Sorry but the chat room you are looking for does not exist, have been removed. id changed or is temporarily unavailable</p>' });
                 }
             });
             /* TODO: socket.on('get-room-member') */
@@ -152,23 +158,6 @@ module.exports.sockets = (io, client) => {
                             }
                         }
                     }
-                }
-            });
-            socket.on('messages-typing', is => {
-                if (socket.room_id && socket.user_id) {
-                    let user_id = socket.user_id;
-                    if (socket.typing) {
-                        if (is) {
-                            if (!socket.typing.includes(user_id)) socket.typing.push(user_id);
-                        } else if (socket.typing.includes(user_id)) {
-                            let u_index = socket.typing.indexOf(user_id);
-                            if (u_index > -1) socket.typing.splice(u_index, 1);
-                        }
-                    } else if (is) socket.typing = [user_id];
-                    Promise.all(socket.typing.map(x => client.database.functions.get_user(x))).then(users => {
-                        let usernames = users.map(x => x.username);
-                        socket.broadcast.to(socket.room_id).emit('messages-typing-response', { room_id: socket.room_id, typing: usernames });
-                    });
                 }
             });
             socket.on('send-message', async ({ id, _message, _id, _attachments = [] }, callback) => {
@@ -247,12 +236,12 @@ module.exports.sockets = (io, client) => {
                                         
                                         Promise.all(room.members.map(user => client.database.functions.get_user(user))).then(users => {
                                             Promise.all(users.filter(x => x).map(user => {
-                                                let save = false;
+                                                let save = false, npr;
                                                 if (!user.rooms.some(x => x.id === room.id)) {
                                                     user.rooms.push({
                                                         id: room.id
                                                     }); save = true;
-                                                    user.mark_modified('rooms');
+                                                    user.mark_modified('rooms'); npr = true;
                                                 }
                                                 if (user.rooms[0]?.id !== room.id) {
                                                     let user_room_index = user.rooms.findIndex(x => x.id == room.id);
@@ -274,7 +263,7 @@ module.exports.sockets = (io, client) => {
                                                         user.mark_modified('rooms');
                                                         io.to(user.id).emit('unread', ({ messages: {
                                                             count: user.rooms.filter(x => x.unread).length,
-                                                            read: [user_room.id]
+                                                            read: [user_room.id], npr
                                                         } }));
                                                     }
                                                 } else if (!user_room.unread) {
@@ -282,7 +271,7 @@ module.exports.sockets = (io, client) => {
                                                     user.mark_modified('rooms');
                                                     io.to(user.id).emit('unread', ({ messages: {
                                                         count: user.rooms.filter(x => x.unread).length,
-                                                        unread: [user_room.id]
+                                                        unread: [user_room.id], npr
                                                     } }));
                                                 }
                                                 if (save) return user.save();
@@ -321,7 +310,12 @@ module.exports.sockets = (io, client) => {
                 }
             });
             socket.on('disconnect', async () => {
-                client.cache.functions.update_user(user.id, { status: 'offline', last_online: Date.now() });
+                if (!io.sockets.adapter.rooms.has(user.id)) {
+                    if (user.presence.type !== 'online') {
+                        client.redis.call('JSON.SET', `user:${user.id}`, '$.presence', `{"status":"offline","date":${Date.now()}}`);
+                        io.to(user.rooms.map(x => x.id)).emit('member-presence-update', { id: user.id, username: user.username, name: user.name, status: 'offline', date: Date.now() });
+                    }
+                }
             });
         } else socket.emit('redirect', '/login?ref=messages');
     });

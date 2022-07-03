@@ -4,7 +4,22 @@ module.exports = (client) => {
 
     router.get('/fetch', async (req, res) => {
         if (req.user) {
-            res.status(200).send(req.user.notifications);
+            let id = req.query.id;
+            if (id && id < 9) {
+                let a = req.user.notifications.length;
+                while(--a) {
+                    if (req.user.notifications[a].id == id) {
+                        let notifications = (a && a > 10) ? req.user.notifications.slice(a, a - 10) : req.user.notifications.slice(0, a);
+                        res.status(200).send({
+                            notifications,
+                            mm: a - 10 ? true : false
+                        });
+                    }
+                }
+            } else res.status(200).send({ 
+                notifications: req.user.notifications.slice(req.user.notifications.length - 10).reverse(),
+                mm: req.user.notifications.length - 10 > 0 ? true : false
+            });
         } else res.status(403).send('forbidden');
     });
 

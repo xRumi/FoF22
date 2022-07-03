@@ -315,6 +315,7 @@ module.exports = (client) => {
                             time: Date.now(),
                             navigateTo: `/spa/profile/${user.id}`,
                             image: `/uploads/users/${user.id}/profile.png`,
+                            unread: true
                         });
                         user.notifications.push({
                             id: id1,
@@ -323,6 +324,7 @@ module.exports = (client) => {
                             time: Date.now(),
                             navigateTo: `/spa/profile/${req.user.id}`,
                             image: `/uploads/users/${req.user.id}/profile.png`,
+                            unread: true
                         });
                         /*
                         client.io.to(req.user.id).emit('unread', ({ notifications: {

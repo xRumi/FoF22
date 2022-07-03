@@ -21,6 +21,10 @@ module.exports = mongoose.model("user", new mongoose.Schema({
 
     presence_type: { type: String, default: 'friends-only' },
     hide_presence: { type: Boolean },
+    presence: { type: Object, default: {
+        status: 'offline',
+        date: Date.now()
+    } },
 
     friends: { type: Array },
     rooms: { type: Array },

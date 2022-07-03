@@ -11,7 +11,7 @@ const passport = require('passport'),
     local_strategy = require('./strategies/local'),
     routes = require('./routes');
 
-const ip = require('./libs/ip');
+require('dotenv').config();
 
 const Redis = require('ioredis'),
     redis = new Redis(process.env.REDIS_CLOUD ? {
@@ -69,10 +69,6 @@ client.database_cache = {};
 client.database_cache.users = new Map();
 client.database_cache.rooms = new Map();
 
-client.cache = {};
-client.cache.functions = {};
-client.cache.users = new Map();
-
 client.io = io;
 client.redis = redis;
 
@@ -81,7 +77,6 @@ client.redis = redis;
 require("./libs/ip")(client);
 require("./functions/db")(client);
 require("./libs/schedule")(client);
-require("./functions/cache")(client);
 require("./functions/mail")(client);
 require("./libs/socket-io").sockets(io, client);
 
