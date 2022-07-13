@@ -83,7 +83,7 @@ module.exports = (client) => {
                 }
                 req.user.mark_modified('login_retry');
                 await req.user.save();
-                res.status(400).send(force_logout ? 'force_logout' : `incorrect password (${Math.abs(5 - req.user.login_retry)})`);
+                res.status(400).send(force_logout ? 'force_logout' : `incorrect password, retry left ${Math.abs(5 - req.user.login_retry)}`);
             }
         } else res.status(403).send('forbidden');
     });

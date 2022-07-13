@@ -5,7 +5,8 @@ let _ajax0 = false,
     old_friends_list = [],
     old_nearby_friends_list = [],
     update_next_time0 = false,
-    update_next_time1 = false;
+    update_next_time1 = false,
+    debounce;
 
 const nearby_people_list = (new_nearby_friends_list, callback) => {
     if (!update_next_time1 && new_nearby_friends_list && JSON.stringify(new_nearby_friends_list) == JSON.stringify(old_nearby_friends_list)) return false;
@@ -96,6 +97,22 @@ export default class extends Constructor {
 
     async render() {
         return $(`<div class="friends">
+            <div class="fr-find">
+                <div class="fr-find-header">Find Friend</div>
+                <div class="fr-find-items">
+                    <div class="fr-find-input">
+                        <input type="text" placeholder="Type to search.." spellcheck="false">
+                        <div class="fr-find-input-icon"><i class="bx bx-search"></i></div>
+                        <div class="fr-find-output"></div>
+                    </div>
+                </div>
+                <div class="fr-req-show-more" style="display: none;">
+                    Show More
+                    <svg class="spinner" style="position: relative; margin-bottom: -6px; width: 20px; height: 20px; margin-left: 10px; display: none;" viewBox="0 0 50 50">
+                        <circle class="spinner-path" style="stroke: black;" cx="25" cy="25" r="20" fill="none" stroke-width="3"></circle>
+                    </svg>
+                </div>
+            </div>
             <div class="fr-req">
                 <div class="fr-req-header">Friend Requests</div>
                 <div class="fr-req-items">
@@ -125,7 +142,27 @@ export default class extends Constructor {
                 </div>
             </div>
         </div>`).on('click', '.fr-req-show-more', (e) => { $(e.currentTarget).find('svg').show(); })
-            .on('click', '.fr-nearby-show-more', (e) => { $(e.currentTarget).find('svg').show(); });
+            .on('click', '.fr-nearby-show-more', (e) => { $(e.currentTarget).find('svg').show(); })
+            .on('keyup', '.fr-find-input input', e => {
+                if (e.code == 37 || e.code == 38 || e.code == 39 || e.code == 40 || e.code == 13) return;
+                clearTimeout(debounce);
+                debounce = setTimeout(() => {
+                    let text = e.target.value;
+                    if (text) {
+                        socket.emit('fr-find', text, (result) => {
+                            console.log(result);
+                            let names = result.names ? result.names.map(x => x = `<a href="/spa/profile/${x.id}" data-link><li><div><img src="/uploads/users/${x.id}/profile.png"></div><p>${x.name}</p><span>${x.is_friend ? `friended` : x.mutual.count ? `${x.mutual.count} mutual friend${x.mutual.count > 1 ? 's' : ''}` : `@${x.username}`}</span></li></a>`) : false;
+                            if (names && names.length) {
+                                $('.fr-find-output').show();
+                                $('.fr-find-output').html(names);
+                            } else {
+                                $('.fr-find-output').hide();
+                                $('.fr-find-output').html('');
+                            }
+                        });
+                    } else $('.fr-find-output').hide();
+                }, 300);
+            })
     }
 
     async after_render() {

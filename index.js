@@ -75,10 +75,10 @@ client.redis = redis;
 // client.database.user.find().then(users => users.forEach(user => user.save()));
 
 require("./libs/ip")(client);
-require("./functions/db")(client);
+require("./libs/db")(client);
 require("./libs/schedule")(client);
-require("./functions/mail")(client);
-require("./libs/socket-io").sockets(io, client);
+require("./libs/mail")(client);
+require("./socket.io/index")(io, client);
 
 app.use(compression());
 app.use(express.json());

@@ -1,6 +1,6 @@
 const mailgun = require("mailgun-js")({
-    apiKey: 'e7b233eec7e60c9a7ce55f0bae392c4f-77985560-6b600cad',
-    domain: 'fof22.me'
+    apiKey: process.env.MAILGUN_API_KEY,
+    domain: process.env.DOMAIN
 });
 
 module.exports = (client) => {

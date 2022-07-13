@@ -23,14 +23,14 @@ module.exports = (client) => {
         } else res.status(403).send('forbidden');
     });
 
-    router.get('/read', async (req, res) => {
+    router.post('/read', async (req, res) => {
         if (req.user) {
             let id = req.body.id;
             let _nic = req.user.notifications.findIndex(x => x.id == id);
             let nic = _nic > -1 ? req.user.notifications[_nic] : false;
             if (nic && nic.unread) {
                 nic.unread = false;
-                io.to(user.id).emit('unread', ({ notifications: {
+                client.io.to(req.user.id).emit('unread', ({ notifications: {
                     count: req.user.notifications.filter(x => x.unread).length,
                     read: [nic.id]
                 } }));
@@ -39,6 +39,22 @@ module.exports = (client) => {
                 res.sendStatus(200);
             } else res.sendStatus(200);
         } else res.status(403).send('forbidden');
+    });
+
+    router.post('/read_all', async (req, res) => {
+        if (req.user) {
+            let unread_notifications = req.user.notifications.filter(x => x.unread);
+            for (let i = 0; i < unread_notifications.length; i++) {
+                unread_notifications[i].unread = false;
+            }
+            client.io.to(req.user.id).emit('unread', ({ notifications: {
+                count: 0,
+                read: [],
+            } }));
+            req.user.mark_modified(`notifications`);
+            await req.user.save();
+            res.sendStatus(200);
+        }
     });
 
     return router;

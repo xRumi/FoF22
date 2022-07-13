@@ -35,6 +35,9 @@ function init(id, username, name) {
 }
 
 let n_time = new Date();
+let today = new Date();
+
+let months = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ];
 
 const periods = {
     year: 12 * 30 * 24 * 60 * 60 * 1000,
@@ -67,13 +70,13 @@ socket.on('unread', unread => {
             if (unread[key].read) unread[key].read.forEach(m => $(`._people[data-id=${m}]`).removeClass('_people-unread'));
             if (unread[key].npr && !client.messages.npr) client.messages.npr;
         } else if (key == 'notifications') {
-            let unreads = unread[key].unread;
-            unreads.forEach(unread_info => alert.render({
+            if (unread[key].unread) unread[key].unread.forEach(unread_info => alert.render({
                 head: unread_info.header,
                 content: unread_info.title,
                 click_to_close: true,
                 delay: 5000
             }));
+            if (unread[key].read) unread[key].read.forEach(x => $(`.notifications-item.nic-unread[data-id="${x}"]`).removeClass('nic-unread'));
         }
     });
 });

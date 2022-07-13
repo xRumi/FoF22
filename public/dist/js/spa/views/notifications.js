@@ -17,26 +17,40 @@ const notifications_list = (new_notifications) => {
     if (new_notifications && JSON.stringify(new_notifications) == JSON.stringify(old_notifications)) return false;
     if (new_notifications) old_notifications = new_notifications;
     if (old_notifications && old_notifications.length && Array.isArray(old_notifications)) $('.notifications-list').html(old_notifications.map(x => {
-        let diff = Date.now() - x.time, time,
-            _time = new Date(parseInt(x.time));
-        if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
-        else if (diff < periods.day && _time.getDate() === today.getDate()) time = _time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
-        else {
-            let _time = new Date(x.time);
-            if (diff < periods.week) time = days[_time.getDay()];
-            else time = _time.toLocaleDateString();
-        }
         return $(`
-            <div class="notifications-item${x.unread ? ' nic-unread' : ''}">
+            <div class="notifications-item${x.unread ? ' nic-unread' : ''}" data-id="${x.id}">
                 <div class="notifications-item-img">
                     <img src="${x.image}">
                 </div>
                 <div class="notifications-item-content">
-                    <div class="nic-title">${x.title}, say Hi to your new friend!</div>
-                    <span class="nic-time">${time}</span>
+                    <div class="nic-title">${x.title}</div>
+                    <span class="nic-time">${parse_message_time(x.time, true)}</span>
                 </div>
             </div>
-        `).on('click', e => $.fn.navigateTo(x.navigateTo));
+        `).on('click', e => {
+            $.ajax({
+                type: 'POST',
+                url: `/notifications/read`,
+                timeout: 30000,
+                data: {
+                    id: x.id,
+                },
+                success: function(result, textStatus, xhr) {
+                    if (!x.navigateTo) {
+                        old_notifications.find(y => y.id == x.id).unread = false;
+                        $(e.currentTarget).removeClass('nic-unread');
+                    }
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    /* do something */
+                }
+            });
+            if (x.navigateTo) {
+                old_notifications.find(y => y.id == x.id).unread = false;
+                $(e.currentTarget).removeClass('nic-unread');
+                $.fn.navigateTo(x.navigateTo);
+            }
+        });
     }));
 }
 
@@ -67,17 +81,47 @@ export default class extends Constructor {
     }
 
     async render() {
-        return `
+        return $(`
             <div class="notifications">
-                <div class="notifications-header">Notifications</div>
+                <div class="notifications-header">
+                    <div>Notifications</div>
+                    <i class='bx bx-envelope' title="Mark As Read"></i>
+                </div>
                 <div class="notifications-list">
                     <span style="position: absolute; margin: 25px;">Loading..</span>
                 </div>
             </div>
-        `;
+        `).on('click', '.notifications-header i', e => {
+            $.ajax({
+                type: 'POST',
+                url: `/notifications/read_all`,
+                timeout: 30000,
+                success: function(result, textStatus, xhr) {
+                    old_notifications.filter(y => y.unread).forEach(y => {
+                        y.unread = false;
+                        $('.notifications-item').removeClass('nic-unread');
+                    });
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    /* do something */
+                }
+            });
+        });
     }
 
     async after_render() {
         notifications_list();
     }
+}
+
+function parse_message_time(message_time, minimal) {
+    let _time = new Date(message_time),
+        diff = Math.abs(Date.now() - message_time), time;
+    if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
+    else if (diff < periods.day && _time.getDate() === today.getDate()) time = `${!minimal ? `Today at ` : ''}${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
+    else {
+        if (diff < periods.week) time = `${days[_time.getDay()]}${!minimal ? ` at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}` : ``}`;
+        else time = `${_time.getDate()} ${months[_time.getMonth()]}${!minimal ? ` at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}` : ``}${_time.getFullYear() !== today.getFullYear() ? `, ${_time.getFullYear()}` : ''}`
+    }
+    return time;
 }

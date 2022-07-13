@@ -250,7 +250,7 @@ export default class extends Constructor {
     }
 
     async after_render() {
-        if (client.messages.npr) people_list();
+        if (!client.messages.npr) people_list();
         else fetch_people();
         if (this.id) {
             $('.chat').addClass('chat-active');
@@ -353,10 +353,6 @@ socket.on('seen-message', ({ id, seen_by }) => {
             tm.find('.message-time').prepend(`<b>seen</b> • `);
     }
 });
-
-let today = new Date();
-
-let months = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ];
 
 function parse_message_time(message_time, minimal) {
     let _time = new Date(message_time),

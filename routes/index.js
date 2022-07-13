@@ -8,7 +8,8 @@ const router = require('express').Router(),
     recover_password = require('./recover-password'),
     register = require('./register'),
     debug = require('./debug'),
-    notifications = require('./notifications');
+    notifications = require('./notifications'),
+    mail = require('./mail');
 
 const me = require('./me');
 
@@ -28,6 +29,7 @@ module.exports = (client) => {
     router.use('/debug', debug(client));
     router.use('/me', me(client));
     router.use('/notifications', notifications(client));
+    router.use('/mail', mail(client));
 
     router.get('/spa', async (req, res) => {
         if (req.user) {

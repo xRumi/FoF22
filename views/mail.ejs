@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mail</title>
+    <style>
+        * { -webkit-box-sizing: border-box; box-sizing: border-box; }
+        body { font-family: 'Open Sans', sans-serif; padding: 0; margin: 30px; }
+        .mail-to { margin-top: 20px; }
+        .mail-subject { margin-top: 10px; }
+        .mail-text { margin-top: 35px; }
+        .mail-text textarea { width: 50%; height: 200px; outline: 0; padding: 10px; font-size: 16px; }
+        input { outline: 0; width: 250px; padding: 3px; }
+        @media only screen and (max-width: 767px) { .mail-text textarea { width: 95%; } }
+        .mail-output { margin-top: 20px; border: solid 1px lightgray; width: fit-content; padding: 10px; display: none; }
+        .mail-btn { margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="mail-from">
+        <label for="from">From:</label>
+        <input type="text" name="from" id="from" value="<%=from%>" style="margin-left: 25px;" disabled data-from>
+    </div>
+    <form id="form">
+        <div class="mail-to">
+            <label for="to">To:</label>
+            <input type="email" name="to" id="to" style="margin-left: 44px;" required>
+        </div>
+        <div class="mail-subject">
+            <label for="subject">Subject:</label>
+            <input type="text" name="subject" id="subject" style="margin-left: 8px;" required>
+        </div>
+        <div class="mail-text">
+            <textarea placeholder="Enter Text" required></textarea>
+        </div>
+        <div class="mail-btn">
+            <button type="submit" id="send">Send</button>
+            <button type="button" id="form-reset" style="margin-left: 10px;">Reset</button>
+        </div>
+    </form>
+    <div class="mail-output"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        $('form').on('submit', e => {
+            e.preventDefault();
+            $('form input').attr('disabled', true);
+            $('textarea').attr('disabled', true);
+            $('button').attr('disabled', true);
+            $.ajax({
+                type: 'POST',
+                url: '/mail/send',
+                data: {
+                    to: $('#to').val(),
+                    subject: $('#subject').val(),
+                    html: $('textarea').val()
+                },
+                success: function(data, textStatus, xhr) {
+                    $('.mail-output').text(data).show().css('color', 'green');
+                    $('form')[0].reset();
+                    $('form input').attr('disabled', false);
+                    $('textarea').attr('disabled', false);
+                    $('button').attr('disabled', false);
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    $('.mail-output').text(errorThrown).show().css('color', 'red');
+                    $('form input').attr('disabled', false);
+                    $('textarea').attr('disabled', false);
+                    $('button').attr('disabled', false);
+                }
+            });
+        });
+        $('#form-reset').on('click', e => $('form')[0].reset());
+    </script>
+</body>
+</html>

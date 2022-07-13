@@ -533,11 +533,78 @@ img {
     margin: auto;
     width: 780px;
     height: auto;
-    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
 	margin-top: 40px;
 }
 
-.fr-req-header, .fr-nearby-header {
+.fr-req, .fr-nearby, .fr-find {
+    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+}
+
+.fr-req, .fr-nearby {
+    margin-top: 30px;
+}
+
+.fr-find-input input {
+    width: 92%;
+    height: 100%;
+    outline: 0;
+    border: 0;
+    padding: 10px;
+    font-size: 14px;
+}
+
+.fr-find-input-icon {
+    float: right;
+    position: relative;
+    top: 9px;
+    left: -10px;
+    font-size: 22px;
+}
+
+.fr-find-output {
+    border: solid 1px lightgray;
+    background-color: white;
+    position: relative;
+    display: none;
+}
+
+.fr-find-output li {
+    list-style: none;
+    padding: 5px 0px 10px 10px;
+    width: 100%;
+    cursor: default;
+}
+
+.fr-find-output li div {
+	margin-top: 3px;
+	margin-right: 10px;
+	width: 35px;
+	height: 35px;
+	overflow: hidden;
+	border-radius: 50%;
+	position: relative;
+	float: left;
+}
+
+.fr-find-output li p {
+    margin-top: 4px;
+}
+
+.fr-find-output li span {
+    display: block;
+    margin-top: -12px;
+    color: darkgray;
+}
+
+.fr-find-output a {
+	color: unset;
+}
+
+.fr-find-output a li:hover {
+	background-color: #efefef;
+}
+
+.fr-req-header, .fr-nearby-header, .fr-find-header {
     padding: 10px;
     font-size: 14px;
     background-color: #07c;
@@ -611,6 +678,9 @@ img {
     .friends {
         width: 100%;
 		margin-top: 0;
+    }
+    .fr-req, .fr-nearby {
+        margin-top: 0;
     }
 }
 
@@ -710,6 +780,7 @@ img {
     height: auto;
     box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
 	margin-top: 40px;
+    cursor: pointer;
 }
 
 .notifications-header {
@@ -718,6 +789,14 @@ img {
     background-color: #07c;
     padding-left: 10px;
     color: white;
+    cursor: default;
+}
+
+.notifications-header i {
+    float: right;
+    font-size: 25px;
+    margin-top: -21px;
+    cursor: pointer;
 }
 
 .notifications-item {
@@ -741,6 +820,7 @@ img {
 
 .nic-unread {
     background-color: #f8f8f8;
+    border-left: solid red;
 }
 
 .nic-title {
@@ -749,7 +829,7 @@ img {
 }
 
 .nic-time {
-	color: grey;
+	color: lightgray;
 }
 
 @media screen and (max-width: 800px) {
@@ -773,7 +853,7 @@ img {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    z-index: 9999;
+    z-index: 100;
 }
 
 .view-images img {

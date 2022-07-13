@@ -129,7 +129,7 @@ async function sync(force) {
                     user.markModified(modified[i].split('[')[0]);
                 }
             }
-            await redis.srem('modified:users', user.id);
+            await redis.call('SREM', 'modified:users', _id);
             await redis.call('JSON.SET', `user:${_id}`, '$.modified', `"|"`);
             return user.save();
         } else return false;
@@ -148,7 +148,7 @@ async function sync(force) {
                     room.markModified(modified[i].split('[')[0]);
                 }
             }
-            await redis.srem('modified:rooms', room.id);
+            await redis.call('SREM', 'modified:rooms', _id);
             await redis.call('JSON.SET', `room:${_id}`, '$.modified', `"|"`);
             return room.save();
         } else return false;
@@ -167,7 +167,7 @@ async function sync(force) {
                     chat.markModified(modified[i].split('[')[0]);
                 }
             }
-            await redis.srem('modified:chat', chat.id);
+            await redis.call('SREM', 'modified:chats', _id);
             await redis.call('JSON.SET', `chat:${_id}`, '$.modified', `"|"`);
             return chat.save();
         } else return false;
