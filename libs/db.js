@@ -1,4 +1,6 @@
 const ObjectId = require("mongodb").ObjectId;
+const fs = require('fs');
+const path = require('path');
 
 module.exports = (client) => {
     const redis_user = {
@@ -134,6 +136,7 @@ module.exports = (client) => {
         let room = new client.database.room({ name, members, type });
         let chat = new client.database.chat({ room_id: room.id });
         room.chat_id = chat.id;
+        fs.mkdir(path.join(__dirname, `/../public/uploads/rooms/${room.id}`), { recursive: true }, err => console.log(err));
         await room.save();
         await chat.save();
         if (_u) {

@@ -131,7 +131,7 @@ module.exports = (io, client, socket) => {
         if (!is_function(callback)) return false;
         if (!socket.room_id || socket.room_id !== id) return callback({ join_room: true });
         let message = _message?.trim();
-        if (_attachments.length >= 10) return false;
+        if (_attachments.length >= 15) return false;
         if (socket.room_id == id && message?.length < 2000 && (message.length || _attachments.length)) {
             let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
             if (user?.id == socket.user_id) {
@@ -140,113 +140,90 @@ module.exports = (io, client, socket) => {
                     if (room?.members?.includes(user.id)) {
                         let chat = await client.database.functions.get_chat(room.chat_id);
                         if (chat) {
-                            let room_img_path = path.join(__dirname, `/../public/uploads/rooms/${room.id}`);
-                            if (_attachments.length) {
-                                if (!fs.existsSync(room_img_path)) fs.mkdir(room_img_path, { recursive: true }, (err) => {
-                                    if (err) throw err;
-                                });
+                            for (let i = 0; i < _attachments.length; i++) {
+                                let { name, type, size, url } = _attachments[i];
+                                if (!name || !type || !size || !url) delete _attachments[i];
                             }
-                            const process_file = async (attachment) => {
-                                if (attachment && attachment.name && attachment.type?.match('image') && attachment.size == attachment.bytes?.length) {
-                                    attachment.name = attachment.name.substring(0, 100);
-                                    return new Promise((resolve, reject) => {
-                                        let __id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-                                        let attachment_extension = attachment.name.includes('.') ? attachment.name.split('.').pop() : false;
-                                        let attachment_path_inside_room = __id + (attachment_extension?.length < 8 ? `.${attachment_extension}` : '');
-                                        let buffer = Buffer.from(attachment.bytes);
-                                        fs.writeFile(`${room_img_path}/${attachment_path_inside_room}`, buffer, (err, result) => {
-                                            if (!err) resolve({
-                                                name: attachment.name,
-                                                type: attachment.type,
-                                                size: attachment.size,
-                                                url: `/uploads/rooms/${room.id}/${attachment_path_inside_room}`
-                                            });
-                                            else reject();
-                                        });
-                                    });
-                                } else return false;
+                            
+                            let chat_data = {
+                                id: Math.random().toString(36).substring(2, 15),
+                                user: user.id,
+                                message,
+                                time: Date.now(),
+                                seen_by: [],
+                                attachments: _attachments.filter(x => x.url)
+                            };
+                            chat.messages.push(chat_data);
+                            chat.mark_modified(`messages[${chat.messages.length - 1}]`);
+                            await chat.save();
+                            chat_data.username = user.username;
+                            
+                            callback({ success: true, user: user.id, id: room.id, chat: chat_data, _id });
+                            socket.broadcast.to(socket.room_id).emit('receive-message', { user: user.id, id: room.id, chat: chat_data, _id });
+
+                            /*io.to('6241d152216bc87c370928f6').emit('receive-message', { user: '61d001de9b64b8c435985da5e', id: '6241d152216bc87c370928f6', chat_data: {
+                                id: Math.random().toString(36).substring(2, 15),
+                                user: '61d001de9b64b8c435985da5',
+                                message: 'hey!',
+                                time: Date.now(),
+                                seen_by: []
+                            } });*/
+
+                            let room_members = [], _room_members = io.sockets.adapter.rooms.get(room.id);
+
+                            for (const id of _room_members ) {
+                                const room_member_socket = io.sockets.sockets.get(id);
+                                if (room_member_socket?.user_id) room_members.push(room_member_socket.user_id);
                             }
-                            Promise.all(_attachments.map(attachment => process_file(attachment))).then(async attachments => {
-                                let chat_data = {
-                                    id: Math.random().toString(36).substring(2, 15),
-                                    user: user.id,
-                                    message,
-                                    time: Date.now(),
-                                    seen_by: [],
-                                    attachments
-                                };
-                                chat.messages.push(chat_data);
-                                chat.mark_modified(`messages[${chat.messages.length - 1}]`);
-                                await chat.save();
-                                chat_data.username = user.username;
-                                
-                                callback({ success: true, user: user.id, id: room.id, chat: chat_data, _id });
-                                socket.broadcast.to(socket.room_id).emit('receive-message', { user: user.id, id: room.id, chat: chat_data, _id });
-
-                                /*io.to('6241d152216bc87c370928f6').emit('receive-message', { user: '61d001de9b64b8c435985da5e', id: '6241d152216bc87c370928f6', chat_data: {
-                                    id: Math.random().toString(36).substring(2, 15),
-                                    user: '61d001de9b64b8c435985da5',
-                                    message: 'hey!',
-                                    time: Date.now(),
-                                    seen_by: []
-                                } });*/
-
-                                let room_members = [], _room_members = io.sockets.adapter.rooms.get(room.id);
-
-                                for (const id of _room_members ) {
-                                    const room_member_socket = io.sockets.sockets.get(id);
-                                    if (room_member_socket?.user_id) room_members.push(room_member_socket.user_id);
-                                }
-                                
-                                let last_message_index = chat.messages.length - 1,
-                                    last_message = chat.messages[last_message_index];
-                                
-                                Promise.all(room.members.map(user => client.database.functions.get_user(user))).then(users => {
-                                    Promise.all(users.filter(x => x).map(user => {
-                                        let save = false, npr;
-                                        if (!user.rooms.some(x => x.id === room.id)) {
-                                            user.rooms.push({
-                                                id: room.id
-                                            }); save = true;
-                                            user.mark_modified('rooms'); npr = true;
+                            
+                            let last_message_index = chat.messages.length - 1,
+                                last_message = chat.messages[last_message_index];
+                            
+                            Promise.all(room.members.map(user => client.database.functions.get_user(user))).then(users => {
+                                Promise.all(users.filter(x => x).map(user => {
+                                    let save = false, npr;
+                                    if (!user.rooms.some(x => x.id === room.id)) {
+                                        user.rooms.push({
+                                            id: room.id
+                                        }); save = true;
+                                        user.mark_modified('rooms'); npr = true;
+                                    }
+                                    if (user.rooms[0]?.id !== room.id) {
+                                        let user_room_index = user.rooms.findIndex(x => x.id == room.id);
+                                        if (user_room_index > -1) {
+                                            let _user_room = user.rooms[user_room_index];
+                                            user.rooms.splice(user_room_index, 1); save = true;
+                                            user.rooms.unshift(_user_room);
+                                            user.mark_modified('rooms');
                                         }
-                                        if (user.rooms[0]?.id !== room.id) {
-                                            let user_room_index = user.rooms.findIndex(x => x.id == room.id);
-                                            if (user_room_index > -1) {
-                                                let _user_room = user.rooms[user_room_index];
-                                                user.rooms.splice(user_room_index, 1); save = true;
-                                                user.rooms.unshift(_user_room);
-                                                user.mark_modified('rooms');
-                                            }
+                                    }
+                                    let user_room = user.rooms.find(x => x.id == room.id);
+                                    if (room_members.includes(user.id)) {
+                                        if (!last_message.seen_by.includes(user.id)) {
+                                            last_message.seen_by.push(user.id);
+                                            chat.mark_modified(`messages[${last_message_index}]`); chat.save();
                                         }
-                                        let user_room = user.rooms.find(x => x.id == room.id);
-                                        if (room_members.includes(user.id)) {
-                                            if (!last_message.seen_by.includes(user.id)) {
-                                                last_message.seen_by.push(user.id);
-                                                chat.mark_modified(`messages[${last_message_index}]`); chat.save();
-                                            }
-                                            if (user_room && user_room.unread) {
-                                                user_room.unread = false; save = true;
-                                                user.mark_modified('rooms');
-                                                io.to(user.id).emit('unread', ({ messages: {
-                                                    count: user.rooms.filter(x => x.unread).length,
-                                                    read: [user_room.id], npr
-                                                } }));
-                                            }
-                                        } else if (!user_room.unread) {
-                                            user_room.unread = true; save = true;
+                                        if (user_room && user_room.unread) {
+                                            user_room.unread = false; save = true;
                                             user.mark_modified('rooms');
                                             io.to(user.id).emit('unread', ({ messages: {
                                                 count: user.rooms.filter(x => x.unread).length,
-                                                unread: [user_room.id], npr
+                                                read: [user_room.id], npr
                                             } }));
                                         }
-                                        if (save) return user.save();
-                                        else return true;
-                                    })).then(() => {
-                                        if (last_message.seen_by?.length) 
-                                            io.to(socket.room_id).emit('seen-message', { id: last_message.id, seen_by: last_message.seen_by });
-                                    });
+                                    } else if (!user_room.unread) {
+                                        user_room.unread = true; save = true;
+                                        user.mark_modified('rooms');
+                                        io.to(user.id).emit('unread', ({ messages: {
+                                            count: user.rooms.filter(x => x.unread).length,
+                                            unread: [user_room.id], npr
+                                        } }));
+                                    }
+                                    if (save) return user.save();
+                                    else return true;
+                                })).then(() => {
+                                    if (last_message.seen_by?.length) 
+                                        io.to(socket.room_id).emit('seen-message', { id: last_message.id, seen_by: last_message.seen_by });
                                 });
                             });
                         } else socket.emit('error', 'chat does not exist');

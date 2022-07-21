@@ -55,7 +55,7 @@ process.stdin.on('data', async data => {
             sync_interval = false;
         } else console.log('[Sync] already stopped');
         process.stdout.write('\n> ');
-    } else if (input == 'clear-cache') {
+    } else if (input.split(' ')[0] == 'clear-cache') {
         let input2 = input.split(' ')[1];
         if (input2) {
             if (input2 == 'user') await redis.del(await redis.keys('user:*')).then(() => console.log('[Redis] user cache cleared')).catch(() => {});

@@ -26,8 +26,10 @@
     "mailgun-js": "^0.22.0",
     "mongodb": "^4.7.0",
     "mongoose": "^6.4.4",
+    "multer": "^1.4.5-lts.1",
     "passport": "^0.6.0",
     "passport-local": "^1.0.0",
-    "socket.io": "^4.5.1"
+    "socket.io": "^4.5.1",
+    "uuid": "^8.3.2"
   }
 }

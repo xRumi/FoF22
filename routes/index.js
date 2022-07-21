@@ -8,16 +8,15 @@ const router = require('express').Router(),
     recover_password = require('./recover-password'),
     register = require('./register'),
     debug = require('./debug'),
+    me = require('./me'),
     notifications = require('./notifications'),
-    mail = require('./mail');
-
-const me = require('./me');
+    mail = require('./mail'),
+    upload = require('./upload');
 
 module.exports = (client) => {
 
-    router.get('/', async (req, res) => {
-        res.render("index");
-    });
+    router.get('/', async (req, res) => res.render("index"));
+    
     router.use('/auth', auth(client));
     router.use('/', profile(client));
     router.use('/friends', friends(client));
@@ -30,6 +29,7 @@ module.exports = (client) => {
     router.use('/me', me(client));
     router.use('/notifications', notifications(client));
     router.use('/mail', mail(client));
+    router.use('/upload', upload(client));
 
     router.get('/spa', async (req, res) => {
         if (req.user) {

@@ -143,17 +143,12 @@ export default class extends Constructor {
             $('.messages-list').append(`
                 <div id="${_id}" class="message outgoing pending-message" data-username="${client.username}">
                     <div class="message-content">
-                        ${attachments.length ? attachments.map(x => `<img src="${x.base64}" data-bytes="${x.bytes}" data-name="${x.name}" data-size="${x.size}" data-lastmodified="${x.lastModified}" data-type="${x.type}" />`).join('') : ''}
+                        ${attachments.length ? attachments.map(x => `<img src="${x.image_src}" data-bytes="${x.bytes}" data-name="${x.name}" data-size="${x.size}" data-lastmodified="${x.lastModified}" data-type="${x.type}" />`).join('') : ''}
                         ${_message ? '<p>' + _message.replace(/[&<>]/g, (t) => ttr[t] || t) + '</p>' : ''}
                     </div>
                 </div>
             `);
-            send_message(_message, attachments.map(x => ({
-                name: x.name,
-                bytes: x.bytes,
-                type: x.type,
-                size: x.size
-            })), _id, (response) => {
+            send_message(_message, attachments.filter(x => x.blob), _id, (response) => {
                 if (response.error) $(`#${_id}`).remove();
                 else {
                     const { id, chat, _id } = response;
@@ -205,29 +200,33 @@ export default class extends Constructor {
                     alert(`duplicate file, skipping ${file.name}`);
                     continue;
                 }
-                let reader_base64 = new FileReader();
-                let reader = new FileReader(), bytes;
-                reader.onload = (_e) => {
-                    bytes = new Uint8Array(_e.target.result)
-                    reader_base64.readAsDataURL(file);
+                let attachment_length = attachments.length + 1;
+                if (attachment_length >= attachment_limit) {
+                    $('#message-input-files-button').prop('disabled', true);
+                    $('#message-input-file-text').text(`limit reached, click to remove`);
+                    break;
+                } else $('#message-input-file-text').text(`${attachment_length} file${attachment_length > 1 ? 's' : ''} selected, click to remove`);
+                let attachment_data = {
+                    name: file.name,
+                    type: file.type,
+                    size: file.size,
+                    lastModified: file.lastModified
+                };
+                attachments.push(attachment_data);
+                let image = new Image(), image_src = URL.createObjectURL(file);
+                image.src = image_src;
+                image.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+                    let ctx = canvas.getContext('2d');
+                    ctx.drawImage(image, 0, 0);
+                    canvas.toBlob(blob => {
+                        $('.message-input-files-preview').append(image);
+                        attachment_data.blob = blob;
+                        attachment_data.image_src = image_src;
+                    }, 'image/jpeg', 0.9);
                 }
-                reader_base64.onload = (_e) => {
-                    attachments.push({
-                        type: file.type,
-                        bytes,
-                        name: file.name,
-                        size: file.size,
-                        lastModified: file.lastModified,
-                        base64: _e.target.result
-                    });
-                    $('.message-input-files-preview').append(`<img src="${_e.target.result}" data-bytes="${file.bytes}" data-name="${file.name}" data-size="${file.size}" data-lastmodified="${file.lastModified}" data-type="${file.type}" />`);
-                    let attachment_length = attachments.length;
-                    if (attachment_length >= attachment_limit) {
-                        $('#message-input-files-button').prop('disabled', true);
-                        $('#message-input-file-text').text(`limit reached, click to remove`);
-                    } else $('#message-input-file-text').text(`${attachment_length} file${attachment_length > 1 ? 's' : ''} selected, click to remove`);
-                }
-                reader.readAsArrayBuffer(file);
             }
             $(e.currentTarget).val('');
         }).on('click', '.message-input-files-preview', (e) => {
@@ -290,7 +289,7 @@ socket.on('receive-message', ({ id, chat, _id }) => {
                     </div>
                     <div class="message-content">
                         ${!chat.deleted ? `
-                            ${chat.attachments ? chat.attachments.filter(x => x.type.match('image')).map(x => `<img src="${x.url}" data-name="${x.name}" />`).join('') : ''}
+                            ${chat.attachments ? chat.attachments.filter(x => x && x.url && x.type && x.type.match('image')).map(x => `<img src="${x.url}" data-name="${x.name}" />`).join('') : ''}
                             ${chat.message ? '<p>' + chat.message.replace(/[&<>]/g, (t) => ttr[t] || t) + '</p>' : ''}
                         ` : `<p><i>This message was deleted</i>`}
                         <div class="message-time">${parse_message_time(chat.time)}</div>
@@ -421,7 +420,7 @@ function join_room(response) {
                         </div>
                         <div class="message-content">
                             ${!m.deleted ? `
-                                ${m.attachments ? m.attachments.filter(x => x.type.match('image')).map(x => `<img src="${x.url}" data-name="${x.name}" />`).join('') : ''}
+                                ${m.attachments ? m.attachments.filter(x => x && x.url && x.type && x.type.match('image')).map(x => `<img src="${x.url}" data-name="${x.name}" />`).join('') : ''}
                                 ${m.message ? '<p>' + m.message.replace(/[&<>]/g, (t) => ttr[t] || t) + '</p>' : ''}
                             ` : `<p><i>This message was deleted</i>`}
                         </div>
@@ -447,6 +446,48 @@ function join_room(response) {
 
 function send_message(_message, _attachments, _id, callback) {
     if (!client.messages.room_id) return false;
+    Promise.all(_attachments.map(attachment => {
+        return new Promise((resolve, reject) => {
+            upload_attachment(attachment, (result, errorThrown) => {
+                if (result) resolve(result);
+                else reject({ error: errorThrown });
+            });
+        });
+    })).then(x => {
+        _send_message(_message, x, _id, callback);
+    }).catch(x => {
+        console.log(x);
+        alert(x);
+    });
+}
+
+function upload_attachment(attachment, callback) {
+    if (attachment.type.match('image')) {
+        let form_data = new FormData();
+        form_data.append('room_id', client.messages.room_id);
+        form_data.append('image', attachment.blob);
+        $.ajax({
+            type: 'POST',
+            url: '/upload/img/room',
+            data: form_data,
+            processData: false,
+            contentType: false,
+            timeout: 30000,
+            success: (result, textStatus, xhr) => callback({
+                name: attachment.name,
+                type: attachment.type,
+                size: attachment.size,
+                url: result
+            }),
+            error: (xhr, textStatus, errorThrown) => {
+                if (xhr.code == 403) window.location.replace(`/login?ref=/spa/messages/${client.messages.room_id}`);
+                else callback(false, xhr.responseText);
+            }
+        });
+    }
+}
+
+function _send_message(_message, _attachments, _id, callback) {
     socket.emit('send-message', ({ id: client.messages.room_id, _message, _id, _attachments }), (response) => {
         if (response.success) callback(response);
         else if (response.join_room) socket.emit('join-room', client.messages.room_id, () => send_message(_message, _attachments, _id, callback));
@@ -510,7 +551,7 @@ function load_more_messages() {
                             </div>
                             <div class="message-content">
                                 ${!m.deleted ? `
-                                    ${m.attachments ? m.attachments.filter(x => x.type.match('image')).map(x => `<img src="${x.url}" data-name="${x.name}" />`).join('') : ''}
+                                    ${m.attachments ? m.attachments.filter(x => x && x.url && x.type && x.type.match('image')).map(x => `<img src="${x.url}" data-name="${x.name}" />`).join('') : ''}
                                     ${m.message ? '<p>' + m.message.replace(/[&<>]/g, (t) => ttr[t] || t) + '</p>' : ''}
                                 ` : `<p><i>This message was deleted</i>`}
                             </div>
