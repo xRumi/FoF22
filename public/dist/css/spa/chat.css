@@ -143,7 +143,7 @@
     margin: 2.5px 0 2.5px 5px;
 }
 
-.message-time {
+.message-foot {
 	color: #777;
 	font-size: 12px;
 	clear: both;
@@ -151,7 +151,7 @@
 	margin-bottom: 8px;
 }
 
-.outgoing .message-time {
+.outgoing .message-foot {
 	float: right;
 }
 
@@ -252,7 +252,7 @@
 }
 
 .outgoing {
-	margin-top: 8px;
+	margin-top: 4px;
 	display: flex;
 	flex-direction: row-reverse;
 }
@@ -262,8 +262,8 @@
 }
 
 .stack-message .message-content {
-	margin-top: 2px;
-    margin-bottom: 5px;
+	/*margin-top: 2px;
+    margin-bottom: 5px;*/
 }
 
 .load-more-messages {
@@ -355,4 +355,34 @@
 
 .pending-message > .message-content > p {
     background-color: lightblue;
+}
+
+.message-actions {
+    margin-left: 5px;
+}
+
+.message-actions button {
+    background-color: white;
+    outline: 0;
+    border: solid 1px;
+    padding: 3.5px 5px;
+    border-radius: 3px;
+}
+
+.message-error {
+    background-color: #ffebe8;
+    width: 100%;
+    padding: 13px;
+    border-bottom: solid 2px #dd3c10;
+    display: none;
+}
+
+.message-error div {
+    float: left;
+    color: #6d220d;
+}
+
+.message-error button {
+    float: right;
+    padding: 4px 5px;
 }

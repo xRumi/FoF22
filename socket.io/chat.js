@@ -140,19 +140,27 @@ module.exports = (io, client, socket) => {
                     if (room?.members?.includes(user.id)) {
                         let chat = await client.database.functions.get_chat(room.chat_id);
                         if (chat) {
+                            let attachments = [];
                             for (let i = 0; i < _attachments.length; i++) {
-                                let { name, type, size, url } = _attachments[i];
-                                if (!name || !type || !size || !url) delete _attachments[i];
+                                let { name, type, url } = _attachments[i];
+                                if (type?.match('image') && url) {
+                                    if (fs.existsSync(path.join(__dirname, url))) {
+                                        attachments.push({
+                                            type: 'image/jpg',
+                                            url,
+                                            name: name?.substring(0, 50) || 'unknown.jpg'
+                                        });
+                                    } else continue;
+                                }
                             }
-                            
                             let chat_data = {
                                 id: Math.random().toString(36).substring(2, 15),
                                 user: user.id,
                                 message,
                                 time: Date.now(),
                                 seen_by: [],
-                                attachments: _attachments.filter(x => x.url)
-                            };
+                                attachments
+                            }
                             chat.messages.push(chat_data);
                             chat.mark_modified(`messages[${chat.messages.length - 1}]`);
                             await chat.save();

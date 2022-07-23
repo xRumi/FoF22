@@ -86,9 +86,11 @@ const router = async () => {
 };
 
 window.addEventListener("popstate", (e) => {
-    let view_image = $('.view-image');
-    if (view_image.is(':visible')) { view_image.hide(); e.preventDefault(); }
-    else router();
+    let model_view = $('.model-view');
+    if (model_view.is(':visible')) {
+        model_view.hide(); e.preventDefault();
+        $('.model-view .model-actions a').hide();
+    } else router();
 });
 
 $('body').on('click', 'a[data-link]', e => {

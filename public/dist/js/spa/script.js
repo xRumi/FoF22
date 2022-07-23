@@ -26,6 +26,25 @@ const navbar = (id, show) => {
     else $('.navbar').hide();
 }
 
+let socket_connected = true, online = true;
+
+socket.on('connect', () => {
+    if (!socket_connected) {
+        $('.top-status').text('Connected')
+            .css('background-color', 'green').show();
+        setTimeout(() => {
+            $('.top-status').hide();
+        }, 2000);
+        socket_connected = true;
+    }
+});
+
+socket.on('disconnect', () => {
+    socket_connected = false;
+    $('.top-status').text(`Disonnected${!navigator.onLine ? `, No internet` : ''}`)
+        .css('background-color', 'red').show();
+});
+
 socket.on('redirect', url => window.location.replace(url));
 
 function init(id, username, name) {
@@ -60,7 +79,7 @@ const ttr = {
     '=': '&#x3D;'
 };
 
-const alert = new Alert();
+const _alert = new Alert();
 
 socket.on('unread', unread => {
     Object.keys(unread).forEach(key => {
@@ -70,7 +89,7 @@ socket.on('unread', unread => {
             if (unread[key].read) unread[key].read.forEach(m => $(`._people[data-id=${m}]`).removeClass('_people-unread'));
             if (unread[key].npr && !client.messages.npr) client.messages.npr;
         } else if (key == 'notifications') {
-            if (unread[key].unread) unread[key].unread.forEach(unread_info => alert.render({
+            if (unread[key].unread) unread[key].unread.forEach(unread_info => _alert.render({
                 head: unread_info.header,
                 content: unread_info.title,
                 click_to_close: true,

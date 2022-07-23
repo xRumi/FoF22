@@ -1,8 +1,6 @@
 const ref = new URLSearchParams(window.location.search).get('ref');
-window.history.pushState({}, '', window.location.origin + window.location.pathname);
-$.fn.isValid = function() {
-    return this[0].checkValidity();
-}
+// window.history.pushState({}, '', window.location.origin + window.location.pathname);
+$.fn.isValid = function() { return this[0].checkValidity(); }
 $('.form').submit(function(e) {
     e.preventDefault();
     if (!$('.form').isValid()) return false;

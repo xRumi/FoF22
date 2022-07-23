@@ -11,6 +11,7 @@
         <title>FoF22</title>
     </head>
     <body data-id="<%=user_id%>" data-username="<%=username%>" data-name="<%=name%>">
+        <div class="top-status">Connected</div>
         <header>
             <nav class="navbar">
                 <div class="nav__logo">FoF22</div>
@@ -27,14 +28,14 @@
             </nav>
         </header>
 
-        <div class="view-image" style="display: none;">
-            <div class="header-back">
-                <div class="header-back-icon" onclick="history.back();">
-                    <i class='bx bx-chevron-left'></i>
-                </div>
-                <p class="view-image-header-text header-back-text"></p>
+        <div class="model-view">
+            <span class="model-close" onclick="history.back();">&times;</span>
+            <div class="model-content"></div>
+            <div class="model-caption"></div>
+            <div class="model-actions">
+                <a class="model-download">Download</a>
+                <a class="model-full-view">Full View</a>
             </div>
-            <div class="view-images"></div>
         </div>
 
         <main id="app"></main>
