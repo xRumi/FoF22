@@ -17,8 +17,11 @@ module.exports = (client) => {
         let { room_id } = req.body;
         if (req.user && room_id && req.user.rooms.some(x => x.id == room_id)) {
             if (!req.file?.buffer) return res.sendStatus(400);
-            let upload_path = `/uploads/rooms/${room_id}/${uuidv4()}.jpg`;
+            let folder_path = `/uploads/rooms/${room_id}`
+            let upload_path = `${folder_path}/${uuidv4()}.jpg`;
             try {
+                if (!fs.existsSync(path.join(__dirname, '/../public' + folder_path)))
+                    fs.mkdirSync(path.join(__dirname, '/../public' + folder_path), { recursive: true });
                 fs.writeFile(path.join(__dirname, '/../public' + upload_path), req.file.buffer, (err, result) => {
                     if (!err) res.status(200).send(upload_path);
                     else {

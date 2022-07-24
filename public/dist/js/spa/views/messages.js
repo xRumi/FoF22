@@ -162,6 +162,12 @@ export default class extends Constructor {
                             <div>Failed to send message</div>
                             <button>Resend</button>
                         `).show();
+                        _alert.render({
+                            head: 'Message Deliver Error',
+                            content: response.error,
+                            click_to_close: true,
+                            delay: 5000
+                        });
                         console.log(response.error);
                     } else {
                         const { id, chat, _id } = response;
@@ -222,7 +228,7 @@ export default class extends Constructor {
                 } else $('#message-input-file-text').text(`${attachment_length} file${attachment_length > 1 ? 's' : ''} selected, click to remove`);
                 let attachment_data = {
                     id: Math.random().toString(36).substring(2, 15),
-                    name: file.name,
+                    name: file.name ? file.name.split(".").slice(0, -1).join(".") : 'unknown',
                     type: file.type,
                     size: file.size,
                     lastModified: file.lastModified
@@ -261,8 +267,12 @@ export default class extends Constructor {
             $('.model-view .model-caption').text(that.data('name'));
             $('.model-view').show();
             if (e.currentTarget.dataset.url) {
-                $('.model-view .model-actions .model-download').attr({ 'href': e.currentTarget.dataset.url, 'download': e.currentTarget.dataset.url.split('/').pop() }).show();
-                $('.model-view .model-actions .model-full-view').attr('href', e.currentTarget.dataset.url).show();
+                $('.model-view .model-actions .model-download').attr({
+                    'href': that.data('url'),
+                    'download': that.data('name') + '.jpg'
+                }).show();
+                $('.model-view .model-actions .model-full-view')
+                    .attr('href', that.data('url')).show();
             } else {
                 // may not work
                 // $('.model-view .model-actions .model-download').attr({ 'href': ("data:image/png;base64," + e.currentTarget.src), 'download': (e.currentTarget.dataset.name || 'unknown.png') }).show();

@@ -140,18 +140,26 @@ module.exports = (io, client, socket) => {
                     if (room?.members?.includes(user.id)) {
                         let chat = await client.database.functions.get_chat(room.chat_id);
                         if (chat) {
-                            let attachments = [];
+                            let attachments = [], callback_done = false;;
                             for (let i = 0; i < _attachments.length; i++) {
                                 let { name, type, url } = _attachments[i];
                                 if (type?.match('image') && url) {
-                                    if (fs.existsSync(path.join(__dirname, url))) {
+                                    if (fs.existsSync(path.join(__dirname, '/../public' + url))) {
                                         attachments.push({
                                             type: 'image/jpg',
                                             url,
-                                            name: name?.substring(0, 50) || 'unknown.jpg'
+                                            name: name?.substring(0, 100) || 'unknown'
                                         });
-                                    } else continue;
+                                    } else {
+                                        callback({ error: 'attachment does not exist' }); callback_done = true;
+                                        break;
+                                    }
                                 }
+                            }
+                            if (callback_done) return;
+                            if (!message && !attachments.length) {
+                                callback({ error: 'empty message' }); callback_done = true;
+                                return;
                             }
                             let chat_data = {
                                 id: Math.random().toString(36).substring(2, 15),
