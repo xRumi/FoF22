@@ -12,9 +12,9 @@ import Menu from "./views/menu.js";
 import MenuChangePassword from "./views/menu/change-password.js";
 
 
-const pathToRegex = path => new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
+const path_to_regex = path => new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
 
-const getParams = match => {
+const get_params = match => {
     const values = match.result.slice(1);
     const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map(result => result[1]);
 
@@ -29,34 +29,36 @@ const navigateTo = url => {
     router();
 };
 
+const routes = [
+    { path: "/spa", view: Index },
+    { path: "/spa/friends", view: Friends },
+
+    { path: "/spa/messages", view: Messages },
+    { path: "/spa/messages/:id", view: Messages },
+
+    { path: "/spa/notifications", view: Notifications },
+
+    { path: "/spa/menu", view: Menu },
+    { path: "/spa/menu/account/change-password", view: MenuChangePassword },
+
+    { path: "/spa/profile", view: Profile },
+    { path: "/spa/profile/:id", view: Profile },
+    
+    { path: "/spa/search", view: Search },
+];
+
 const router = async () => {
-    const routes = [
-        { path: "/spa", view: Index },
-        { path: "/spa/friends", view: Friends },
 
-        { path: "/spa/messages", view: Messages },
-        { path: "/spa/messages/:id", view: Messages },
+    $.fn._go_back = null;
 
-        { path: "/spa/notifications", view: Notifications },
-
-        { path: "/spa/menu", view: Menu },
-        { path: "/spa/menu/account/change-password", view: MenuChangePassword },
-
-        { path: "/spa/profile", view: Profile },
-        { path: "/spa/profile/:id", view: Profile },
-        
-        { path: "/spa/search", view: Search },
-
-    ];
-
-    const potentialMatches = routes.map(route => {
+    const potential_matches = routes.map(route => {
         return {
-            route: route,
-            result: location.pathname.replace(/\/$/, "").match(pathToRegex(route.path))
+            route,
+            result: location.pathname.replace(/\/$/, "").match(path_to_regex(route.path))
         };
     });
 
-    let match = potentialMatches.find(potentialMatch => potentialMatch.result !== null);
+    let match = potential_matches.find(potentialMatch => potentialMatch.result !== null);
 
     if (!match) {
         document.querySelector("#app").innerHTML = `
@@ -68,13 +70,14 @@ const router = async () => {
             </div>`;
         return false;
     }
+
     if (before_new_render) {
         await before_new_render();
         before_new_render = null;
     }
 
-    const view = new match.route.view(getParams(match));
-
+    const view = new match.route.view(get_params(match));
+    
     if (view.before_render) await view.before_render();
 
     let html = await view.render();
@@ -90,6 +93,10 @@ window.addEventListener("popstate", (e) => {
     if (model_view.is(':visible')) {
         model_view.hide(); e.preventDefault();
         $('.model-view .model-actions a').hide();
+    } else if ($.fn._go_back) {
+        $.fn._go_back();
+        $.fn._go_back = null;
+        return true;
     } else router();
 });
 
@@ -99,10 +106,16 @@ $('body').on('click', 'a[data-link]', e => {
 });
 
 $.fn.navigateTo = navigateTo;
+$.fn.routes = routes;
 $.fn.router = router;
 $.fn.shortcuts = {};
 
 $.fn.go_back = (fallback) => {
+    if ($.fn._go_back) {
+        $.fn._go_back();
+        $.fn._go_back = null;
+        return true;
+    }
     let prev_page = window.location.href;
     history.back();
     setTimeout(() => { 

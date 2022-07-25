@@ -132,6 +132,7 @@ export default class extends Constructor {
                     </div>
                 </div>
             </div>
+            <div class="profile-" style="display: none;"></div>
         `).on('submit', '.messages-bottom form', (e) => {
             e.preventDefault();
             let input = $('#message-input'),
@@ -432,6 +433,7 @@ function join_room(response) {
         let { chat_data, messages, id, name, mm } = response;
         if (client.messages.room_id == id) {
             document.title = name;
+            client.messages.room_name = name;
             $('.messages-header-back-text').text(name);
             let html = [], lm = {};
             for (let i = 0; i < messages.length; i++) {
@@ -546,11 +548,29 @@ function active_ago(time_) {
     return Math.floor(diff / periods.day) ? Math.floor(diff / periods.day) + 'd ago' : Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
 }
 
+$.fn.chat_show_profile = async (id) => {
+    if (!id) return false;
+    let profile = $.fn.routes.find(x => x.path == '/spa/profile');
+    if (!profile) return false;
+    let previous_location = window.location.pathname;
+    history.pushState(null, null, `/spa/profile/${id}`);
+    let view = new profile.view({ id });
+    let html = await view.render();
+    $('.chat').hide();
+    $('.profile-').html(html).show();
+    $.fn._go_back = () => {
+        history.pushState(null, null, previous_location);
+        document.title = client.messages.room_name || 'Messages';
+        $('.chat').show();
+        $('.profile-').html('');
+    }
+}
+
 function format_message(m, lm = {}) {
     return m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
         <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${m.deleted ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
             <div class="message-img">
-                <img src="/uploads/users/${m.user}/profile.png" onclick="$.fn.navigateTo('/spa/profile/${m.user}');">
+                <img src="/uploads/users/${m.user}/profile.png" onclick="$.fn.chat_show_profile('${m.user}');">
             </div>
             <div class="message-content">
                 ${!m.deleted ? `

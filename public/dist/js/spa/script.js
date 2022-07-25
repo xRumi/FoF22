@@ -5,7 +5,8 @@ const body = $('body');
 const client = {
     messages: {
         room_id: null,
-        npr: false
+        npr: false,
+        room_name: null
     },
     id: body.data('id'),
     username: body.data('username'),
@@ -98,4 +99,14 @@ socket.on('unread', unread => {
             if (unread[key].read) unread[key].read.forEach(x => $(`.notifications-item.nic-unread[data-id="${x}"]`).removeClass('nic-unread'));
         }
     });
+});
+
+$('.model-view').on('click', e => {
+    let close_class = ['model-view', 'model-actions', 'model-content'];
+    for (let i = 0; i < close_class.length; i++) {
+        if (e.target.classList.contains(close_class[i])) {
+            history.back();
+            break;
+        }
+    }
 });

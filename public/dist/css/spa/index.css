@@ -52,7 +52,7 @@ img {
 		background-color: #ffffff;
 		display: flex;
 		overflow-x: auto;
-		z-index: 99;
+		z-index: 5;
 	}
 
 	.nav__link {
@@ -88,7 +88,7 @@ img {
 		background-color: #ffffff;
 		display: flex;
 		justify-content: space-between;
-		z-index: 99;
+		z-index: 5;
 	}
 
 	.nav__logo {
@@ -326,8 +326,8 @@ img {
 	font-size: 45px;
 	float: left;
 	position: relative;
-    height: 60px;
-    width: 60px;
+    height: 50px;
+    width: 75px;
 }
 
 .header-back-text {
@@ -890,7 +890,7 @@ img {
 .model-view {
     display: none;
     position: fixed;
-    z-index: 100;
+    z-index: 8;
     left: 0;
     top: 0;
     width: 100%;
@@ -908,7 +908,7 @@ img {
     font-size: 40px;
     font-weight: bold;
     transition: 0.3s;
-    z-index: 101;
+    z-index: 10;
 }
 .model-close:hover, .model-close:focus {
     color: #bbb;
@@ -922,6 +922,7 @@ img {
     color: white;
     text-align: center;
     padding-top: 18px;
+    z-index: 9;
 }
 
 .model-content img {

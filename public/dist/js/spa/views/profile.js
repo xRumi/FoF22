@@ -140,14 +140,6 @@ export default class extends Constructor {
     }
 
     async after_render() {
-        let pc_user_info_header = $(".pc-user-info-header");
-        let pc_user_info_headers = $(".pc-user-info-header div");
-        for (let i = 0; i < pc_user_info_headers.length; i++) {
-            pc_user_info_headers[i].addEventListener("click", () => {
-                pc_user_info_header[0].querySelector(".pc-user-info-header-active").classList.remove("pc-user-info-header-active");
-                pc_user_info_headers[i].classList.add("pc-user-info-header-active");
-            });
-        }
     }
     async before_new_render() {
         $('.navbar').show();
