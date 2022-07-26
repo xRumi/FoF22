@@ -3,6 +3,15 @@ const is_function = value => value && (Object.prototype.toString.call(value) ===
 const fs = require("fs");
 const path = require('path');
 
+const mime_types = {
+    'image/png': ['png'],
+    'image/jpg': ['jpg', 'jpeg'],
+    'image/jpeg': ['jpg', 'jpeg'],
+    'image/gif': ['gif'],
+    'application/pdf': ['pdf'],
+    'application/vnd.android.package-archive': ['apk'],
+}
+
 module.exports = (io, client, socket) => {
     socket.on('create-or-join-room', async (user_id, callback) => {
         if (!is_function(callback)) return false;
@@ -142,18 +151,28 @@ module.exports = (io, client, socket) => {
                         if (chat) {
                             let attachments = [], callback_done = false;;
                             for (let i = 0; i < _attachments.length; i++) {
-                                let { name, type, url } = _attachments[i];
-                                if (type?.match('image') && url) {
-                                    if (fs.existsSync(path.join(__dirname, '/../public' + url))) {
+                                let { name, type, url, ext } = _attachments[i];
+                                url = xss(url), type = xss(type), ext = xss(ext);
+                                const mime_ext = mime_types[type];
+                                if (mime_ext && ext && mime_ext.includes(ext)) {
+                                    let attachment_path = path.join(__dirname, `/../public/uploads/rooms/${room.id}/` + url.split('/').pop());
+                                    if (fs.existsSync(attachment_path)) {
+                                        let attachment_info = fs.statSync(attachment_path);
                                         attachments.push({
-                                            type: 'image/jpg',
+                                            type,
                                             url,
-                                            name: name?.substring(0, 100) || 'unknown'
+                                            size: attachment_info.size,
+                                            name: xss((name?.substring(0, 100) || 'unknown') + '.' + ext),
                                         });
                                     } else {
-                                        callback({ error: 'attachment does not exist' }); callback_done = true;
+                                        callback_done = true;
+                                        callback({ error: `Attachment does not exist` }); callback_done = true;
                                         break;
                                     }
+                                } else {
+                                    callback_done = true;
+                                    callback({ error: `Attachment type is not suppprted` });
+                                    break;
                                 }
                             }
                             if (callback_done) return;
@@ -161,6 +180,7 @@ module.exports = (io, client, socket) => {
                                 callback({ error: 'empty message' }); callback_done = true;
                                 return;
                             }
+                            message = xss(message || '');
                             let chat_data = {
                                 id: Math.random().toString(36).substring(2, 15),
                                 user: user.id,

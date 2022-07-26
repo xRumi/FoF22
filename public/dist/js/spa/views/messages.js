@@ -8,6 +8,15 @@ let attachments = [],
     is_private,
     members = [];
 
+const mime_types = {
+    'image/png': ['png'],
+    'image/jpg': ['jpg', 'jpeg'],
+    'image/jpeg': ['jpg', 'jpeg'],
+    'image/gif': ['gif'],
+    'application/pdf': ['pdf'],
+    'application/vnd.android.package-archive': ['apk'],
+}
+
 const people_list = (new_people_list) => {
     if (new_people_list && JSON.stringify(new_people_list) == JSON.stringify(old_people_list)) return false;
     if (new_people_list) old_people_list = new_people_list;
@@ -122,10 +131,10 @@ export default class extends Constructor {
                                 <i style="display: none;" class='bx bx-send message-send-icon'></i>
                             </button>
                             <div id="message-input-files">
-                                ${window.File && window.FileList && window.FileReader ? `
+                                ${window.FileReader ? `
                                     <input id="message-input-files-button" type="button" value="upload" disabled> <span id="message-input-file-text" style="margin-left: 5px; font-size: 13px;">No file selected</span>
-                                    <input type="file" style="display: none;" accept="image/*">
-                                ` : `<span style="color: grey;">does not support file upload</span>`}
+                                    <input type="file" style="display: none;" accept=".jpeg,.jpg,.png,.gif,.pdf,.apk">
+                                ` : `<span style="color: grey;">does not support file reader</span>`}
                             </div>
                             <div class="message-input-files-preview"></div>
                         </form>
@@ -144,7 +153,7 @@ export default class extends Constructor {
             $('.messages-list').append(`
                 <div id="${_id}" class="message outgoing pending-message" data-username="${client.username}">
                     <div class="message-content">
-                        ${attachments.length ? attachments.map(x => `<img id="${x.id}" src="${x.image_src}" data-bytes="${x.bytes}" data-name="${x.name}" data-size="${x.size}" data-lastmodified="${x.lastModified}" data-type="${x.type}" />`).join('') : ''}
+                        ${format_attachment(attachments)}
                         ${_message ? '<p>' + _message.replace(/[&<>]/g, (t) => ttr[t] || t) + '</p>' : ''}
                     </div>
                     <div class="message-error"></div>
@@ -154,7 +163,7 @@ export default class extends Constructor {
                 $(`#${_id} .message-content`).show();
                 do_send_message();
             });
-            let _attachments = attachments.filter(x => x.blob).map(x => Object.assign({}, x));
+            let _attachments = attachments.filter(x => x.file).map(x => Object.assign({}, x));
             function do_send_message() {
                 send_message(_message, _attachments, _id, (response) => {
                     if (response.error) {
@@ -213,14 +222,43 @@ export default class extends Constructor {
             let files = e.target.files;
             for (let i = 0; i < files.length; i++) {
                 let file = files[i];
-                if (!file.type.match('image')) continue;
-                if (file.size > 5242880) {
-                    alert(`upload limit: 5mb; skipping ${file.name}`);
+                if (file.size > 20 * 1024 * 1024) {
+                    alert(`Upload limit 20mb, skipping ${file.name}`);
                     continue;
                 } else if (attachments.some(x => x.name == file.name && file.type == x.type && file.size == x.size && x.lastModified == file.lastModified)) {
-                    alert(`duplicate file, skipping ${file.name}`);
+                    alert(`Duplicate file, skipping ${file.name}`);
+                    continue;
+                } else if (!file.name) {
+                    alert('File does not have any name, skipping');
                     continue;
                 }
+
+                let mime_ext = mime_types[file.type];
+
+                console.log(file.type);
+                
+                if (!mime_ext || !mime_ext.length) {
+                    alert(`File type is not supported, skipping ${file.name}`);
+                    continue;
+                }
+
+                let ext = file.name.split('.').pop();
+                
+                if (!ext) {
+                    alert(`File does not have an extension, skipping ${file.name}`);
+                    continue;
+                }
+
+                if (!mime_ext.includes(ext)) {
+                    alert(`File extension ${ext} is not supported, skipping ${file.name}`);
+                    continue;
+                }
+
+                if (!URL.createObjectURL) {
+                    alert('Your browser does not support representing file using createObjectURL');
+                    break;
+                }
+
                 let attachment_length = attachments.length + 1;
                 if (attachment_length >= attachment_limit) {
                     $('#message-input-files-button').prop('disabled', true);
@@ -229,25 +267,32 @@ export default class extends Constructor {
                 } else $('#message-input-file-text').text(`${attachment_length} file${attachment_length > 1 ? 's' : ''} selected, click to remove`);
                 let attachment_data = {
                     id: Math.random().toString(36).substring(2, 15),
-                    name: file.name ? file.name.split(".").slice(0, -1).join(".") : 'unknown',
+                    name: file.name.split('.').slice(0, -1).join('.'),
                     type: file.type,
+                    ext,
                     size: file.size,
-                    lastModified: file.lastModified
+                    lastModified: file.lastModified,
                 };
                 attachments.push(attachment_data);
-                let image = new Image(), image_src = URL.createObjectURL(file);
-                image.src = image_src;
-                image.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = image.width;
-                    canvas.height = image.height;
-                    let ctx = canvas.getContext('2d');
-                    ctx.drawImage(image, 0, 0);
-                    canvas.toBlob(blob => {
-                        $('.message-input-files-preview').append(image);
-                        attachment_data.blob = blob;
-                        attachment_data.image_src = image_src;
-                    }, 'image/jpeg', 0.8);
+                if (file.type.match('image')) {
+                    let image = new Image(), src_url = URL.createObjectURL(file);
+                    image.src = src_url;
+                    image.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = image.width;
+                        canvas.height = image.height;
+                        let ctx = canvas.getContext('2d');
+                        ctx.drawImage(image, 0, 0);
+                        canvas.toBlob(blob => {
+                            $('.message-input-files-preview').append(image);
+                            attachment_data.file = file;
+                            attachment_data.src_url = src_url;
+                            attachment_data.ext = 'jpg';
+                        }, 'image/jpeg', 0.8);
+                    }
+                } else {
+                    attachment_data.src_url = URL.createObjectURL(file);
+                    attachment_data.file = file;
                 }
             }
             $(e.currentTarget).val('');
@@ -473,37 +518,36 @@ function send_message(_message, _attachments, _id, callback) {
         _send_message(_message, x.map(y => ({
             name: y.name,
             type: y.type,
+            ext: y.ext,
             url: y.url
         })), _id, callback);
     }).catch(x => {
         console.log(x);
-        callback({ error: x });
+        callback({ error: x || 'no response' });
     });
 }
 
 function upload_attachment(attachment, callback) {
-    if (attachment.type.match('image')) {
-        if (attachment.url) return callback(attachment.url);
-        let form_data = new FormData();
-        form_data.append('room_id', client.messages.room_id);
-        form_data.append('image', attachment.blob);
-        $.ajax({
-            type: 'POST',
-            url: '/upload/img/room',
-            data: form_data,
-            processData: false,
-            contentType: false,
-            timeout: 30000,
-            success: (result, textStatus, xhr) => {
-                $(`#${attachment.id}`).attr('data-url', result);
-                callback(result);
-            },
-            error: (xhr, textStatus, errorThrown) => {
-                if (xhr.code == 403) window.location.replace(`/login?ref=/spa/messages/${client.messages.room_id}`);
-                else callback(false, xhr.responseText);
-            }
-        });
-    }
+    if (attachment.url) return callback(attachment.url);
+    let form_data = new FormData();
+    form_data.append('room_id', client.messages.room_id);
+    form_data.append('attachment', attachment.file, 'attachment.' + attachment.ext);
+    $.ajax({
+        type: 'POST',
+        url: '/upload/room',
+        data: form_data,
+        processData: false,
+        contentType: false,
+        timeout: 30000,
+        success: (result, textStatus, xhr) => {
+            $(`#${attachment.id}`).attr('data-url', result);
+            callback(result);
+        },
+        error: (xhr, textStatus, errorThrown) => {
+            if (xhr.code == 403) window.location.replace(`/login?ref=/spa/messages/${client.messages.room_id}`);
+            else callback(false, xhr.responseText);
+        }
+    });
 }
 
 function _send_message(_message, _attachments, _id, callback) {
@@ -566,6 +610,36 @@ $.fn.chat_show_profile = async (id) => {
     }
 }
 
+function format_attachment(attachments) {
+    
+    return '<div class="msg-attachments">' + attachments.map(x => {
+        if (!x) return '';
+        return x.type.match('image') ? `<img ${x.id ? `id="${x.id}"` : ''} src="${x.src_url || x.url}" data-name="${x.name}" ${x.url ? `data-url="${x.url}"` : ``}>` :
+            `<a ${x.id ? `id="${x.id}"` : ''} class="message-file" href="${x.url || x.src_url}" download="${x.ext ? (x.name + '.' + x.ext) : x.name}" ${x.url ? `data-url="${x.url}"` : ''}>
+                <div class="message-file-icon"><i class="bx bx-file"></i></div>
+                <div class="message-file-name">${x.ext ? (x.name + '.' + x.ext) : x.name}</div>
+                <div class="message-file-size">${x.size ? filesize(x.size) : '∞'}</div>
+            </a>`;
+    }).join('') + '</div>';
+}
+
+function filesize(bytes, si = false, dp = 1) {
+    if (isNaN(bytes)) return '∞';
+    const thresh = si ? 1000 : 1024;
+    if (Math.abs(bytes) < thresh) return bytes + ' B';
+    const units = si 
+        ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'] 
+        : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+    let u = -1;
+    const r = 10**dp;
+    do {
+        bytes /= thresh;
+        ++u;
+    } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
+
+    return bytes.toFixed(dp) + ' ' + units[u];
+}
+
 function format_message(m, lm = {}) {
     return m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
         <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${m.deleted ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
@@ -574,7 +648,7 @@ function format_message(m, lm = {}) {
             </div>
             <div class="message-content">
                 ${!m.deleted ? `
-                    ${m.attachments ? m.attachments.filter(x => x && x.url && x.type && x.type.match('image')).map(x => `<img data-url="${x.url}" src="${x.url}" data-name="${x.name}" />`).join('') : ''}
+                    ${format_attachment(m.attachments)}
                     ${m.message ? '<p>' + m.message.replace(/[&<>]/g, (t) => ttr[t] || t) + '</p>' : ''}
                 ` : `<p><i>This message was deleted</i>`}
             </div>

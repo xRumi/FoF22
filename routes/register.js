@@ -1,6 +1,7 @@
 const ObjectId = require("mongodb").ObjectId;
 const router = require('express').Router();
 const rateLimit = require('express-rate-limit');
+const xss = require('xss');
 
 module.exports = (client) => {
 
@@ -22,7 +23,7 @@ module.exports = (client) => {
     });
 
     router.post('/new', limiter1, _limiter1, async (req, res) => {
-        const email = req.body.email;
+        const email = xss(req.body.email);
         if (email && email.match(/^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i)) {
             let _user = await client.database._user.findOne({ email });
             if (!_user) {
@@ -128,7 +129,7 @@ module.exports = (client) => {
 
     router.post('/confirm/new', limiter3, _limiter3, async (req, res) => {
         let username = req.body.username?.toLowerCase(),
-            name = req.body.name,
+            name = xss(req.body.name),
             _token = req.body.token,
             password = req.body.password;
         if (_token && username?.length >= 4 && username.length <= 16 && name?.length >= 4 && name.length <= 32 && password?.length >= 8 && password.length <= 32 && ObjectId.isValid(_token)) {
