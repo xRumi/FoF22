@@ -284,7 +284,7 @@ export default class extends Constructor {
                         let ctx = canvas.getContext('2d');
                         ctx.drawImage(image, 0, 0);
                         canvas.toBlob(blob => {
-                            $('.message-input-files-preview').append(image);
+                            $('.message-input-files-preview').append(`<img src="${src_url}" data-id="${attachment_data.id}">`);
                             attachment_data.file = file;
                             attachment_data.src_url = src_url;
                             attachment_data.ext = 'jpg';
@@ -293,12 +293,13 @@ export default class extends Constructor {
                 } else {
                     attachment_data.src_url = URL.createObjectURL(file);
                     attachment_data.file = file;
+                    $('.message-input-files-preview').append(`<span data-id="${attachment_data.id}">.${ext}</span>`);
                 }
             }
             $(e.currentTarget).val('');
         }).on('click', '.message-input-files-preview', (e) => {
             let that = $(e.target);
-            let attachment_index = attachments.findIndex(x => x.name == that.data('name') && x.type == that.data('type') && x.size == that.data('size') && x.lastModified == that.data('lastmodified'));
+            let attachment_index = attachments.findIndex(x => x.id == that.data('id'));
             if (attachment_index > -1) {
                 attachments.splice(attachment_index, 1);
                 that.remove();
@@ -611,7 +612,7 @@ $.fn.chat_show_profile = async (id) => {
 }
 
 function format_attachment(attachments) {
-    
+    if (!attachments) return '';
     return '<div class="msg-attachments">' + attachments.map(x => {
         if (!x) return '';
         return x.type.match('image') ? `<img ${x.id ? `id="${x.id}"` : ''} src="${x.src_url || x.url}" data-name="${x.name}" ${x.url ? `data-url="${x.url}"` : ``}>` :
