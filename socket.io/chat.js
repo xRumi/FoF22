@@ -2,6 +2,7 @@ const ObjectId = require("mongodb").ObjectId;
 const is_function = value => value && (Object.prototype.toString.call(value) === "[object Function]" || "function" === typeof value || value instanceof Function);
 const fs = require("fs");
 const path = require('path');
+const xss = require('xss');
 
 const mime_types = {
     'image/png': ['png'],
@@ -10,6 +11,7 @@ const mime_types = {
     'image/gif': ['gif'],
     'application/pdf': ['pdf'],
     'application/vnd.android.package-archive': ['apk'],
+    'video/mp4': ['mp4'],
 }
 
 module.exports = (io, client, socket) => {
@@ -152,27 +154,25 @@ module.exports = (io, client, socket) => {
                             let attachments = [], callback_done = false;;
                             for (let i = 0; i < _attachments.length; i++) {
                                 let { name, type, url, ext } = _attachments[i];
-                                url = xss(url), type = xss(type), ext = xss(ext);
-                                const mime_ext = mime_types[type];
-                                if (mime_ext && ext && mime_ext.includes(ext)) {
-                                    let attachment_path = path.join(__dirname, `/../public/uploads/rooms/${room.id}/` + url.split('/').pop());
+                                if (!name || !url) {
+                                    callback({ error: `Attachment has missing informations` }); callback_done = true;
+                                    break;
+                                } else {
+                                    url = xss(url), type = xss(type), ext = xss(ext?.substring(0, 6));
+                                    let filename = url.split('/').pop();
+                                    let attachment_path = path.join(__dirname, `/../public/uploads/rooms/${room.id}/` + filename);
                                     if (fs.existsSync(attachment_path)) {
                                         let attachment_info = fs.statSync(attachment_path);
                                         attachments.push({
-                                            type,
-                                            url,
+                                            type: type?.substring(0, 20),
+                                            url: `/uploads/rooms/${room.id}/${filename}`,
                                             size: attachment_info.size,
-                                            name: xss((name?.substring(0, 100) || 'unknown') + '.' + ext),
+                                            name: xss((name?.substring(0, 100) || 'unknown') + (ext ? '.' + ext : '')),
                                         });
                                     } else {
-                                        callback_done = true;
                                         callback({ error: `Attachment does not exist` }); callback_done = true;
                                         break;
                                     }
-                                } else {
-                                    callback_done = true;
-                                    callback({ error: `Attachment type is not suppprted` });
-                                    break;
                                 }
                             }
                             if (callback_done) return;

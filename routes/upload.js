@@ -5,15 +5,6 @@ const express = require('express'),
     fs = require('fs'),
     multer = require('multer');
 
-const mime_types = {
-    'image/png': ['png'],
-    'image/jpg': ['jpg', 'jpeg'],
-    'image/jpeg': ['jpg', 'jpeg'],
-    'image/gif': ['gif'],
-    'application/pdf': ['pdf'],
-    'application/vnd.android.package-archive': ['apk'],
-}
-
 const room_upload = multer({
     storage: multer.diskStorage({
         destination: (req, file, cb) => {
@@ -21,7 +12,7 @@ const room_upload = multer({
             cb(null, path.join(__dirname, `/../public/uploads/rooms/${room_id}`));
         },
         filename: (req, file, cb) => {
-            cb(null, uuidv4() + path.extname(file.originalname));
+            cb(null, uuidv4() + path.extname(file.originalname).substring(0, 6));
         }
     }),
     limits: {
@@ -29,15 +20,10 @@ const room_upload = multer({
     },
     fileFilter: (req, file, cb) => {
         let { room_id } = req.body;
-        if (!file.originalname && !file.mimetype) return cb('File isn\'t supported', false);
-        const ext = file.originalname.split('.').pop()?.replace('jpeg', 'jpg');
-        const mime_ext = mime_types[file.mimetype];
-        if (mime_ext && mime_ext.includes(ext)) {
-            if (req.user && room_id && req.user.rooms.some(x => x.id == room_id))
-                return cb(null, true);
-            else return cb('You are not in the room or does not exist', false);
-        }
-        return cb('File type isn\'t supported', false);
+        if (!file.originalname) return cb('File does not have a name', false);
+        if (req.user && room_id && req.user.rooms.some(x => x.id == room_id))
+            return cb(null, true);
+        else return cb('You are not in the room or does not exist', false);
     }
 }).single('attachment');
 

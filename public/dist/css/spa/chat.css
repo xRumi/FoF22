@@ -342,6 +342,7 @@
     border: solid 1px;
     height: 50px;
     width: 50px;
+    overflow: hidden;
     margin-right: 5px;
     margin-bottom: 5px;
     display: flex;
@@ -420,6 +421,11 @@
     border: solid 1px lightgrey;
     margin-left: 0;
     margin-right: auto;
+}
+
+.msg-attachments video {
+    max-width: 250px;
+    max-height: 250px;
 }
 
 .outgoing .msg-attachments img {

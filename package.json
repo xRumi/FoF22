@@ -20,6 +20,7 @@
     "express-rate-limit": "^6.4.0",
     "express-session": "^1.17.3",
     "fast-geoip": "^1.1.88",
+    "file-extension": "^4.0.5",
     "http": "^0.0.1-security",
     "humanize-duration": "^3.27.2",
     "ioredis": "^5.2.0",

@@ -8,15 +8,6 @@ let attachments = [],
     is_private,
     members = [];
 
-const mime_types = {
-    'image/png': ['png'],
-    'image/jpg': ['jpg', 'jpeg'],
-    'image/jpeg': ['jpg', 'jpeg'],
-    'image/gif': ['gif'],
-    'application/pdf': ['pdf'],
-    'application/vnd.android.package-archive': ['apk'],
-}
-
 const people_list = (new_people_list) => {
     if (new_people_list && JSON.stringify(new_people_list) == JSON.stringify(old_people_list)) return false;
     if (new_people_list) old_people_list = new_people_list;
@@ -133,7 +124,7 @@ export default class extends Constructor {
                             <div id="message-input-files">
                                 ${window.FileReader ? `
                                     <input id="message-input-files-button" type="button" value="upload" disabled> <span id="message-input-file-text" style="margin-left: 5px; font-size: 13px;">No file selected</span>
-                                    <input type="file" style="display: none;" accept=".jpeg,.jpg,.png,.gif,.pdf,.apk">
+                                    <input type="file" style="display: none;" accept=".jpeg,.jpg,.png,.gif,.pdf,.apk,.mp4">
                                 ` : `<span style="color: grey;">does not support file reader</span>`}
                             </div>
                             <div class="message-input-files-preview"></div>
@@ -231,45 +222,26 @@ export default class extends Constructor {
                 } else if (!file.name) {
                     alert('File does not have any name, skipping');
                     continue;
-                }
-
-                let mime_ext = mime_types[file.type];
-
-                console.log(file.type);
-                
-                if (!mime_ext || !mime_ext.length) {
-                    alert(`File type is not supported, skipping ${file.name}`);
-                    continue;
-                }
-
-                let ext = file.name.split('.').pop();
-                
-                if (!ext) {
-                    alert(`File does not have an extension, skipping ${file.name}`);
-                    continue;
-                }
-
-                if (!mime_ext.includes(ext)) {
-                    alert(`File extension ${ext} is not supported, skipping ${file.name}`);
-                    continue;
-                }
-
-                if (!URL.createObjectURL) {
+                } else if (!URL.createObjectURL) {
                     alert('Your browser does not support representing file using createObjectURL');
                     break;
                 }
-
                 let attachment_length = attachments.length + 1;
                 if (attachment_length >= attachment_limit) {
                     $('#message-input-files-button').prop('disabled', true);
                     $('#message-input-file-text').text(`limit reached, click to remove`);
                     break;
-                } else $('#message-input-file-text').text(`${attachment_length} file${attachment_length > 1 ? 's' : ''} selected, click to remove`);
+                } else $('#message-input-file-text').text(`${attachment_length} file${attachment_length > 1 ? 's' : ''} selected, click to remove`); 
+                let _name = file.name.split('.'), ext, name;
+                if (_name.length > 1 && _name[0]) {
+                    name = _name.slice(0, -1).join('.').substring(0, 100);
+                    ext = _name.pop().substring(0, 6);
+                } else name = file.name.substring(0, 100);
                 let attachment_data = {
                     id: Math.random().toString(36).substring(2, 15),
-                    name: file.name.split('.').slice(0, -1).join('.'),
-                    type: file.type,
+                    name,
                     ext,
+                    type: file.type,
                     size: file.size,
                     lastModified: file.lastModified,
                 };
@@ -293,7 +265,7 @@ export default class extends Constructor {
                 } else {
                     attachment_data.src_url = URL.createObjectURL(file);
                     attachment_data.file = file;
-                    $('.message-input-files-preview').append(`<span data-id="${attachment_data.id}">.${ext}</span>`);
+                    $('.message-input-files-preview').append(`<span data-id="${attachment_data.id}">${ext ? '.' + ext : '?'}</span>`);
                 }
             }
             $(e.currentTarget).val('');
@@ -532,7 +504,7 @@ function upload_attachment(attachment, callback) {
     if (attachment.url) return callback(attachment.url);
     let form_data = new FormData();
     form_data.append('room_id', client.messages.room_id);
-    form_data.append('attachment', attachment.file, 'attachment.' + attachment.ext);
+    form_data.append('attachment', attachment.file, 'attachment' + (attachment.ext ? '.' + attachment.ext : ''));
     $.ajax({
         type: 'POST',
         url: '/upload/room',
@@ -616,6 +588,14 @@ function format_attachment(attachments) {
     return '<div class="msg-attachments">' + attachments.map(x => {
         if (!x) return '';
         return x.type.match('image') ? `<img ${x.id ? `id="${x.id}"` : ''} src="${x.src_url || x.url}" data-name="${x.name}" ${x.url ? `data-url="${x.url}"` : ``}>` :
+            x.type.match('video') ? `<video controls muted preload="metadata">
+                <source src="${x.url || x.src_url}" type="${x.type}">
+                Your browser does not support the video tag.
+            </video>` :
+            x.type.match('audio') ? `<audio controls muted preload="metadata">
+                <source src="${x.url || x.src_url}" type="${x.type}">
+                Your browser does not support the video tag. 
+            </audio>` :
             `<a ${x.id ? `id="${x.id}"` : ''} class="message-file" href="${x.url || x.src_url}" download="${x.ext ? (x.name + '.' + x.ext) : x.name}" ${x.url ? `data-url="${x.url}"` : ''}>
                 <div class="message-file-icon"><i class="bx bx-file"></i></div>
                 <div class="message-file-name">${x.ext ? (x.name + '.' + x.ext) : x.name}</div>
