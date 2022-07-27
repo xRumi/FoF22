@@ -124,7 +124,7 @@ export default class extends Constructor {
                             <div id="message-input-files">
                                 ${window.FileReader ? `
                                     <input id="message-input-files-button" type="button" value="upload" disabled> <span id="message-input-file-text" style="margin-left: 5px; font-size: 13px;">No file selected</span>
-                                    <input type="file" style="display: none;" accept=".jpeg,.jpg,.png,.gif,.pdf,.apk,.mp4">
+                                    <input type="file" style="display: none;">
                                 ` : `<span style="color: grey;">does not support file reader</span>`}
                             </div>
                             <div class="message-input-files-preview"></div>
