@@ -41,7 +41,7 @@ mongoose.connect(`mongodb+srv://main:iVAFZ0z5YDcHf5jm@cluster0.pcm42.mongodb.net
 
 const session_store = session({
     secret: '1p@d20&f#JtceK0jso,!h9&,7N@7@?',
-    cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 },
+    cookie: { maxAge: 2 * 30 * 24 * 60 * 60 * 1000 },
     resave: false,
     saveUninitialized: false,
     store: new redis_store({ client: redis, prefix: 'session:' }),
