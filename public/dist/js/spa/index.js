@@ -11,13 +11,17 @@ import Messages from "./views/messages.js";
 import Menu from "./views/menu.js";
 import MenuChangePassword from "./views/menu/change-password.js";
 
+// game room
+import Game_Room from "./views/game_room.js";
+import Game_Room_Create from "./views/game_room/create.js";
+import Game_Room_Join from "./views/game_room/join.js";
+import Game_Room_Solo from "./views/game_room/solo.js";
 
 const path_to_regex = path => new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
 
 const get_params = match => {
     const values = match.result.slice(1);
     const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map(result => result[1]);
-
     return Object.fromEntries(keys.map((key, i) => {
         return [key, values[i]];
     }));
@@ -28,6 +32,10 @@ const navigateTo = url => {
     history.pushState(null, null, url);
     router();
 };
+
+let is_first_time = true;
+
+setTimeout(() => is_first_time = false, 5000);
 
 const routes = [
     { path: "/spa", view: Index },
@@ -45,6 +53,13 @@ const routes = [
     { path: "/spa/profile/:id", view: Profile },
     
     { path: "/spa/search", view: Search },
+
+    { path: "/spa/game-room", view: Game_Room },
+    { path: "/spa/game-room/create", view: Game_Room_Create },
+    { path: "/spa/game-room/join", view: Game_Room_Join },
+    { path: "/spa/game-room/solo", view: Game_Room_Solo },
+    { path: "/spa/game-room/:id/:game", view: Game_Room },
+    { path: "/spa/game-room/:id", view: Game_Room },
 ];
 
 const router = async () => {
@@ -77,16 +92,47 @@ const router = async () => {
     }
 
     const view = new match.route.view(get_params(match));
-    
+
+    if (view.wait_for_socket) {
+        if (is_first_time) {
+            if (socket.connected) setTimeout(() => {
+                router_show(view);
+                $('.top-status').hide();
+            }, 500);
+            else $.fn.on_socket_connect_1 = () => {
+                setTimeout(() => {
+                    router_show(view);
+                    $('.top-status').hide();
+                    $.fn.on_socket_connect_1 = null;
+                }, 1000);
+            };
+            is_first_time = false;
+            $('.top-status').text('Waiting for connection')
+                .css('background-color', 'darkred').show();
+        } else {
+            if (socket.connected) router_show(view);
+            else {
+                $.fn.on_socket_connect_1 = () => {
+                    setTimeout(() => {
+                        router_show(view);
+                        $('.top-status').hide();
+                        $.fn.on_socket_connect_1 = null;
+                    }, 1000);
+                };
+                $('.top-status').text('Waiting for connection')
+                    .css('background-color', 'darkred').show();
+            }
+        }
+    } else router_show(view);
+};
+
+async function router_show(view) {
     if (view.before_render) await view.before_render();
-
     let html = await view.render();
-
     $(view.target || "#app").html(html);
-
     if (view.after_render) await view.after_render();
     if (view.before_new_render) before_new_render = view.before_new_render;
-};
+}
 
 window.addEventListener("popstate", (e) => {
     let model_view = $('.model-view');

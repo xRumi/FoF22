@@ -218,22 +218,31 @@ function accept_friend_request(e, user_data) {
 }
 
 function remove_friend(e, user_data) {
-    let that = $(e.target);
-    that.prop('disabled', true).text('Removing').css('opacity', '0.5');
-    $.ajax({
-        type: 'POST',
-        url: `/friends/remove`,
-        data: {
-            user: user_data.id
-        },
-        timeout: 30000,
-        success: function(result, textStatus, xhr) {
-            that.prop('disabled', false).text('Add Friend').css('opacity', '1').attr('class', 'pc-user-add-friend');
-            that.off('click');
-            that.on('click', (e) => add_friend(e, user_data));
-        },
-        error: function(xhr, textStatus, errorThrown) {
-            that.prop('disabled', false).text('Remove Friend').css('opacity', '1');
-        },
-    });
+    $.confirm({
+        title: 'Remove Friend',
+        content: `Are you sure you want to remove <b>${user_data.name}</b> from your friend list?`,
+        buttons: {
+            confirm: () => {
+                let that = $(e.target);
+                that.prop('disabled', true).text('Removing').css('opacity', '0.5');
+                $.ajax({
+                    type: 'POST',
+                    url: `/friends/remove`,
+                    data: {
+                        user: user_data.id
+                    },
+                    timeout: 30000,
+                    success: function(result, textStatus, xhr) {
+                        that.prop('disabled', false).text('Add Friend').css('opacity', '1').attr('class', 'pc-user-add-friend');
+                        that.off('click');
+                        that.on('click', (e) => add_friend(e, user_data));
+                    },
+                    error: function(xhr, textStatus, errorThrown) {
+                        that.prop('disabled', false).text('Remove Friend').css('opacity', '1');
+                    },
+                });
+            },
+            cancel: () => {}
+        }
+    })
 }

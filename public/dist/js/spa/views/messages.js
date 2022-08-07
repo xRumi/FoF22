@@ -81,6 +81,7 @@ export default class extends Constructor {
     constructor(params) {
         super(params);
         this.id = params.id;
+        if (this.id) this.wait_for_socket = true;
         this.setTitle('Messages');
         navbar('#nav__link__messages', true); 
         fetch_people();
@@ -154,6 +155,7 @@ export default class extends Constructor {
                 $(`#${_id} .message-content`).show();
                 do_send_message();
             });
+
             let _attachments = attachments.filter(x => x.file).map(x => Object.assign({}, x));
             function do_send_message() {
                 send_message(_message, _attachments, _id, (response) => {
@@ -195,6 +197,8 @@ export default class extends Constructor {
             };
             do_send_message();
         }).on('click', '.header-back-icon', e => {
+            $('.msg-attachments video').hide().trigger('pause');
+            $('.msg-attachment-video-thumbnail').show();
             history.pushState(null, null, `/spa/messages`);
             socket.emit('leave-room', client.messages.room_id);
             client.messages.room_id = null;
@@ -213,8 +217,8 @@ export default class extends Constructor {
             let files = e.target.files;
             for (let i = 0; i < files.length; i++) {
                 let file = files[i];
-                if (file.size > 20 * 1024 * 1024) {
-                    alert(`Upload limit 20mb, skipping ${file.name}`);
+                if (file.size > 30 * 1024 * 1024) {
+                    alert(`Upload limit 30mb, skipping ${file.name}`);
                     continue;
                 } else if (attachments.some(x => x.name == file.name && file.type == x.type && file.size == x.size && x.lastModified == file.lastModified)) {
                     alert(`Duplicate file, skipping ${file.name}`);
@@ -226,17 +230,11 @@ export default class extends Constructor {
                     alert('Your browser does not support representing file using createObjectURL');
                     break;
                 }
-                let attachment_length = attachments.length + 1;
-                if (attachment_length >= attachment_limit) {
-                    $('#message-input-files-button').prop('disabled', true);
-                    $('#message-input-file-text').text(`limit reached, click to remove`);
-                    break;
-                } else $('#message-input-file-text').text(`${attachment_length} file${attachment_length > 1 ? 's' : ''} selected, click to remove`); 
                 let _name = file.name.split('.'), ext, name;
                 if (_name.length > 1 && _name[0]) {
-                    name = _name.slice(0, -1).join('.').substring(0, 100);
+                    name = _name.slice(0, -1).join('.').substring(0, 200);
                     ext = _name.pop().substring(0, 6);
-                } else name = file.name.substring(0, 100);
+                } else name = file.name.substring(0, 200);
                 let attachment_data = {
                     id: Math.random().toString(36).substring(2, 15),
                     name,
@@ -245,33 +243,85 @@ export default class extends Constructor {
                     size: file.size,
                     lastModified: file.lastModified,
                 };
-                attachments.push(attachment_data);
+                let attachment_length = attachments.length + 1;
+                if (attachment_length >= attachment_limit) {
+                    $('#message-input-files-button').prop('disabled', true);
+                    $('#message-input-file-text').text(`limit reached, click to remove`);
+                    break;
+                } else {
+                    $('#message-input-file-text').text(`${attachment_length} file${attachment_length > 1 ? 's' : ''} selected, click to remove`);
+                    $('.message-input-files-preview').append(`<div data-id="preview-${attachment_data.id}">
+                        <span>
+                            <svg class="spinner" style="height: 25px; width: 35px; position: relative; margin-top: 0px;" viewBox="0 0 50 50">
+                                <circle class="spinner-path" cx="25" cy="25" r="20" fill="none" stroke-width="3"></circle>
+                            </svg>
+                        </span>
+                    </div>`);
+                }
+                let message_input_file_preview = $(`[data-id="preview-${attachment_data.id}"]`);
                 if (file.type.match('image')) {
                     let image = new Image(), src_url = URL.createObjectURL(file);
                     image.src = src_url;
                     image.onload = () => {
                         const canvas = document.createElement('canvas');
+                        canvas.setAttribute("style", "background-color: red;");
                         canvas.width = image.width;
                         canvas.height = image.height;
                         let ctx = canvas.getContext('2d');
-                        ctx.drawImage(image, 0, 0);
+                        ctx.drawImage(image, 0, 0, image.width, image.height);
                         canvas.toBlob(blob => {
-                            $('.message-input-files-preview').append(`<img src="${src_url}" data-id="${attachment_data.id}">`);
-                            attachment_data.file = file;
+                            message_input_file_preview.html(`<img src="${src_url}">`);
+                            attachment_data.file = blob;
                             attachment_data.src_url = src_url;
-                            attachment_data.ext = 'jpg';
-                        }, 'image/jpeg', 0.8);
+                            attachment_data.ext = 'png';
+                            attachments.push(attachment_data);
+                        }, 'image/png', 0.8);
+                    }
+                } else if (file.type.match('video')) {
+                    let video = document.createElement('video'), src_url = URL.createObjectURL(file);
+                    video.src = src_url;
+                    video.load();
+                    video.onerror = () => {
+                        alert(`video error while processing ${file.name}`);
+                        message_input_file_preview.remove();
+                        let attachment_length = attachments.length;
+                        $('#message-input-file-text').text(attachment_length ? `${attachment_length} file${attachment_length > 1 ? 's' : ''} selected, click to remove` : 'No file selected');
+                    }
+                    video.onloadeddata = () => {
+                        let seek_to = parseInt(video.duration / 3);
+                        setTimeout(() => video.currentTime = seek_to, 200);
+                        video.onseeked = () => {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = video.videoWidth;
+                            canvas.height = video.videoHeight;
+                            let ctx = canvas.getContext('2d');
+                            ctx.drawImage(video, 0, 0);
+                            let thumbnail_src = canvas.toDataURL("image/png");
+                            canvas.toBlob(blob => {
+                                message_input_file_preview.html(`<img src="${thumbnail_src}">`);
+                                attachment_data.file = file;
+                                attachment_data.thumbnail_blob = blob;
+                                attachment_data.thumbnail_src = thumbnail_src;
+                                attachment_data.src_url = src_url;
+                                attachment_data.duration = video.duration;
+                                attachments.push(attachment_data);
+                            }, 'image/jpeg', 1);
+                        }
                     }
                 } else {
                     attachment_data.src_url = URL.createObjectURL(file);
                     attachment_data.file = file;
-                    $('.message-input-files-preview').append(`<span data-id="${attachment_data.id}">${ext ? '.' + ext : '?'}</span>`);
+                    message_input_file_preview.html(`<span>${ext ? '.' + ext : '?'}</span>`);
+                    attachments.push(attachment_data);
                 }
             }
             $(e.currentTarget).val('');
-        }).on('click', '.message-input-files-preview', (e) => {
-            let that = $(e.target);
-            let attachment_index = attachments.findIndex(x => x.id == that.data('id'));
+        }).on('click', '.message-input-files-preview > div', (e) => {
+            let that = $(e.currentTarget);
+            let id = that.data('id');
+            if (!id) return;
+            id = id.split('preview-')[1];
+            let attachment_index = attachments.findIndex(x => x.id == id);
             if (attachment_index > -1) {
                 attachments.splice(attachment_index, 1);
                 that.remove();
@@ -279,23 +329,29 @@ export default class extends Constructor {
                 let attachment_length = attachments.length;
                 $('#message-input-file-text').text(attachment_length ? `${attachment_length} file${attachment_length > 1 ? 's' : ''} selected, click to remove` : 'No file selected');
             }
-        }).on('click', '.message-content img', (e) => {
+        }).on('click', '.message-content img[data-model]', (e) => {
             let that = $(e.currentTarget).clone();
             history.pushState(null, null, window.location.href.replace(window.location.origin, ""));
             $('.model-view .model-content').html(that);
-            $('.model-view .model-caption').text(that.data('name'));
             $('.model-view').show();
             if (e.currentTarget.dataset.url) {
+                $('.model-view .model-caption').text(that.data('name'));
                 $('.model-view .model-actions .model-download').attr({
                     'href': that.data('url'),
-                    'download': that.data('name') + '.jpg'
+                    'download': that.data('name'),
                 }).show();
                 $('.model-view .model-actions .model-full-view')
                     .attr('href', that.data('url')).show();
             } else {
+                $('.model-view .model-caption').text(that.data('name') + (that.data('ext') ? "." + that.data('ext') : ''));
                 // may not work
                 // $('.model-view .model-actions .model-download').attr({ 'href': ("data:image/png;base64," + e.currentTarget.src), 'download': (e.currentTarget.dataset.name || 'unknown.png') }).show();
             }
+        }).on('click', '.msg-attachment-video-play', e => {
+            $('.msg-attachment > video[controls]').trigger('pause').removeAttr('controls')
+                .parent().find('.msg-attachment-video-play').show();
+            $(e.currentTarget).hide()
+                .parent().find('video').trigger('play').attr('controls', 'true');
         });
     }
 
@@ -306,12 +362,7 @@ export default class extends Constructor {
             $('.chat').addClass('chat-active');
             $('.navbar').addClass('chat-active');
             client.messages.room_id = this.id;
-            if (socket.connected) socket.emit('join-room', this.id, (response) => join_room(response));
-            else {
-                socket.on('connect', () => {
-                    setTimeout(() => socket.emit('join-room', this.id, (response) => join_room(response)), 1000);
-                });
-            }
+            socket.emit('join-room', this.id, (response) => join_room(response));
         }
     }
 
@@ -481,7 +532,8 @@ function send_message(_message, _attachments, _id, callback) {
         return new Promise((resolve, reject) => {
             upload_attachment(attachment, (result, errorThrown) => {
                 if (result) {
-                    attachment.url = result;
+                    attachment.url = result.url;
+                    if (result.thumbnail) attachment.thumbnail = result.thumbnail;
                     resolve(attachment);
                 } else reject(errorThrown);
             });
@@ -492,7 +544,8 @@ function send_message(_message, _attachments, _id, callback) {
             name: y.name,
             type: y.type,
             ext: y.ext,
-            url: y.url
+            url: y.url,
+            thumbnail: y.thumbnail
         })), _id, callback);
     }).catch(x => {
         console.log(x);
@@ -501,10 +554,11 @@ function send_message(_message, _attachments, _id, callback) {
 }
 
 function upload_attachment(attachment, callback) {
-    if (attachment.url) return callback(attachment.url);
+    if (attachment.url && (attachment.thumbnail_blob ? attachment.thumbnail : true)) return callback(attachment.url);
     let form_data = new FormData();
     form_data.append('room_id', client.messages.room_id);
     form_data.append('attachment', attachment.file, 'attachment' + (attachment.ext ? '.' + attachment.ext : ''));
+    if (attachment.thumbnail_blob) form_data.append('thumbnail', attachment.thumbnail_blob, 'thumbnail.png');
     $.ajax({
         type: 'POST',
         url: '/upload/room',
@@ -587,20 +641,33 @@ function format_attachment(attachments) {
     if (!attachments) return '';
     return '<div class="msg-attachments">' + attachments.map(x => {
         if (!x) return '';
-        return x.type.match('image') ? `<img ${x.id ? `id="${x.id}"` : ''} src="${x.src_url || x.url}" data-name="${x.name}" ${x.url ? `data-url="${x.url}"` : ``}>` :
-            x.type.match('video') ? `<video controls muted preload="metadata">
-                <source src="${x.url || x.src_url}" type="${x.type}">
-                Your browser does not support the video tag.
-            </video>` :
-            x.type.match('audio') ? `<audio controls muted preload="metadata">
-                <source src="${x.url || x.src_url}" type="${x.type}">
-                Your browser does not support the video tag. 
-            </audio>` :
-            `<a ${x.id ? `id="${x.id}"` : ''} class="message-file" href="${x.url || x.src_url}" download="${x.ext ? (x.name + '.' + x.ext) : x.name}" ${x.url ? `data-url="${x.url}"` : ''}>
-                <div class="message-file-icon"><i class="bx bx-file"></i></div>
-                <div class="message-file-name">${x.ext ? (x.name + '.' + x.ext) : x.name}</div>
-                <div class="message-file-size">${x.size ? filesize(x.size) : '∞'}</div>
-            </a>`;
+        return x.type.match('image') ? `
+            <div class="msg-attachment">
+                <img src="${x.src_url || x.url}" data-name="${x.name}" ${x.url ? `data-url="${x.url}"` : ``} ${x.ext ? `data-ext="${x.ext}"` : ''} data-model>
+            </div>` :
+            x.type.match('video') ? `
+            <div class="msg-attachment">
+                <img class="msg-attachment-video-play" src="/dist/img/play-button.png">
+                <video ${client.messages.should_mute_video ? `muted` : ''} preload="metadata" poster="${x.thumbnail || x.thumbnail_src}">
+                    <source src="${x.url || x.src_url}" type="${x.type}">
+                    Your browser does not support the video tag.
+                </video>
+            </div>` :
+            x.type.match('audio') ? `
+            <div class="msg-attachment">
+                    <audio controls ${client.messages.should_mute_audio ? 'muted' : ''} preload="metadata">
+                    <source src="${x.url || x.src_url}" type="${x.type}">
+                    Your browser does not support the video tag. 
+                </audio>
+            </div>` :
+            `
+            <div class="msg-attachment">
+                <a ${x.id ? `id="${x.id}"` : ''} class="msg-attachment-file" href="${x.url || x.src_url}" download="${x.ext ? (x.name + '.' + x.ext) : x.name}" ${x.url ? `data-url="${x.url}"` : ''}>
+                    <div class="msg-attachment-file-icon"><i class="bx bx-file"></i></div>
+                    <div class="msg-attachment-file-name">${x.ext ? (x.name + '.' + x.ext) : x.name}</div>
+                    <div class="msg-attachment-file-size">${x.size ? filesize(x.size) : '∞'}</div>
+                </a>
+            </div>`;
     }).join('') + '</div>';
 }
 

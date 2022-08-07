@@ -3,16 +3,7 @@ const is_function = value => value && (Object.prototype.toString.call(value) ===
 const fs = require("fs");
 const path = require('path');
 const xss = require('xss');
-
-const mime_types = {
-    'image/png': ['png'],
-    'image/jpg': ['jpg', 'jpeg'],
-    'image/jpeg': ['jpg', 'jpeg'],
-    'image/gif': ['gif'],
-    'application/pdf': ['pdf'],
-    'application/vnd.android.package-archive': ['apk'],
-    'video/mp4': ['mp4'],
-}
+const video_length = require('video-length');
 
 module.exports = (io, client, socket) => {
     socket.on('create-or-join-room', async (user_id, callback) => {
@@ -153,22 +144,41 @@ module.exports = (io, client, socket) => {
                         if (chat) {
                             let attachments = [], callback_done = false;;
                             for (let i = 0; i < _attachments.length; i++) {
-                                let { name, type, url, ext } = _attachments[i];
+                                let { name, type, url, ext, thumbnail } = _attachments[i];
                                 if (!name || !url) {
                                     callback({ error: `Attachment has missing informations` }); callback_done = true;
                                     break;
                                 } else {
+                                    if (thumbnail) thumbnail = xss(thumbnail);
                                     url = xss(url), type = xss(type), ext = xss(ext?.substring(0, 6));
                                     let filename = url.split('/').pop();
                                     let attachment_path = path.join(__dirname, `/../public/uploads/rooms/${room.id}/` + filename);
                                     if (fs.existsSync(attachment_path)) {
-                                        let attachment_info = fs.statSync(attachment_path);
-                                        attachments.push({
+                                        let thumbnail_filename = thumbnail ? thumbnail.split('/').pop() : false;
+                                        let thumbnail_path = thumbnail_filename ? path.join(__dirname, `/../public/uploads/rooms/${room.id}/` + thumbnail_filename) : false;
+                                        if (thumbnail_path && !fs.existsSync(thumbnail_path)) {
+                                            callback({ error: `Attachment thumbnail does not exist` }); callback_done = true;
+                                            break;
+                                            return;
+                                        }
+                                        let attachment_info = !type.match('video') ? fs.statSync(attachment_path) :
+                                            await video_length(attachment_path, { bin: 'mediainfo', extended: true });
+                                        if (!attachment_info) {
+                                            callback({ error: `Error processing attachment` }); callback_done = true;
+                                            break;
+                                            return;
+                                        }
+                                        let attachment_data = {
                                             type: type?.substring(0, 20),
                                             url: `/uploads/rooms/${room.id}/${filename}`,
                                             size: attachment_info.size,
-                                            name: xss((name?.substring(0, 100) || 'unknown') + (ext ? '.' + ext : '')),
-                                        });
+                                            name: xss((name?.substring(0, 200) || 'unknown') + (ext ? '.' + ext : '')),
+                                        };
+                                        if (type.match('video')) {
+                                            attachment_data.thumbnail = `/uploads/rooms/${room.id}/${thumbnail_filename}`;
+                                            attachment_data.duration = attachment_info.duration;
+                                        }
+                                        attachments.push(attachment_data);
                                     } else {
                                         callback({ error: `Attachment does not exist` }); callback_done = true;
                                         break;
@@ -180,11 +190,10 @@ module.exports = (io, client, socket) => {
                                 callback({ error: 'empty message' }); callback_done = true;
                                 return;
                             }
-                            message = xss(message || '');
                             let chat_data = {
                                 id: Math.random().toString(36).substring(2, 15),
                                 user: user.id,
-                                message,
+                                message: xss(message || ''),
                                 time: Date.now(),
                                 seen_by: [],
                                 attachments

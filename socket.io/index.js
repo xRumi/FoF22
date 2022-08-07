@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require('path');
 
 const chat = require("./chat");
+const game_room = require("./game_room");
 
 module.exports = (io, client) => {
     io.on('connection', async (socket) => {
@@ -34,6 +35,10 @@ module.exports = (io, client) => {
             // messaging stuff start
             chat(io, client, socket);
             // messaging stuff end
+
+            // game room stuff start
+            game_room(io, client, socket);
+            // game room stuff end
 
             // other stuff start
             socket.on('fr-find', async (term, callback) => {

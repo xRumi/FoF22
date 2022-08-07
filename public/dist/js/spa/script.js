@@ -1,12 +1,29 @@
-const nanobar = new Nanobar(),
-    socket = io.connect();
+let socket_connected = true,
+    nanobar = new Nanobar(),
+    socket = io.connect().on('connect', () => {
+        if ($.fn.on_socket_connect_1) $.fn.on_socket_connect_1();
+        if (!socket_connected) {
+            $('.top-status').text('Connected')
+                .css('background-color', 'green').show();
+            setTimeout(() => {
+                $('.top-status').hide();
+            }, 2000);
+            socket_connected = true;
+        }
+    }).on('disconnect', () => {
+        socket_connected = false;
+        $('.top-status').text(`Disonnected${!navigator.onLine ? `, No internet` : ''}`)
+            .css('background-color', 'red').show();
+    });
 
 const body = $('body');
 const client = {
     messages: {
         room_id: null,
         npr: false,
-        room_name: null
+        room_name: null,
+        should_mute_video: true,
+        should_mute_audio: false
     },
     id: body.data('id'),
     username: body.data('username'),
@@ -26,25 +43,6 @@ const navbar = (id, show) => {
     if (show) $('.navbar').show();
     else $('.navbar').hide();
 }
-
-let socket_connected = true, online = true;
-
-socket.on('connect', () => {
-    if (!socket_connected) {
-        $('.top-status').text('Connected')
-            .css('background-color', 'green').show();
-        setTimeout(() => {
-            $('.top-status').hide();
-        }, 2000);
-        socket_connected = true;
-    }
-});
-
-socket.on('disconnect', () => {
-    socket_connected = false;
-    $('.top-status').text(`Disonnected${!navigator.onLine ? `, No internet` : ''}`)
-        .css('background-color', 'red').show();
-});
 
 socket.on('redirect', url => window.location.replace(url));
 

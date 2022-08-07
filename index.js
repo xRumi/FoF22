@@ -63,6 +63,7 @@ client.database.room = require("./models/Room");
 client.database.chat = require("./models/Chat");
 client.database.token = require("./models/Token");
 client.database._user = require("./models/_User");
+client.database.game_room = require("./models/Game_Room");
 client.database.functions = {};
 
 client.database_cache = {};
@@ -76,6 +77,7 @@ client.redis = redis;
 
 require("./libs/ip")(client);
 require("./libs/db")(client);
+require("./libs/game_room")(client);
 require("./libs/schedule")(client);
 require("./libs/mail")(client);
 require("./socket.io/index")(io, client);

@@ -16,16 +16,28 @@ const room_upload = multer({
         }
     }),
     limits: {
-        fileSize: 20 * 1024 * 1024,
+        fileSize: 30 * 1024 * 1024,
     },
     fileFilter: (req, file, cb) => {
         let { room_id } = req.body;
-        if (!file.originalname) return cb('File does not have a name', false);
-        if (req.user && room_id && req.user.rooms.some(x => x.id == room_id))
+        if (!file.originalname) return cb({ msg: 'File does not have a name' }, false);
+        if (req.user && room_id && req.user.rooms.some(x => x.id == room_id)) {
+            if (!fs.existsSync(path.join(__dirname, `/../public/uploads/rooms/${room_id}`)))
+                fs.mkdirSync(path.join(__dirname, `/../public/uploads/rooms/${room_id}`));
             return cb(null, true);
-        else return cb('You are not in the room or does not exist', false);
+        }
+        else return cb({ msg: 'You are not in the room or does not exist' }, false);
     }
-}).single('attachment');
+}).fields([
+    {
+        name: 'attachment',
+        maxCount: 1,
+    },
+    {
+        name: 'thumbnail',
+        maxCount: 1,
+    }
+]);
 
 module.exports = (client) => {
 
@@ -34,9 +46,15 @@ module.exports = (client) => {
             if (err instanceof multer.MulterError) {
                 console.log(err);
                 return res.status(400).send('Something went wrong, try again later');
-            } else if (err) return res.status(400).send(err);
+            } else if (err) {
+                if (!err.msg) console.log(err);
+                return res.status(400).send(err.msg || 'Something went wrong, try again later');
+            }
             let { room_id } = req.body;
-            res.status(200).send(`/uploads/rooms/${room_id}/${req.file.filename}`);
+            res.status(200).send({
+                url: `/uploads/rooms/${room_id}/${req.files.attachment[0].filename}`,
+                thumbnail: req.files.thumbnail?.length ? `/uploads/rooms/${room_id}/${req.files.thumbnail[0].filename}` : false,
+            });
         });
     });
 
