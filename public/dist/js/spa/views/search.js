@@ -3,7 +3,7 @@ import Constructor from "./constructor.js";
 export default class extends Constructor {
     constructor(params) {
         super(params);
-        this.setTitle("Search");
+        this.set_title("Search");
     }
 
     async before_render() {}

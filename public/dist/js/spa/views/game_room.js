@@ -48,7 +48,7 @@ function fetch_rooms() {
 export default class extends Constructor {
     constructor(params) {
         super(params);
-        this.setTitle("Game Room");
+        this.set_title("Game Room");
         this.id = params.id;
         this.game = params.game;
         game_room_id = this.id;

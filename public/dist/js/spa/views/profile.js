@@ -6,7 +6,7 @@ export default class extends Constructor {
     constructor(params) {
         super(params);
         this.id = params.id;
-        this.setTitle("Profile");
+        this.set_title("Profile");
         if (!this.id || this.id == 'me') {
             this.id = client.id;
             history.pushState(null, null, `/spa/profile/${this.id}`);
@@ -21,6 +21,7 @@ export default class extends Constructor {
                 success: function(result, textStatus, xhr) {
                     user_data = result;
                     _ajax0 = false;
+                    document.title = user_data.name;
                     $('.profile-header p').text(user_data.name);
                     $('.pc-user-cover').css('background-image', `uploads/users/${user_data.id}/cover.png`);
                     $('.pc-user-img img').attr('src', `/uploads/users/${user_data.id}/profile.png`);
@@ -41,7 +42,7 @@ export default class extends Constructor {
                             let that = $(e.target);
                             that.prop('disabled', true).text('Messaging').css('opacity', '0.5');
                             socket.emit('create-or-join-room', user_data.id, id => {
-                                if (id) $.fn.navigateTo(`/spa/messages/${id}`);
+                                if (id) $.fn.navigate_to(`/spa/messages/${id}`);
                                 else that.prop('disabled', false).text('Message').css('opacity', '1');
                             });
                         }));
@@ -221,6 +222,7 @@ function remove_friend(e, user_data) {
     $.confirm({
         title: 'Remove Friend',
         content: `Are you sure you want to remove <b>${user_data.name}</b> from your friend list?`,
+        backgroundDismiss: true,
         buttons: {
             confirm: () => {
                 let that = $(e.target);

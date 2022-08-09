@@ -3,7 +3,7 @@ export default class {
         this.params = params;
     }
 
-    setTitle(title) {
+    set_title(title) {
         document.title = title;
     }
 

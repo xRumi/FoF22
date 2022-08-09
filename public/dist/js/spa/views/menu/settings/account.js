@@ -5,7 +5,7 @@ var data = {};
 export default class extends Constructor {
     constructor(params) {
         super(params);
-        this.setTitle("Account Settings");
+        this.set_title("Account Settings");
         $('#app').on('submit.account-settings', '#form1', (e) => {
             e.preventDefault();
             if (!($("#username").val() || $('#full_name').val() || $('#email').val())) return false;

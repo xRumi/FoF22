@@ -36,7 +36,7 @@ const notifications_list = (new_notifications) => {
                     id: x.id,
                 },
                 success: function(result, textStatus, xhr) {
-                    if (!x.navigateTo) {
+                    if (!x.navigate_to) {
                         old_notifications.find(y => y.id == x.id).unread = false;
                         $(e.currentTarget).removeClass('nic-unread');
                     }
@@ -45,10 +45,10 @@ const notifications_list = (new_notifications) => {
                     /* do something */
                 }
             });
-            if (x.navigateTo) {
+            if (x.navigate_to) {
                 old_notifications.find(y => y.id == x.id).unread = false;
                 $(e.currentTarget).removeClass('nic-unread');
-                $.fn.navigateTo(x.navigateTo);
+                $.fn.navigate_to(x.navigate_to);
             }
         });
     }));
@@ -57,7 +57,7 @@ const notifications_list = (new_notifications) => {
 export default class extends Constructor {
     constructor(params) {
         super(params);
-        this.setTitle("Notification");
+        this.set_title("Notification");
         navbar('#nav__link__notifications', true);
         if (!_ajax0) {
             _ajax0 = true;

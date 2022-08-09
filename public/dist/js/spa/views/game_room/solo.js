@@ -3,7 +3,7 @@ import Constructor from "../constructor.js";
 export default class extends Constructor {
     constructor(params) {
         super(params);
-        this.setTitle("Solo Game");
+        this.set_title("Solo Game");
         navbar(null, false);
     }
 

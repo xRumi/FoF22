@@ -45,7 +45,7 @@ function fetch_rooms() {
 export default class extends Constructor {
     constructor(params) {
         super(params);
-        this.setTitle("Game Room Join");
+        this.set_title("Game Room Join");
         this.wait_for_socket = true;
         navbar(null, false);
         fetch_rooms();

@@ -9,7 +9,7 @@ import Messages from "./views/messages.js";
 
 // menu
 import Menu from "./views/menu.js";
-import MenuChangePassword from "./views/menu/change-password.js";
+import Menu_Change_Password from "./views/menu/change-password.js";
 
 // game room
 import Game_Room from "./views/game_room.js";
@@ -27,7 +27,7 @@ const get_params = match => {
     }));
 };
 
-const navigateTo = url => {
+const navigate_to = url => {
     if (!url) return false;
     history.pushState(null, null, url);
     router();
@@ -47,7 +47,7 @@ const routes = [
     { path: "/spa/notifications", view: Notifications },
 
     { path: "/spa/menu", view: Menu },
-    { path: "/spa/menu/account/change-password", view: MenuChangePassword },
+    { path: "/spa/menu/account/change-password", view: Menu_Change_Password },
 
     { path: "/spa/profile", view: Profile },
     { path: "/spa/profile/:id", view: Profile },
@@ -148,10 +148,10 @@ window.addEventListener("popstate", (e) => {
 
 $('body').on('click', 'a[data-link]', e => {
     e.preventDefault();
-    navigateTo($(e.currentTarget).attr('href'));
+    navigate_to($(e.currentTarget).attr('href'));
 });
 
-$.fn.navigateTo = navigateTo;
+$.fn.navigate_to = navigate_to;
 $.fn.routes = routes;
 $.fn.router = router;
 $.fn.shortcuts = {};
@@ -165,7 +165,7 @@ $.fn.go_back = (fallback) => {
     let prev_page = window.location.href;
     history.back();
     setTimeout(() => { 
-        if (window.location.href == prev_page) $.fn.navigateTo(fallback);
+        if (window.location.href == prev_page) $.fn.navigate_to(fallback);
     }, 200);
 }
 

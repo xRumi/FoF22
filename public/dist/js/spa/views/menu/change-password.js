@@ -3,7 +3,7 @@ import Constructor from "../constructor.js";
 export default class extends Constructor {
     constructor(params) {
         super(params);
-        this.setTitle("Change Password");
+        this.set_title("Change Password");
     }
 
     async before_render() {

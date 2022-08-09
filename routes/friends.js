@@ -219,7 +219,7 @@ module.exports = (client) => {
                                 user_id: user.id,
                                 title: `You are now friends with <b>${user.username}</b>, say Hi to your new friend!`,
                                 time: Date.now(),
-                                navigateTo: `/spa/profile/${user.id}`,
+                                navigate_to: `/spa/profile/${user.id}`,
                                 unread: true,
                                 image: `/uploads/users/${user.id}/profile.png`,
                             });
@@ -228,7 +228,7 @@ module.exports = (client) => {
                                 user_id: req.user.id,
                                 title: `You are now friends with <b>${req.user.username}</b>, say Hi to your new friend!`,
                                 time: Date.now(),
-                                navigateTo: `/spa/profile/${req.user.id}`,
+                                navigate_to: `/spa/profile/${req.user.id}`,
                                 unread: true,
                                 image: `/uploads/users/${req.user.id}/profile.png`,
                             });
@@ -239,7 +239,7 @@ module.exports = (client) => {
                                     user_id: user.id,
                                     header: 'Friend Request Accepted',
                                     title: `You are now friends with <b>${user.username}</b>, say Hi to your new friend!`,
-                                    navigateTo: `/spa/profile/${user.id}`,
+                                    navigate_to: `/spa/profile/${user.id}`,
                                 }]
                             } }));
                             client.io.to(user.id).emit('unread', ({ notifications: {
@@ -249,7 +249,7 @@ module.exports = (client) => {
                                     user_id: req.user.id,
                                     header: 'Friend Request Accepted',
                                     title: `You are now friends with <b>${req.user.username}</b>, say Hi to your new friend!`,
-                                    navigateTo: `/spa/profile/${user.id}`,
+                                    navigate_to: `/spa/profile/${user.id}`,
                                 }]
                             } }));
                             user.mark_modified(`notifications[${user.notifications.length - 1}]`);
@@ -313,7 +313,7 @@ module.exports = (client) => {
                             user_id: user.id,
                             title: `You are now friends with <b>${user.username}</b>`,
                             time: Date.now(),
-                            navigateTo: `/spa/profile/${user.id}`,
+                            navigate_to: `/spa/profile/${user.id}`,
                             image: `/uploads/users/${user.id}/profile.png`,
                             unread: true
                         });
@@ -322,7 +322,7 @@ module.exports = (client) => {
                             user_id: req.user.id,
                             title: `<b>${req.user.username}</b> has accepted your friend request, say Hi to your new friend`,
                             time: Date.now(),
-                            navigateTo: `/spa/profile/${req.user.id}`,
+                            navigate_to: `/spa/profile/${req.user.id}`,
                             image: `/uploads/users/${req.user.id}/profile.png`,
                             unread: true
                         });
@@ -334,7 +334,7 @@ module.exports = (client) => {
                                 user_id: user.id,
                                 header: 'Friend Request Accepted',
                                 title: `You are now friends with <b>${user.username}</b>, say Hi to your new friend!`,
-                                navigateTo: `/spa/profile/${user.id}`,
+                                navigate_to: `/spa/profile/${user.id}`,
                             }]
                         } }));
                         */
@@ -345,7 +345,7 @@ module.exports = (client) => {
                                 user_id: req.user.id,
                                 header: 'Friend Request Accepted',
                                 title: `You are now friends with <b>${req.user.username}</b>, say Hi to your new friend!`,
-                                navigateTo: `/spa/profile/${req.user.id}`,
+                                navigate_to: `/spa/profile/${req.user.id}`,
                             }]
                         } }));
                         user.mark_modified(`notifications[${user.notifications.length - 1}]`);

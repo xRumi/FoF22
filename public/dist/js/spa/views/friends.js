@@ -26,7 +26,7 @@ const nearby_people_list = (new_nearby_friends_list, callback) => {
                     <button class="pc-user-message">Remove</button>
                 </div>
             </div>
-        `).on('click', '.fr-nearby-img, .fr-nearby-content', () => $.fn.navigateTo(`/spa/profile/${x.id}`))
+        `).on('click', '.fr-nearby-img, .fr-nearby-content', () => $.fn.navigate_to(`/spa/profile/${x.id}`))
             .on('click', '.pc-user-add-friend', e => add_friend(e, x))
             .on('click', '.pc-user-message', e => remove_nearby(e, x));
     }));
@@ -53,7 +53,7 @@ const req_people_list = (new_friends_list, callback) => {
                     <button class="pc-user-message" id="fr-req-reject">Reject</button>
                 </div>
             </div>
-        `).on('click', '.fr-req-img, .fr-req-content', () => $.fn.navigateTo(`/spa/profile/${x.id}`)).on('click', '#fr-req-accept', e => accept_friend_request(e, x)).on('click', '#fr-req-reject', e => cancel_friend_request(e, x));
+        `).on('click', '.fr-req-img, .fr-req-content', () => $.fn.navigate_to(`/spa/profile/${x.id}`)).on('click', '#fr-req-accept', e => accept_friend_request(e, x)).on('click', '#fr-req-reject', e => cancel_friend_request(e, x));
     }));
     else return;
     if (callback) callback();
@@ -68,7 +68,7 @@ function fr_req_time(time_) {
 export default class extends Constructor {
     constructor(params) {
         super(params);
-        this.setTitle("Friends");
+        this.set_title("Friends");
         navbar('#nav__link__friends', true);
         if (!_ajax0) {
             _ajax0 = true;

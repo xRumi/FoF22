@@ -3,7 +3,7 @@ import Constructor from "../constructor.js";
 export default class extends Constructor {
     constructor(params) {
         super(params);
-        this.setTitle("Game Room Create");
+        this.set_title("Game Room Create");
         this.wait_for_socket = true;
         navbar(null, false);
     }
@@ -50,7 +50,7 @@ export default class extends Constructor {
                     $('.game-room-create-error').html(response.error).show();
                     $('.game-room-create > form > button')
                         .attr('disabled', false).text('Create');
-                } else $.fn.navigateTo(`/spa/game-room/${response.id}`);
+                } else $.fn.navigate_to(`/spa/game-room/${response.id}`);
             });
         });
     }

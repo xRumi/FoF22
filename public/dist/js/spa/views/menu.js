@@ -3,7 +3,7 @@ import Constructor from "./constructor.js";
 export default class extends Constructor {
     constructor(params) {
         super(params);
-        this.setTitle("Menu");
+        this.set_title("Menu");
         navbar('#nav__link__menu', true);
     }
     async render() {
