@@ -105,7 +105,7 @@ module.exports = (client) => {
         if (!req.user) {
             if (req.query.token && ObjectId.isValid(req.query.token)) {
                 let _user = await client.database._user.findById(req.query.token);
-                if (!_user) return res.redirect('/login?ref=/spa');
+                if (!_user) return res.redirect('/login?back_to=/spa');
                 res.render("confirm-account", { alert: !_user.verified ? 'email address verified successfully, change the password to activate your account' : null });
                 if (!_user.verified) {
                     _user.verified = true;

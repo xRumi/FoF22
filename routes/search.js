@@ -4,7 +4,7 @@ module.exports = (client) => {
 
     router.get('/', async (req, res) => {
         if (req.user) res.render("index", { user: req.user, route: 'search' });
-        else res.redirect('/login?ref=search');
+        else res.redirect('/login?back_to=/spa/search');
     });
 
     router.get('/fetch', async (req, res) => {

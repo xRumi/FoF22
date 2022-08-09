@@ -1,5 +1,4 @@
-const ref = new URLSearchParams(window.location.search).get('ref');
-// window.history.pushState({}, '', window.location.origin + window.location.pathname);
+const back_to = new URLSearchParams(window.location.search).get('back_to');
 $.fn.isValid = function() { return this[0].checkValidity(); }
 $('.form').submit(function(e) {
     e.preventDefault();
@@ -8,7 +7,7 @@ $('.form').submit(function(e) {
     const username = $("#username").val(), password = $("#password").val();
     $.ajax({
         type: 'POST',
-        url: `/auth/local${ref ? `?ref=${ref}` : ''}`,
+        url: `/auth/local${back_to ? `?back_to=${back_to}` : ''}`,
         data: {
             username,
             password,
@@ -17,7 +16,7 @@ $('.form').submit(function(e) {
         timeout: 30000,
         success: function(result, textStatus, xhr) {
             $('#sub-btn').html('done').addClass('btn-success').css('opacity', '1');
-		    window.location.replace(result.returnTo || `/${ref}` || "/");
+		    window.location.replace(back_to || "/");
         },
         error: function(xhr, textStatus, errorThrown) {
             $('#password').val('');

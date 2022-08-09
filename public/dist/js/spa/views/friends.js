@@ -150,7 +150,6 @@ export default class extends Constructor {
                     let text = e.target.value;
                     if (text) {
                         socket.emit('fr-find', text, (result) => {
-                            console.log(result);
                             let names = result.names ? result.names.map(x => x = `<a href="/spa/profile/${x.id}" data-link><li><div><img src="/uploads/users/${x.id}/profile.png"></div><p>${x.name}</p><span>${x.is_friend ? `friended` : x.mutual.count ? `${x.mutual.count} mutual friend${x.mutual.count > 1 ? 's' : ''}` : `@${x.username}`}</span></li></a>`) : false;
                             if (names && names.length) {
                                 $('.fr-find-output').show();

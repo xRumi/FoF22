@@ -8,6 +8,7 @@ module.exports = (client) => {
             res.status(200).send(game_rooms.map(x => ({
                 id: String(x._id),
                 name: x.name,
+                is_host: x.host == req.user.id,
                 player_count: x.players.length,
                 player_limit: x.player_limit
             })));

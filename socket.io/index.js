@@ -78,6 +78,6 @@ module.exports = (io, client) => {
             });
             // other stuff end
 
-        }  else socket.emit('redirect', '/login?ref=messages');
+        }  else socket.emit('redirect', '/login?back_to=/spa/messages');
     });
 };

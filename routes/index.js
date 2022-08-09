@@ -56,7 +56,7 @@ module.exports = (client) => {
                     req.user.save();
                 }
             }
-        } else res.status(403).redirect(`/login?ref=${req.originalUrl}`);
+        } else res.status(403).redirect(`/login?back_to=${req.originalUrl}`);
     });
 
     router.get('/spa/*', async (req, res) => {
@@ -81,7 +81,7 @@ module.exports = (client) => {
                     req.user.save();
                 }
             }
-        } else res.status(403).redirect(`/login?ref=${req.originalUrl}`);
+        } else res.status(403).redirect(`/login?back_to=${req.originalUrl}`);
     });
  
     router.get('/login', async (req, res) => {

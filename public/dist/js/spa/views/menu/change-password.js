@@ -49,7 +49,7 @@ export default class extends Constructor {
                     timeout: 30000,
                     success: function(result, textStatus, xhr) {
                         $('#new-password-response').text(result || 'success').css('background-color', 'lightseagreen').show();
-                        window.location.replace('/login?ref=/spa/menu/account/change-password');
+                        window.location.replace('/login?back_to=/spa/menu/account/change-password');
                     },
                     error: function(xhr, textStatus, errorThrown) {
                         if (xhr.status == 406) {
@@ -57,7 +57,7 @@ export default class extends Constructor {
                             confirm_new_password.val('');
                         } else if (xhr.status == 400) old_password.val('');
                         $('#change-password-form input').prop('disabled', false);
-                        if (xhr.responseText == 'force_logout') window.location.replace('/login?ref=/spa/menu/account/change-password');
+                        if (xhr.responseText == 'force_logout') window.location.replace('/login?back_to=/spa/menu/account/change-password');
                         else $('#new-password-response').text(xhr.responseText || 'no response').css('background-color', 'darkorange').show();
                     },
                 });

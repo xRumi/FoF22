@@ -274,7 +274,7 @@ module.exports = (io, client, socket) => {
                         } else socket.emit('error', 'chat does not exist');
                     } else socket.emit('error', 'room does not exist');
                 }
-            } else socket.emit('redirect', '/login?ref=messages');
+            } else socket.emit('redirect', '/login?back_to=/spa/messages');
         }
     });
     socket.on('delete-message', async ({ id, _id }, callback) => {

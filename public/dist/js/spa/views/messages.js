@@ -571,7 +571,7 @@ function upload_attachment(attachment, callback) {
             callback(result);
         },
         error: (xhr, textStatus, errorThrown) => {
-            if (xhr.code == 403) window.location.replace(`/login?ref=/spa/messages/${client.messages.room_id}`);
+            if (xhr.code == 403) window.location.replace(`/login?back_to=/spa/messages/${client.messages.room_id}`);
             else callback(false, xhr.responseText);
         }
     });
@@ -590,10 +590,10 @@ function messages_info_header_text(chat_data) {
         let other_member = chat_data.members.find(x => x.id !== client.id); is_private = other_member ? other_member.id : false;
         if (other_member) $('.messages-info-text').attr({ 'data-id': other_member.id ,'data-status': other_member.status, 'data-date': other_member.date }).html(other_member ?
             other_member.status == 'online' ?
-                `<span style="color: green;">online</span>` :
+                `<span style="color: green;">Online</span>` :
                 other_member.date ? 
-                `active ${active_ago(other_member.date)}` :
-                `offline`
+                `Active ${active_ago(other_member.date)}` :
+                `Offline`
             : `offline`).parent().show();
     }
 }

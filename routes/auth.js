@@ -18,8 +18,7 @@ const _limiter = rateLimit({
 module.exports = (client) => {
 
     router.post('/local', limiter, _limiter, async (req, res, next) => {
-        const returnTo = req.query.ref ? req.query.ref : '/';
-        if (req.user) res.status(200).json({ message: 'user already logged in', returnTo });
+        if (req.user) res.status(200).json({ message: 'user already logged in' });
         else passport.authenticate('local', (err, user, info) => {
             if (err) return res.status(400).send('Something went wrong, try again later');
             if (!user) return res.status(401).send( 'username or password is incorrect' );
@@ -32,16 +31,16 @@ module.exports = (client) => {
                 client.redis.sadd(`sessions:${user.id}`, req.session.id);
                 if (user.login_retry) user.login_retry = 0;
                 let save = false;
-                if (user.account_status == 'active') res.status(200).json({ message: 'user logged in', returnTo });
+                if (user.account_status == 'active') res.status(200).json({ message: 'user logged in' });
                 else if (user.account_status == 'deactive') {
                     user.account_status = 'active'; save = true;
                     user.mark_modified(`account_status`);
-                    res.status(200).json({ message: 'account activated', returnTo });
+                    res.status(200).json({ message: 'account activated' });
                 } else if (user.account_status == 'delete') {
                     user.account_status = 'active'; save = true;
                     user.delete_requested_at = null;
                     user.mark_modified('account_status|delete_requested_at');
-                    res.status(200).json({ message: 'account deletion cancelled', returnTo });
+                    res.status(200).json({ message: 'account deletion cancelled' });
                 } else if (user.account_status == 'deleted') return res.status(400).send( 'account already deleted' );
                 if (user.account_status !== 'deleted' && Math.abs(Date.now() - user.last_location_change) > 2 * 24 * 60 * 60 * 1000) {
                     let ip_info = await client.get_ip_info(req);

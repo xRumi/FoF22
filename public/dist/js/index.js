@@ -12,7 +12,7 @@ function ajax (page, url, retry = false, type = 'GET') {
                 },
                 error: function (xhr, textStatus, errorThrown) {
                     if (xhr.status == 403) {
-                        window.location.replace(`/login?ref=${page}`);
+                        window.location.replace(`/login?back_to=${page}`);
                         reject({ });
                     }
                 }

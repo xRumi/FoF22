@@ -11,6 +11,9 @@ const room_list = (new_room_list) => {
         return $(`
             <a href="/spa/game-room/${x.id}" class="game-room-item" data-room-id="${x.id}" data-link>
                 <div class="game-room-item-name">${x.name}</div>
+                <div class="game-room-item-badge">
+                    ${x.is_host ? `<div>host</div>` : ''}
+                </div>
                 <span>${x.player_count}/${x.player_limit}</span>
             </a>
         `);

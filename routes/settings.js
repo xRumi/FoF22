@@ -4,7 +4,7 @@ module.exports = (client) => {
 
     router.get('/', async (req, res) => {
         if (req.user) res.render('index', { user: req.user, route: 'settings' });
-        else res.status(403).redirect('/login?ref=menu');
+        else res.status(403).redirect('/login?back_to=/spa/menu');
     });
 
     router.get('/fetch', async (req, res) => {
