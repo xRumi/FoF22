@@ -1,0 +1,78 @@
+.ttt-gameboard {
+    max-width: 75vmin;
+    max-height: 75vmin;
+    margin: 0 auto;
+    margin-top: 50px;
+}
+
+.ttt-block {
+    width: 32%;
+    padding-bottom: 32%;
+    float: left;
+    cursor: pointer;
+}
+
+.ttt-block:nth-child(3n + 1) {
+    border-right: 1vmin solid #018492;
+}
+
+.ttt-block:nth-child(3n + 0) {
+    border-left: 1vmin solid #018492;
+}
+
+.ttt-firstrow {
+    border-bottom: 1vmin solid #018492;
+}
+
+.ttt-thirdrow {
+    border-top: 1vmin solid #018492;
+}
+
+.ttt-block {
+    position: relative;
+}
+
+.ttt-block i {
+    display: none;
+    margin: 0 auto;
+    font-size: 20vmin;
+    position: absolute;
+    margin-top: 7px;
+    margin-left: 7px;
+}
+
+.ttt-block .bx-circle {
+    font-size: 17vmin;
+    color: #fa7268;
+    margin-top: 12px;
+    margin-left: 10px;
+}
+
+.ttt-block i.ttt-clicked {
+    display: block;
+}
+
+.ttt-turn {
+    border: solid 1px lightgrey;
+    padding: 10px;
+    text-align: center;
+    background-color: #07c;
+    color: white;
+    font-size: 15px;
+}
+
+.ttt-overlay {
+    text-align: center;
+}
+
+.ttt-overlay div {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 50px;
+    color: white;
+    transform: translate(-50%,-50%);
+    -ms-transform: translate(-50%,-50%);
+    display: flex;
+    flex-direction: column;
+}

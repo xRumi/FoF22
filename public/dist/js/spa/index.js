@@ -16,6 +16,7 @@ import Game_Room from "./views/game_room.js";
 import Game_Room_Create from "./views/game_room/create.js";
 import Game_Room_Join from "./views/game_room/join.js";
 import Game_Room_Solo from "./views/game_room/solo.js";
+import Game_Room_Solo_TTT from "./views/game_room/games/solo/tictactoe.js";
 
 const path_to_regex = path => new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
 
@@ -58,6 +59,7 @@ const routes = [
     { path: "/spa/game-room/create", view: Game_Room_Create },
     { path: "/spa/game-room/join", view: Game_Room_Join },
     { path: "/spa/game-room/solo", view: Game_Room_Solo },
+    { path: "/spa/game-room/solo/tictactoe", view: Game_Room_Solo_TTT },
     { path: "/spa/game-room/:id/:game", view: Game_Room },
     { path: "/spa/game-room/:id", view: Game_Room },
 ];

@@ -18,7 +18,14 @@ export default class extends Constructor {
                     </div>
                     <p class="header-back-text">Play Game Solo</p>
                 </div>
-                this is solo page
+                <div class="game-list">
+                    <div class="game-item">
+                        <img src="/dist/img/games/tictactoe/icon.png">
+                        <h3>Tic Tac Toe</h3>
+                        <p>Play tic tac toe with a robot</p>
+                        <a href="/spa/game-room/solo/tictactoe" data-link>Play</a>
+                    </div>
+                <div>
             </div>
         `);
     }
