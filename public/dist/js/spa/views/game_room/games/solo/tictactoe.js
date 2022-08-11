@@ -16,8 +16,6 @@ let computer_moves = [];
 let whose_turn = "";
 let total_moves = 0;
 let did_someone_win = false;
-let player_about_to_win = false;
-let smart_computer_next_move;
 
 export default class extends Constructor {
     constructor(params) {
@@ -105,48 +103,45 @@ function play_game() {
     } else if (whose_turn === "computer") setTimeout(() => computer(), 400);
 }
 
-let smart_computer_next_move_call = 0;
-
 function computer() {
-    if (smart_computer_next_move_call > 9) {
-        smart_computer_next_move = null;
-        smart_computer_next_move_call = 0;
-    } else {
-        smart_computer_next_move_call++;
-        smart_computer();
+    let pick_ttt_move = null;
+    let computer_potential_wins = winning_combinations.filter(array => array.filter(item => computer_moves.indexOf(item) > -1).length === 2);
+    if (computer_potential_wins.length > 0) {
+        computer_potential_wins.filter(array => array.filter(item => {
+            if (computer_potential_wins.indexOf(item) === -1 && player_moves.indexOf(item) === -1 && computer_moves.indexOf(item) === -1)
+                pick_ttt_move = item;
+        }));
     }
-    let random = pick_ttt_move();
-    let random_id = random ? random.attr('id').split('ttt-')[1] : false;
+    if (pick_ttt_move == null) {
+        let player_potential_wins = winning_combinations.filter(array => array.filter(item => player_moves.indexOf(item) > -1).length === 2);
+        if (player_potential_wins.length > 0) {
+            player_potential_wins.filter(array => array.filter(item => {
+                if (player_potential_wins.indexOf(item) === -1 && player_moves.indexOf(item) === -1 && computer_moves.indexOf(item) === -1)
+                    pick_ttt_move = item;
+            }));
+        }
+    }
+    if (pick_ttt_move == null) {
+        let potential_wins = winning_combinations.filter(array => array.some(item => player_moves.indexOf(item) === -1 && computer_moves.indexOf(item) === -1));
+        if (potential_wins.length) {
+            potential_wins.filter(array => array.filter(item => {
+                if (potential_wins.indexOf(item) === -1 && player_moves.indexOf(item) === -1 && computer_moves.indexOf(item) === -1)
+                    pick_ttt_move = item;
+            }));
+        }
+    }
+    if (pick_ttt_move == null) pick_ttt_move = pick_ttt_random_move();
+    let picked_ttt_move = $(`#ttt-${pick_ttt_move}`);
     if (total_moves === 9 && !did_someone_win) return;
-    else if (computer_moves.indexOf(Number(random_id)) !== -1 || player_moves.indexOf(Number(random_id)) !== -1) return computer();
-    random.find('.bx-circle').addClass("ttt-clicked");
-    if (!computer_moves.includes(Number(random_id))) {
-        computer_moves.push(Number(random_id));
-    }
+    picked_ttt_move.find('.bx-circle').addClass("ttt-clicked");
+    computer_moves.push(Number(pick_ttt_move));
     next_turn("player", computer_moves);
 }
 
-function pick_ttt_move() {
-    let random;
-    if (player_about_to_win) {
-        if (smart_computer_next_move && computer_moves.indexOf(smart_computer_next_move) === -1 && player_moves.indexOf(smart_computer_next_move) === -1) {
-            random = smart_computer_next_move;
-            player_about_to_win = false;
-        } else random = Math.floor(Math.random() * 9);
-    } else if (total_moves === 9 && did_someone_win === false) {
-        return;
-    } else random = Math.floor(Math.random() * 9);
-    return $($('.ttt-block').get(random));
-}
-
-function smart_computer() {
-    let player_potential_wins = winning_combinations.filter(array => array.filter(item => player_moves.indexOf(item) > -1).length === 2);
-    if (player_potential_wins.length > 0) {
-        player_about_to_win = true;
-        player_potential_wins.filter(array => array.filter(item => {
-            if (player_potential_wins.indexOf(item) === -1 && player_moves.indexOf(item) === -1 && computer_moves.indexOf(item) === -1) smart_computer_next_move = item;
-        }));
-    }
+function pick_ttt_random_move() {
+    let random = Math.floor(Math.random() * 9);
+    if (computer_moves.indexOf(Number(random)) !== -1 || player_moves.indexOf(Number(random)) !== -1) return pick_ttt_random_move();
+    else return random;
 }
 
 function next_turn(opponent, whose_moves) {
@@ -172,8 +167,10 @@ function reset_game() {
     whose_turn = Math.random() < 0.5 ? "computer" : "player";
     total_moves = 0;
     did_someone_win = false;
-    player_about_to_win = false;
-    smart_computer_next_move = null;
+    shuffle_array(winning_combinations);
+    for (let i = 0; i < winning_combinations.length; i++) {
+        shuffle_array(winning_combinations[i]);
+    }
     $('.ttt-overlay').hide();
     $('.ttt-clicked').removeClass('ttt-clicked')
     if (whose_turn == 'computer') {
