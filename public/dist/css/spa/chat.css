@@ -40,7 +40,7 @@
 	font-size: 13px;
 	float: left;
 	margin-left: 10px;
-	margin-top: 3px;
+	margin-top: 5px;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	width: 55%;
@@ -60,7 +60,7 @@
 	color: darkgray;
 	float: left;
 	margin-left: 10px;
-	margin-top: 6px;
+	margin-top: 3.5px;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -340,7 +340,7 @@
     transform: translateY(-4px);
 }
 
-.pending-message > .message-content > img {
+.pending-message > .message-content > .msg-attachments > .msg-attachment {
     opacity: 0.5;
 }
 
@@ -394,10 +394,6 @@
     margin-left: auto;
 }
 
-.msg-attachment:not(:last-child) {
-    margin-bottom: 3px;
-}
-
 .msg-attachment > img:not(.msg-attachment-video-play) {
     max-width: 180px;
     max-height: 180px;
@@ -427,7 +423,7 @@
 .msg-attachment-file {
     border: solid 1px darkgray;
     border-radius: 10px;
-    padding: 13px 10px 11px 10px;
+    padding: 12px 18px 10px 10px;
     width: auto;
     display: block;
     color: black;
@@ -437,8 +433,8 @@
     font-size: 35px;
     float: left;
     position: relative;
-    margin-right: 8px;
-    bottom: 3px;
+    margin-right: 6px;
+    bottom: 4px;
 }
 
 .msg-attachment-file-name {
@@ -449,9 +445,36 @@
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 85%;
+    min-width: 50px;
 }
 
 .msg-attachment-file-size {
     color: darkgray;
     font-size: 11px;
+}
+
+.pending-message .msg-attachment-file,
+.pending-message .msg-attachment > img:not(.msg-attachment-video-play),
+.pending-message .msg-attachment > audio,
+.pending-message .msg-attachment > video {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.pending-message .msg-attachment-progress {
+    display: block;
+}
+
+.msg-attachment-progress {
+    display: none;
+    position: absolute;
+    width: 100%;
+}
+
+.msg-attachment-progress div {
+    background-color: red;
+    width: 30%;
+    height: 100%;
+    border: solid 1.2px red;
+    border-radius: 10px;
 }

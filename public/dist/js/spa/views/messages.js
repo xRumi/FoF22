@@ -573,7 +573,21 @@ function upload_attachment(attachment, callback) {
         error: (xhr, textStatus, errorThrown) => {
             if (xhr.code == 403) window.location.replace(`/login?back_to=/spa/messages/${client.messages.room_id}`);
             else callback(false, xhr.responseText);
-        }
+        },
+        xhr: () => {
+            let xhr = new window.XMLHttpRequest();
+            if (attachment.id) {
+                let attachment_progress = $(`#${attachment.id} > .msg-attachment-progress > div`);
+                xhr.upload.addEventListener("progress", evt => {
+                    if (evt.lengthComputable) {
+                        let percent_complete = evt.loaded / evt.total;
+                        percent_complete = parseInt(percent_complete * 100);
+                        attachment_progress.css('width', `${percent_complete}%`);
+                    }
+                }, false);
+            }
+            return xhr;
+        },
     });
 }
 
@@ -642,11 +656,13 @@ function format_attachment(attachments) {
     return '<div class="msg-attachments">' + attachments.map(x => {
         if (!x) return '';
         return x.type.match('image') ? `
-            <div class="msg-attachment">
+            <div class="msg-attachment" ${x.id ? `id="${x.id}"` : ''}>
+                <div class="msg-attachment-progress"><div></div></div>
                 <img src="${x.src_url || x.url}" data-name="${x.name}" ${x.url ? `data-url="${x.url}"` : ``} ${x.ext ? `data-ext="${x.ext}"` : ''} data-model>
             </div>` :
             x.type.match('video') ? `
-            <div class="msg-attachment">
+            <div class="msg-attachment" ${x.id ? `id="${x.id}"` : ''}>
+                <div class="msg-attachment-progress"><div></div></div>
                 <img class="msg-attachment-video-play" src="/dist/img/play-button.png">
                 <video ${client.messages.should_mute_video ? `muted` : ''} preload="metadata" poster="${x.thumbnail || x.thumbnail_src}">
                     <source src="${x.url || x.src_url}" type="${x.type}">
@@ -654,15 +670,17 @@ function format_attachment(attachments) {
                 </video>
             </div>` :
             x.type.match('audio') ? `
-            <div class="msg-attachment">
-                    <audio controls ${client.messages.should_mute_audio ? 'muted' : ''} preload="metadata">
+            <div class="msg-attachment" ${x.id ? `id="${x.id}"` : ''}>
+                <div class="msg-attachment-progress"><div></div></div>
+                <audio controls ${client.messages.should_mute_audio ? 'muted' : ''} preload="metadata">
                     <source src="${x.url || x.src_url}" type="${x.type}">
                     Your browser does not support the video tag. 
                 </audio>
             </div>` :
             `
-            <div class="msg-attachment">
-                <a ${x.id ? `id="${x.id}"` : ''} class="msg-attachment-file" href="${x.url || x.src_url}" download="${x.ext ? (x.name + '.' + x.ext) : x.name}" ${x.url ? `data-url="${x.url}"` : ''}>
+            <div class="msg-attachment" ${x.id ? `id="${x.id}"` : ''}>
+                <div class="msg-attachment-progress"><div></div></div>
+                <a class="msg-attachment-file" href="${x.url || x.src_url}" download="${x.ext ? (x.name + '.' + x.ext) : x.name}" ${x.url ? `data-url="${x.url}"` : ''}>
                     <div class="msg-attachment-file-icon"><i class="bx bx-file"></i></div>
                     <div class="msg-attachment-file-name">${x.ext ? (x.name + '.' + x.ext) : x.name}</div>
                     <div class="msg-attachment-file-size">${x.size ? filesize(x.size) : '∞'}</div>
