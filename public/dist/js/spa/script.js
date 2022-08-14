@@ -117,3 +117,12 @@ function shuffle_array(array) {
         array[j] = temp;
     }
 }
+
+$(window).on('click', e => {
+    let target = $(e.target);
+    if (!target.hasClass('messages-options') &&
+        !target.parent().hasClass('messages-options') &&
+        !target.parent().parent().hasClass('messages-options') &&
+        !target.hasClass('bx-dots-vertical')
+    ) $('.messages-options').hide();
+});

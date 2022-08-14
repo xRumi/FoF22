@@ -35,7 +35,7 @@ const people_list = (new_people_list) => {
             $('#message-input').prop('disabled', true);
             $('#message-input-files-button').prop('disabled', true);
             $('.message-send-icon').hide();
-            $('.messages-info').hide();
+            $('.messages-top').hide();
             $('.load-more-messages .spinner').hide();
             $('.load-more-messages').hide();
             $('.messages-list').html('');
@@ -105,9 +105,43 @@ export default class extends Constructor {
                         </div>
                         <p class="messages-header-back-text header-back-text"></p>
                     </div>
-                    <div class="messages-info" style="display: none;">
-                        <div class="messages-info-text"></div>
+                    <div class="messages-top" style="display: none;">
+                        <div class="messages-top-text"></div>
                         <i class="bx bx-dots-vertical"></i>
+                        <div class="messages-options">
+                            <div class="messages-option">
+                                <i class="bx bx-poll"></i>
+                                <span>Create Poll</span>
+                            </div>
+                            <div class="messages-option">
+                                <i class="bx bx-bookmark"></i>
+                                <span>Mark As Unread</span>
+                            </div>
+                            <div class="messages-option">
+                                <i class="bx bx-select-multiple"></i>
+                                <span>Delete Messages</span>
+                            </div>
+                            <div class="messages-option">
+                                <i class="bx bx-message-alt-x"></i>
+                                <span>Ignore Messages</span>
+                            </div>
+                            <div class="messages-option">
+                                <i class="bx bx-block"></i>
+                                <span>Block Messages</span>
+                            </div>
+                            <div class="messages-option">
+                                <i class="bx bx-log-out"></i>
+                                <span>Leave Conversation</span>
+                            </div>
+                            <div class="messages-option">
+                                <i class="bx bx-message-x"></i>
+                                <span>Delete Conversation</span>
+                            </div>
+                            <div class="messages-option">
+                                <i class="bx bx-bug"></i>
+                                <span>Something Went Wrong</span>
+                            </div>
+                        </div>
                     </div>
                     <div class="load-more-messages" style="display: none;">
                         See Older Messages
@@ -134,7 +168,9 @@ export default class extends Constructor {
                 </div>
             </div>
             <div class="profile-" style="display: none;"></div>
-        `).on('submit', '.messages-bottom form', (e) => {
+        `).on('click', '.bx-dots-vertical', e => {
+            $('.messages-options').toggle();
+        }).on('submit', '.messages-bottom form', (e) => {
             e.preventDefault();
             let input = $('#message-input'),
                 _message = input.val();
@@ -602,7 +638,7 @@ function _send_message(_message, _attachments, _id, callback) {
 function messages_info_header_text(chat_data) {
     if (chat_data.is_private) {
         let other_member = chat_data.members.find(x => x.id !== client.id); is_private = other_member ? other_member.id : false;
-        if (other_member) $('.messages-info-text').attr({ 'data-id': other_member.id ,'data-status': other_member.status, 'data-date': other_member.date }).html(other_member ?
+        if (other_member) $('.messages-top-text').attr({ 'data-id': other_member.id ,'data-status': other_member.status, 'data-date': other_member.date }).html(other_member ?
             other_member.status == 'online' ?
                 `<span style="color: green;">Online</span>` :
                 other_member.date ? 
@@ -622,7 +658,7 @@ setTimeout(() => setInterval(() => {
                 x.innerText = time;
             }
         }); 
-        let mit = $('.messages-info-text[data-status=offline]');
+        let mit = $('.messages-top-text[data-status=offline]');
         if (mit.length) messages_info_header_text({ is_private, members: [{ id: mit.data('id'), status: mit.data('status'), date: mit.data('date') }] });
     }
 }, 60000), (60 - n_time.getSeconds()) * 1000);

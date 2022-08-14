@@ -94,10 +94,8 @@ export default class extends Constructor {
 }
 
 function play_game() {
-    if (total_moves === 9 && !did_someone_win) {
-        display_result("It's a tie");
-        setTimeout(() => reset_game(), 1500);
-    } else if (did_someone_win) setTimeout(() => reset_game(), 1500);
+    if (total_moves === 9 && !did_someone_win) display_result("It's a tie");
+    else if (did_someone_win) setTimeout(() => reset_game(), 1500);
     else if (whose_turn === "player" || total_moves === 0) {
         /* do something */
     } else if (whose_turn === "computer") setTimeout(() => computer(), 400);
@@ -182,4 +180,5 @@ function reset_game() {
 function display_result(winning_message) {
     $('.ttt-overlay div').text(winning_message);
     $('.ttt-overlay').show();
+    setTimeout(() => reset_game(), 1500);
 }
