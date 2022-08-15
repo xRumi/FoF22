@@ -6,7 +6,9 @@ let attachments = [],
     _ajax0 = false,
     loading_more_messages = false,
     is_private,
-    members = [];
+    members = [],
+    msg_opt_delete_selecting,
+    msg_opt_delete_selected = [];
 
 const people_list = (new_people_list) => {
     if (new_people_list && JSON.stringify(new_people_list) == JSON.stringify(old_people_list)) return false;
@@ -117,7 +119,7 @@ export default class extends Constructor {
                                 <i class="bx bx-bookmark"></i>
                                 <span>Mark As Unread</span>
                             </div>
-                            <div class="messages-option">
+                            <div class="messages-option" id="mod-messages">
                                 <i class="bx bx-select-multiple"></i>
                                 <span>Delete Messages</span>
                             </div>
@@ -139,7 +141,7 @@ export default class extends Constructor {
                             </div>
                             <div class="messages-option">
                                 <i class="bx bx-bug"></i>
-                                <span>Something Went Wrong</span>
+                                <span>Report A Problem</span>
                             </div>
                         </div>
                     </div>
@@ -152,7 +154,7 @@ export default class extends Constructor {
                     <div class="messages-list scrollbar"></div>
                     <div class="messages-bottom">
                         <form autocomplete="off">
-                            <input type="text" name="message-input" id="message-input" placeholder="type your message..." disabled>
+                            <input type="text" name="message-input" id="message-input" placeholder="type your message" disabled>
                             <button type="submit" style="outline: none; border: none; background-color: unset; margin-left: -5px;">
                                 <i style="display: none;" class='bx bx-send message-send-icon'></i>
                             </button>
@@ -170,6 +172,124 @@ export default class extends Constructor {
             <div class="profile-" style="display: none;"></div>
         `).on('click', '.bx-dots-vertical', e => {
             $('.messages-options').toggle();
+        }).on('click', '#mod-messages', e => {
+            let that = $(e.currentTarget);
+            $('.outgoing:not(.message-deleted) .message-content').each((index, value) => {
+                let msg_content = $(value);
+                let foot = msg_content.find('.message-foot');
+                if (foot.length) {
+                    foot.find('button').remove();
+                    foot.prepend(`<button class="modm-select">Select</button>`);
+                } else msg_content.append(`
+                    <div class="message-foot">
+                        <button style="margin-right: unset;" class="modm-select">Select</button>
+                    </div>
+                `);
+            });
+            $(`.messages-option:not(#mod-messages)`).addClass('mo-disabled');
+            $('.messages-options').hide();
+            that.attr('id', 'mod-selected-messages')
+                .find('span').text('Cancel Message Delete');
+            msg_opt_delete_selecting = true;
+            let input = $('.messages-bottom > form > input');
+            input.attr({ 'disabled': true, 'placeholder': 'cancel message delete to continue', 'data-previous-message': input.val() });
+            input.val('');
+            $('.message-send-icon').hide();
+        }).on('click', '#mod-selected-messages', e => {
+            let that = $(e.currentTarget);
+            $('.outgoing .message-content .message-foot').each((index, value) => {
+                let msg_foot = $(value);
+                let msg_btn = msg_foot.find('button');
+                if (msg_btn.text() == 'Selected') {
+                    msg_btn.attr('disabled', '').removeClass('modm-selected');
+                    msg_btn.html(`Deleting<span style="margin-left: 3px; color: red; position: relative; top: 1px;" class="blinking">•</span>`);
+                } else msg_btn.remove();
+                if (!msg_foot.children().length) msg_foot.remove();
+            });
+            if (msg_opt_delete_selected.length) {
+                that.attr({ 'id': 'mod-messages', 'style': 'pointer-events: none;' })
+                    .find('span').html(`Deleting ${msg_opt_delete_selected.length} message${msg_opt_delete_selected.length > 1 ? 's' : ''} <span style="float: right; margin-left: 5px; margin-right: 8px; color: red; position: relative; top: 1px;" class="blinking">•</span>`);
+                $('.messages-options').hide();
+                socket.emit('delete-messages', { ids: msg_opt_delete_selected, _id: client.messages.room_id}, ({ error, success, err }) => {
+                    if (err) {
+                        $.confirm({
+                            title: '',
+                            content: 'Error Deleting messages',
+                            type: 'red',
+                            typeAnimated: true,
+                            buttons: {
+                                close: () => {}
+                            }
+                        });
+                        return false;
+                    }
+                    for (let i = 0; i < success.length; i++) {
+                        let message = $(`[data-id="${success[i]}"]`);
+                        let message_content_p = message.find('.message-content p');
+                        message.addClass('message-deleted');
+                        message_content_p.css('background-color', '').text('This message was deleted');
+                        let msg_foot = message.find('.message-foot');
+                        msg_foot.find('button').remove();
+                        if (!msg_foot.children().length) msg_foot.remove();
+                    }
+                    for (let i = 0; i < error.length; i++) {
+                        let message = $(`[data-id="${error[i]}"]`);
+                        let msg_foot = message.find('.message-foot');
+                        msg_foot.find('button').remove();
+                        if (!msg_foot.children().length) msg_foot.remove();
+                    }
+                    if (error.length) {
+                        $.confirm({
+                            title: '',
+                            content: `Failed to delete message${error.length > 1 ? 's' : ''} with id: <b>${error.join('</b>, <b>')}</b><br><hr><br>If you think this is not supposed happen, then open the right-corner chat menu and select \"<b>Report A Problem</b>\"`,
+                            type: 'orange',
+                            typeAnimated: true,
+                            buttons: {
+                                close: () => {}
+                            }
+                        });
+                    }
+                    msg_opt_delete_selected = [];
+                    $(`.messages-option:not(#mod-messages)`).removeClass('mo-disabled');
+                    that.attr({ 'id': 'mod-messages', 'style': '' })
+                        .find('span').text('Delete Messages');
+                });
+            } else {
+                $(`.messages-option:not(#mod-messages)`).removeClass('mo-disabled');
+                that.attr({ 'id': 'mod-messages', 'style': '' })
+                    .find('span').text('Delete Messages');
+                $('.messages-options').hide();
+            }
+            msg_opt_delete_selecting = false;
+            let input = $('.messages-bottom > form > input');
+            input.val(input.attr('data-previous-message') || '');
+            input.attr({ 'disabled': false, 'placeholder': 'type your message', 'previous-message': '' });
+            $('.message-send-icon').show();
+        }).on('click', '.modm-select', e => {
+            let that = $(e.currentTarget);
+            let message = that.parent().parent().parent();
+            let id = message.data('id');
+            if (id) {
+                if (that.html() == 'Selected') {
+                    let index = msg_opt_delete_selected.findIndex(x => x == id);
+                    if (index > -1) msg_opt_delete_selected.splice(index, 1);
+                    that.html('Select');
+                    that.removeClass('modm-selected');
+                    if (msg_opt_delete_selected.length) $('#mod-selected-messages')
+                        .css({ 'background-color': 'red', 'color': 'white' })
+                        .find('span').text(`Delete ${msg_opt_delete_selected.length} message${msg_opt_delete_selected.length > 1 ? 's' : ''}`);
+                    else $('#mod-selected-messages')
+                        .css({ 'background-color': 'white', 'color': 'black' })
+                        .find('span').text(`Cancel Message Delete`);
+                } else {
+                    msg_opt_delete_selected.push(id);
+                    that.html('Selected');
+                    that.addClass('modm-selected');
+                    $('#mod-selected-messages')
+                        .css({ 'background-color': 'red', 'color': 'white' })
+                        .find('span').text(`Delete ${msg_opt_delete_selected.length} message${msg_opt_delete_selected.length > 1 ? 's' : ''}`);
+                }
+            }
         }).on('submit', '.messages-bottom form', (e) => {
             e.preventDefault();
             let input = $('#message-input'),

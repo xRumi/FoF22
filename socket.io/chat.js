@@ -277,24 +277,32 @@ module.exports = (io, client, socket) => {
             } else socket.emit('redirect', '/login?back_to=/spa/messages');
         }
     });
-    socket.on('delete-message', async ({ id, _id }, callback) => {
+    socket.on('delete-messages', async ({ ids, _id }, callback) => {
         if (!is_function(callback)) return false;
-        if (_id && id?.length > 8 && _id === socket.room_id) {
+        if (_id && Array.isArray(ids) && ids.length && ids.length < 20 && _id === socket.room_id) {
+            let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
+            console.log('delete message')
+            if (!user) return callback({ err: true });
             let chat = await client.database.functions.get_chat(socket.chat_id);
             if (chat.room_id == socket.room_id) {
-                let _a = chat.messages.findIndex(x => x.id == id);
-                if (_a > -1) {
-                    let a = chat.messages[_a];
-                    if (!a.deleted) {
-                        a.deleted = true;
-                        a.message = null;
-                        a.attachments = [];
-                        chat.mark_modified(`messages[${_a}]`);
-                        await chat.save();
-                        callback({ id, done: true });
-                        socket.broadcast.to(socket.room_id).emit('update-message', { id: socket.room_id, chat: a });
-                    } else callback({ id, done: false });
-                } else callback({ id, done: false });
+                console.log('deleting messages...')
+                let error = [], success = [];
+                for (i = 0;  i < ids.length; i++) {
+                    let _a = chat.messages.findIndex(x => x.id == ids[i]);
+                    if (_a > -1) {
+                        let a = chat.messages[_a];
+                        if (!a.deleted && a.user == user.id) {
+                            a.deleted = true;
+                            a.message = null;
+                            a.attachments = [];
+                            chat.mark_modified(`messages[${_a}]`);
+                            await chat.save();
+                            socket.broadcast.to(socket.room_id).emit('update-message', { id: socket.room_id, chat: a });
+                            success.push(ids[i]);
+                        } else error.push(ids[i]);
+                    } else error.push(ids[i]);
+                }
+                callback({ error, success });
             }
         }
     });

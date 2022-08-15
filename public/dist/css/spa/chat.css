@@ -257,7 +257,6 @@
     border: solid 1px lightgray;
     padding: 10px;
     border-radius: 10px;
-    background-color: lightgray;
     letter-spacing: 1.2px;
 }
 
@@ -357,6 +356,7 @@
 .messages-option {
     padding: 7px;
 	cursor: pointer;
+    min-width: 220px;
 }
 
 .messages-option > span {
@@ -365,8 +365,13 @@
 
 .messages-option > i {
     font-size: 20px;
-    margin-right: 5px;
+    margin-right: 6.5px;
     float: left;
+}
+
+.mo-disabled {
+    pointer-events: none;
+    color: lightgray;
 }
 
 .messages-option:not(:last-child) {
@@ -381,16 +386,18 @@
     background-color: lightblue;
 }
 
-.message-actions {
-    margin-left: 5px;
-}
-
-.message-actions button {
+.message-foot button {
     background-color: white;
     outline: 0;
-    border: solid 1px;
-    padding: 3.5px 5px;
-    border-radius: 3px;
+    border: solid 1px darkgray;
+    padding: 3.5px 8px;
+    border-radius: 5px;
+    margin-right: 5px;
+    letter-spacing: 1.3px;
+}
+
+.message-foot button.modm-selected {
+    background-color: lightgrey;
 }
 
 .message-error {
