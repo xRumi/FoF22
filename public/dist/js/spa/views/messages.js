@@ -178,7 +178,7 @@ export default class extends Constructor {
             $('.messages-options').toggle();
         }).on('click', '#mod-messages', e => {
             let that = $(e.currentTarget);
-            $('.outgoing:not(.message-deletedy) .message-content').each((index, value) => {
+            $('.outgoing:not(.message-deleted) .message-content').each((index, value) => {
                 let msg_content = $(value);
                 let foot = msg_content.find('.message-foot');
                 if (foot.length) {
@@ -909,8 +909,9 @@ function load_more_messages() {
                     if ($('#mod-selected-messages').length) {
                         _html = $(_html);
                         _html.each((index, value) => {
-                            let msg_content = $(value);
-                            if (!msg_content.hasClass('outgoing') || msg_content.hasClass('message-deleted')) return;
+                            let msg = $(value);
+                            if (!msg.hasClass('outgoing') || msg.hasClass('message-deleted')) return;
+                            let msg_content = msg.find('.message-content');
                             let foot = msg_content.find('.message-foot');
                             if (foot.length) foot.prepend(`<button class="modm-select">Select</button>`);
                             else msg_content.append(`
