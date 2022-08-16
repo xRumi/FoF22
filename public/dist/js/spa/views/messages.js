@@ -29,6 +29,10 @@ const people_list = (new_people_list) => {
                 </div>
             </div>
         `).on('click', (e) => {
+            $(`.messages-option`).removeClass('mo-disabled');
+            if ($('#mod-selected-messages').length) $('#mod-selected-messages').attr({ 'id': 'mod-messages', 'style': '' })
+                .find('span').text('Delete Messages');
+            $('.messages-options').hide();
             attachments = [];
             $('#message-input-file-text').text('No file selected');
             $('.message-input-files-preview').html('');
@@ -174,7 +178,7 @@ export default class extends Constructor {
             $('.messages-options').toggle();
         }).on('click', '#mod-messages', e => {
             let that = $(e.currentTarget);
-            $('.outgoing:not(.message-deleted) .message-content').each((index, value) => {
+            $('.outgoing:not(.message-deletedy) .message-content').each((index, value) => {
                 let msg_content = $(value);
                 let foot = msg_content.find('.message-foot');
                 if (foot.length) {
@@ -241,7 +245,15 @@ export default class extends Constructor {
                     if (error.length) {
                         $.confirm({
                             title: '',
-                            content: `Failed to delete message${error.length > 1 ? 's' : ''} with id: <b>${error.join('</b>, <b>')}</b><br><hr><br>If you think this is not supposed happen, then open the right-corner chat menu and select \"<b>Report A Problem</b>\"`,
+                            content: `
+                                Failed to delete message${error.length > 1 ? 's' : ''} with id, <b>${error.join('</b>, <b>')}</b>
+                                <br><hr>
+                                Make sure these messages are,
+                                <br><b>• from you</b>
+                                <br><b>• not deleted</b>
+                                <br><b>• accessible</b>
+                                <br><br><hr>If you think this is not supposed happen, then open the right-corner chat menu and select \"<b>Report A Problem</b>\"
+                            `,
                             type: 'orange',
                             typeAnimated: true,
                             buttons: {
@@ -723,7 +735,7 @@ function upload_attachment(attachment, callback) {
         contentType: false,
         timeout: 30000,
         success: (result, textStatus, xhr) => {
-            $(`#${attachment.id}`).attr('data-url', result);
+            $(`#${attachment.id}`).attr('data-url', result.url);
             callback(result);
         },
         error: (xhr, textStatus, errorThrown) => {
@@ -896,8 +908,22 @@ function load_more_messages() {
                     lm = m;
                 }
                 message_time(html, (_html) => {
-                    $('.messages-list').prepend(_html);
+                    if ($('#mod-selected-messages').length) {
+                        _html = $(_html);
+                        _html.each((index, value) => {
+                            let msg_content = $(value);
+                            if (!msg_content.hasClass('outgoing') || msg_content.hasClass('message-deleted')) return;
+                            let foot = msg_content.find('.message-foot');
+                            if (foot.length) foot.prepend(`<button class="modm-select">Select</button>`);
+                            else msg_content.append(`
+                                <div class="message-foot">
+                                    <button style="margin-right: unset;" class="modm-select">Select</button>
+                                </div>
+                            `);
+                        });
+                    }
                     $('.load-more-messages .spinner').hide();
+                    $('.messages-list').prepend(_html);
                 }, {});
             } else $('.load-more-messages .spinner').hide();
             if (!mm) $('.load-more-messages').hide();

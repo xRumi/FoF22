@@ -281,11 +281,9 @@ module.exports = (io, client, socket) => {
         if (!is_function(callback)) return false;
         if (_id && Array.isArray(ids) && ids.length && ids.length < 20 && _id === socket.room_id) {
             let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
-            console.log('delete message')
             if (!user) return callback({ err: true });
             let chat = await client.database.functions.get_chat(socket.chat_id);
             if (chat.room_id == socket.room_id) {
-                console.log('deleting messages...')
                 let error = [], success = [];
                 for (i = 0;  i < ids.length; i++) {
                     let _a = chat.messages.findIndex(x => x.id == ids[i]);
