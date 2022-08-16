@@ -7,7 +7,6 @@ let attachments = [],
     loading_more_messages = false,
     is_private,
     members = [],
-    msg_opt_delete_selecting,
     msg_opt_delete_selected = [];
 
 const people_list = (new_people_list) => {
@@ -29,6 +28,7 @@ const people_list = (new_people_list) => {
                 </div>
             </div>
         `).on('click', (e) => {
+            msg_opt_delete_selected = [];
             $(`.messages-option`).removeClass('mo-disabled');
             if ($('#mod-selected-messages').length) $('#mod-selected-messages').attr({ 'id': 'mod-messages', 'style': '' })
                 .find('span').text('Delete Messages');
@@ -194,7 +194,6 @@ export default class extends Constructor {
             $('.messages-options').hide();
             that.attr('id', 'mod-selected-messages')
                 .find('span').text('Cancel Message Delete');
-            msg_opt_delete_selecting = true;
             let input = $('.messages-bottom > form > input');
             input.attr({ 'disabled': true, 'placeholder': 'cancel message delete to continue', 'data-previous-message': input.val() });
             input.val('');
@@ -272,7 +271,6 @@ export default class extends Constructor {
                     .find('span').text('Delete Messages');
                 $('.messages-options').hide();
             }
-            msg_opt_delete_selecting = false;
             let input = $('.messages-bottom > form > input');
             input.val(input.attr('data-previous-message') || '');
             input.attr({ 'disabled': false, 'placeholder': 'type your message', 'previous-message': '' });
