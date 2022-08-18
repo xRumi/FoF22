@@ -183,6 +183,11 @@ export default class extends Constructor {
                 let foot = msg_content.find('.message-foot');
                 if (foot.length) {
                     foot.find('button').remove();
+                    if (foot.is(':hidden')) {
+                        foot.children().hide();
+                        foot.show();
+                        foot.attr('data-was-hidden', true);
+                    }
                     foot.prepend(`<button class="modm-select">Select</button>`);
                 } else msg_content.append(`
                     <div class="message-foot">
@@ -207,6 +212,7 @@ export default class extends Constructor {
                     msg_btn.attr('disabled', '').removeClass('modm-selected');
                     msg_btn.html(`Deleting<span style="margin-left: 3px; color: red; position: relative; top: 1px;" class="blinking">•</span>`);
                 } else msg_btn.remove();
+                if (msg_foot.data('was-hidden')) msg_foot.hide();
                 if (!msg_foot.children().length) msg_foot.remove();
             });
             if (msg_opt_delete_selected.length) {
@@ -233,12 +239,14 @@ export default class extends Constructor {
                         message_content_p.css('background-color', '').text('This message was deleted');
                         let msg_foot = message.find('.message-foot');
                         msg_foot.find('button').remove();
+                        if (msg_foot.data('was-hidden')) msg_foot.hide();
                         if (!msg_foot.children().length) msg_foot.remove();
                     }
                     for (let i = 0; i < error.length; i++) {
                         let message = $(`[data-id="${error[i]}"]`);
                         let msg_foot = message.find('.message-foot');
                         msg_foot.find('button').remove();
+                        if (msg_foot.data('was-hidden')) msg_foot.hide();
                         if (!msg_foot.children().length) msg_foot.remove();
                     }
                     if (error.length) {
