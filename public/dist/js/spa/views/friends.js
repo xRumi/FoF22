@@ -88,7 +88,6 @@ export default class extends Constructor {
                     nanobar.go(100);
                 },
                 error: function(xhr, textStatus, errorThrown) {
-                    alert('uhh')
                     _ajax0 = false;
                 },
             });

@@ -91,7 +91,7 @@
 }
 
 .messages-list {
-	margin-top: 25px;
+	margin-top: 10px;
 	padding: 10px;
 	height: auto;
 	overflow: auto;
@@ -121,11 +121,13 @@
 	background: #efefef none repeat scroll 0 0;
 	border-radius: 8px;
 	font-size: 14px;
-	padding: 8px;
+	padding: 7px 8.5px;
 	width: fit-content;
 	word-break: break-all;
     clear: both;
     height: auto;
+    min-width: 35px;
+    text-align: center;
 }
 
 .message-foot {
@@ -242,11 +244,20 @@
 	visibility: hidden;
 }
 
-.load-more-messages {
+.load-more-messages-up {
 	font-size: 15px;
 	cursor: pointer;
     padding: 10px;
     border-bottom: solid 1px grey;
+    color: #007fff;
+}
+
+.load-more-messages-down {
+	font-size: 15px;
+	cursor: pointer;
+    padding: 10px;
+    border-bottom: solid 1px grey;
+    border-top: solid 1px grey;
     color: #007fff;
 }
 
@@ -406,16 +417,29 @@
     padding: 13px;
     border-bottom: solid 2px #dd3c10;
     display: none;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
 }
 
-.message-error div {
+.message-error > div {
     float: left;
+}
+
+.message-error > div > div {
+    font-size: 14.5px;
+}
+
+.message-error > div > span {
     color: #6d220d;
 }
 
-.message-error button {
+.message-error > button {
     float: right;
     padding: 4px 5px;
+    letter-spacing: 1.3px;
+    border-radius: 5px;
+    outline: 0;
+    border: solid 1px black;
 }
 
 .msg-attachments {
@@ -515,6 +539,6 @@
     background-color: red;
     width: 30%;
     height: 100%;
-    border: solid 1.2px red;
+    border: solid 1.5px red;
     border-radius: 10px;
 }

@@ -4,10 +4,18 @@ const attachment_limit = 10;
 let attachments = [],
     old_people_list = [],
     _ajax0 = false,
-    loading_more_messages = false,
+    loading_more_messages_up = false,
+    loading_more_messages_down = false,
     is_private,
     members = [],
     msg_opt_delete_selected = [];
+
+on_socket_reconnect.views_messages_01 = () => {
+    if (!client.messages.room_id) return false;
+    if (!socket.connected) return false;
+    if (!navigator.onLine) return false;
+    loading_more_messages_down();
+}
 
 const people_list = (new_people_list) => {
     if (new_people_list && JSON.stringify(new_people_list) == JSON.stringify(old_people_list)) return false;
@@ -42,8 +50,10 @@ const people_list = (new_people_list) => {
             $('#message-input-files-button').prop('disabled', true);
             $('.message-send-icon').hide();
             $('.messages-top').hide();
-            $('.load-more-messages .spinner').hide();
-            $('.load-more-messages').hide();
+            $('.load-more-messages-up .spinner').hide();
+            $('.load-more-messages-up').hide();
+            $('.load-more-messages-down .spinner').hide();
+            $('.load-more-messages-down').hide();
             $('.messages-list').html('');
             $('._people-active').removeClass('_people-active');
             let _people = $(e.currentTarget);
@@ -149,13 +159,19 @@ export default class extends Constructor {
                             </div>
                         </div>
                     </div>
-                    <div class="load-more-messages" style="display: none;">
+                    <div class="load-more-messages-up" style="display: none;">
                         See Older Messages
                         <svg class="spinner" style="width: 20px; height: 20px; margin-left: 10px; position: relative; margin-bottom: -6px; display: none;" viewBox="0 0 50 50">
                             <circle class="spinner-path" style="stroke: black;" cx="25" cy="25" r="20" fill="none" stroke-width="3"></circle>
                         </svg>
                     </div>
                     <div class="messages-list scrollbar"></div>
+                    <div class="load-more-messages-down" style="display: none;">
+                        See Newer Messages
+                        <svg class="spinner" style="width: 20px; height: 20px; margin-left: 10px; position: relative; margin-bottom: -6px; display: none;" viewBox="0 0 50 50">
+                            <circle class="spinner-path" style="stroke: black;" cx="25" cy="25" r="20" fill="none" stroke-width="3"></circle>
+                        </svg>
+                    </div>
                     <div class="messages-bottom">
                         <form autocomplete="off">
                             <input type="text" name="message-input" id="message-input" placeholder="type your message" disabled>
@@ -210,7 +226,7 @@ export default class extends Constructor {
                 let msg_btn = msg_foot.find('button');
                 if (msg_btn.text() == 'Selected') {
                     msg_btn.attr('disabled', '').removeClass('modm-selected');
-                    msg_btn.html(`Deleting<span style="margin-left: 3px; color: red; position: relative; top: 1px;" class="blinking">•</span>`);
+                    msg_btn.html(`Deleting<span style="margin-left: 5px; color: red; position: relative; top: 1px;" class="blinking">•</span>`);
                 } else msg_btn.remove();
                 if (msg_foot.data('was-hidden')) msg_foot.hide();
                 if (!msg_foot.children().length) msg_foot.remove();
@@ -236,7 +252,9 @@ export default class extends Constructor {
                         let message = $(`[data-id="${success[i]}"]`);
                         let message_content_p = message.find('.message-content p');
                         message.addClass('message-deleted');
-                        message_content_p.css('background-color', '').text('This message was deleted');
+                        if (message_content_p.length) message_content_p.css('background-color', '').text('This message was deleted');
+                        else message.find('.message-content').prepend(`<p>This message was deleted</p>`)
+                        message.find('.msg-attachments').remove();
                         let msg_foot = message.find('.message-foot');
                         msg_foot.find('button').remove();
                         if (msg_foot.data('was-hidden')) msg_foot.hide();
@@ -312,7 +330,11 @@ export default class extends Constructor {
             e.preventDefault();
             let input = $('#message-input'),
                 _message = input.val();
-            if ((!_message && !attachments.length) || !client.messages.room_id) return $('.message-send-icon').shake();
+            if (!client.messages.room_id) return $('.message-send-icon').shake();
+            if (attachments.length) {
+                if (attachments.length !== $('.message-input-files-preview').children().length)
+                    return $('.message-send-icon').shake();
+            } else if (!_message) return $('.message-send-icon').shake();
             input.val(''); let _id = Math.random().toString(36).substring(2, 15);
             $('#message-input-file-text').text('No file selected');
             $('.message-input-files-preview').html('');
@@ -336,16 +358,12 @@ export default class extends Constructor {
                     if (response.error) {
                         $(`#${_id} .message-content`).hide();
                         $(`#${_id} .message-error`).html(`
-                            <div>Failed to send message</div>
+                            <div>
+                                <div>Failed to send message</div>
+                                <span>${response.error}</span>
+                            </div>
                             <button>Resend</button>
                         `).show();
-                        _alert.render({
-                            head: 'Message Deliver Error',
-                            content: response.error,
-                            click_to_close: true,
-                            delay: 5000
-                        });
-                        console.log(response.error);
                     } else {
                         const { id, chat, _id } = response;
                         if (client.messages.room_id == id) {
@@ -379,11 +397,16 @@ export default class extends Constructor {
             document.title = 'Messages';
             $('.chat').removeClass('chat-active');
             $('.navbar').removeClass('chat-active');
-        }).on('click', '.load-more-messages', e => {
-            if (loading_more_messages) return false;
-            $('.load-more-messages .spinner').show();
-            loading_more_messages = true;
-            load_more_messages();
+        }).on('click', '.load-more-messages-up', e => {
+            if (loading_more_messages_up) return false;
+            $('.load-more-messages-up .spinner').show();
+            loading_more_messages_up = true;
+            load_more_messages_up();
+        }).on('click', '.load-more-messages-down', e => {
+            if (loading_more_messages_down) return false;
+            $('.load-more-messages-down .spinner').show();
+            loading_more_messages_down = true;
+            load_more_messages_down();
         }).on('click', '#message-input-files input:button', (e) => {
             e.preventDefault();
             $(e.currentTarget).parent().find('input:file').trigger('click');
@@ -433,6 +456,7 @@ export default class extends Constructor {
                     </div>`);
                 }
                 let message_input_file_preview = $(`[data-id="preview-${attachment_data.id}"]`);
+                $('#message-input-files-button').prop('disabled', true);
                 if (file.type.match('image')) {
                     let image = new Image(), src_url = URL.createObjectURL(file);
                     image.src = src_url;
@@ -449,6 +473,7 @@ export default class extends Constructor {
                             attachment_data.src_url = src_url;
                             attachment_data.ext = 'png';
                             attachments.push(attachment_data);
+                            $('#message-input-files-button').prop('disabled', false);
                         }, 'image/png', 0.8);
                     }
                 } else if (file.type.match('video')) {
@@ -460,6 +485,7 @@ export default class extends Constructor {
                         message_input_file_preview.remove();
                         let attachment_length = attachments.length;
                         $('#message-input-file-text').text(attachment_length ? `${attachment_length} file${attachment_length > 1 ? 's' : ''} selected, click to remove` : 'No file selected');
+                        $('#message-input-files-button').prop('disabled', false);
                     }
                     video.onloadeddata = () => {
                         let seek_to = parseInt(video.duration / 3);
@@ -479,6 +505,7 @@ export default class extends Constructor {
                                 attachment_data.src_url = src_url;
                                 attachment_data.duration = video.duration;
                                 attachments.push(attachment_data);
+                                $('#message-input-files-button').prop('disabled', false);
                             }, 'image/jpeg', 1);
                         }
                     }
@@ -487,6 +514,7 @@ export default class extends Constructor {
                     attachment_data.file = file;
                     message_input_file_preview.html(`<span>${ext ? '.' + ext : '?'}</span>`);
                     attachments.push(attachment_data);
+                    $('#message-input-files-button').prop('disabled', false);
                 }
             }
             $(e.currentTarget).val('');
@@ -693,7 +721,7 @@ function join_room(response) {
                 $('.message-send-icon').show();
                 if ($(".message:last-child")[0]) $(".message:last-child")[0].scrollIntoView();
             }, messages[messages.length - 1]);
-            if (mm) $('.load-more-messages').show();
+            if (mm) $('.load-more-messages-up').show();
             $(`._people[data-id="${id}"]`).css('background-color', '');
             nanobar.go(100);
         }
@@ -701,7 +729,9 @@ function join_room(response) {
 }
 
 function send_message(_message, _attachments, _id, callback) {
-    if (!client.messages.room_id) return false;
+    if (!client.messages.room_id) return callback({ error: 'Invalid chat room, refresh and try again' });
+    if (!navigator.onLine) return callback({ error: 'No internet connection' });
+    if (!socket.connected) return callback({ error: 'Websocket is not Connected' });
     Promise.all(_attachments.map(attachment => {
         return new Promise((resolve, reject) => {
             upload_attachment(attachment, (result, errorThrown) => {
@@ -896,16 +926,18 @@ function format_message(m, lm = {}) {
     `
 }
 
-function load_more_messages() {
-    if (!client.messages.room_id) {
-        $('.load-more-messages .spinner').hide();
-        return false;
+function load_more_messages_up() {
+    if (!client.messages.room_id || !navigator.onLine || !socket.connected) {
+        loading_more_messages_up = false;
+        return $('.load-more-messages-up .spinner').hide();
     }
-    socket.emit('load-more-messages', $('.message')[0].getAttribute('data-id'), (response) => {
-        if (!response) socket.emit('join-room', client.messages.room_id, () => load_more_messages());
+    socket.emit('load-more-messages-up', $('.message:first-child').data('id'), 7, (response) => {
+        if (response.error) {
+            loading_more_messages_up = false;
+        } else if (response.join_room) socket.emit('join-room', client.messages.room_id, () => load_more_messages_up());
         else {
             let { id, messages, mm } = response;
-            loading_more_messages = false;
+            loading_more_messages_up = false;
             if (client.messages.room_id == id && messages.length) {
                 let html = [], lm = {};
                 for (let i = 0; i < messages.length; i++) {
@@ -914,8 +946,13 @@ function load_more_messages() {
                     lm = m;
                 }
                 message_time(html, (_html) => {
+                    _html = $(_html);
+                    let llm = _html.filter(':last-child'),
+                        llmt = llm.data('time'),
+                        plmt = $('.message:first-child').data('time');
+                    if (llmt && plmt && Math.abs(parseInt(llmt) - parseInt(plmt)) < 7 * 60 * 1000)
+                        llm.find('.message-foot').hide();
                     if ($('#mod-selected-messages').length) {
-                        _html = $(_html);
                         _html.each((index, value) => {
                             let msg = $(value);
                             if (!msg.hasClass('outgoing') || msg.hasClass('message-deleted')) return;
@@ -929,11 +966,73 @@ function load_more_messages() {
                             `);
                         });
                     }
-                    $('.load-more-messages .spinner').hide();
+                    $('.load-more-messages-up .spinner').hide();
                     $('.messages-list').prepend(_html);
                 }, {});
-            } else $('.load-more-messages .spinner').hide();
-            if (!mm) $('.load-more-messages').hide();
+            } else $('.load-more-messages-up .spinner').hide();
+            if (!mm) $('.load-more-messages-up').hide();
+        }
+    });
+}
+
+function load_more_messages_down() {
+    if (!client.messages.room_id || !navigator.onLine || !socket.connected) {
+        loading_more_messages_down = false;
+        return $('.load-more-messages-down .spinner').hide();
+    }
+    socket.emit('load-more-messages-down', $('.message:last-child').data('id'), 7, (response) => {
+        if (response.error) {
+            loading_more_messages_down = false;
+        } else if (response.join_room) socket.emit('join-room', client.messages.room_id, () => load_more_messages_down());
+        else {
+            let { id, messages, mm } = response;
+            loading_more_messages_down = false;
+            if (!messages.length) return $('.load-more-messages-down .spinner').hide();
+            if (client.messages.room_id == id && messages.length) {
+                let html = [], lm = {};
+                for (let i = 0; i < messages.length; i++) {
+                    let m = messages[i];
+                    html.push(format_message(m, lm));
+                    lm = m;
+                }
+                message_time(html, (_html) => {
+                    _html = $(_html);
+                    let llm = _html.filter(':first-child'),
+                        llmt = llm.data('time'),
+                        plm = $('.message:last-child'),
+                        plmt = plm.data('time');
+                    if (llmt && plmt && Math.abs(parseInt(plmt) - parseInt(llmt)) < 7 * 60 * 1000) {
+                        llm.find('.message-foot').hide();
+                        plm.find('.message-foot').hide();
+                    }
+                    if ($('#mod-selected-messages').length) {
+                        _html.each((index, value) => {
+                            let msg = $(value);
+                            if (!msg.hasClass('outgoing') || msg.hasClass('message-deleted')) return;
+                            let msg_content = msg.find('.message-content');
+                            let foot = msg_content.find('.message-foot');
+                            if (foot.length) foot.prepend(`<button class="modm-select">Select</button>`);
+                            else msg_content.append(`
+                                <div class="message-foot">
+                                    <button style="margin-right: unset;" class="modm-select">Select</button>
+                                </div>
+                            `);
+                        });
+                    }
+                    $('.load-more-messages-down .spinner').hide();
+                    $('.messages-list').append(_html);
+                }, {});
+            } else $('.load-more-messages-down .spinner').hide();
+            let input = $('.messages-bottom > form > input');
+            if (mm) {
+                $('.load-more-messages-down').show();
+                input.attr({ 'disabled': true, 'placeholder': 'go to the end or refresh the page to continue', 'data-previous-message': input.val() });
+                input.val('');
+            } else {
+                input.val(input.attr('data-previous-message') || '');
+                input.attr({ 'disabled': false, 'placeholder': 'type your message', 'previous-message': '' });
+                $('.load-more-messages-down').hide();
+            }
         }
     });
 }

@@ -105,27 +105,64 @@ module.exports = (io, client, socket) => {
         }
     });
     /* TODO: socket.on('get-room-member') */
-    socket.on('load-more-messages', async (id, callback) => {
+    socket.on('load-more-messages-up', async (id, limit = 7, callback) => {
         if (!is_function(callback)) return false;
         if (id && id.length > 8) {
-            if (!socket.chat_id) return callback(false);
+            if (!socket.chat_id) return callback({ join_room: true });
             let chat = await client.database.functions.get_chat(socket.chat_id);
             if (chat && chat.room_id == socket.room_id) {
+                limit = Math.abs(limit > 20 ? 20 : limit);
+                let index = chat.messages.findIndex(x => x.id == id);
+                if (index > -1) {
+                    let messages = index - limit > -1 ? chat.messages.slice(index - limit, index) : chat.messages.slice(0, index);
+                    Promise.all(messages.map(message => client.database.functions.get_user(message.user))).then(users => {
+                        for (let i = 0; i < users.length; i++) {
+                            let user = users[i];
+                            let message = messages.find(x => x.user == user.id);
+                            if (message) message.username = user.username;
+                        }
+                        callback({ id: socket.room_id, messages, mm: chat.messages[index - limit - 1] ? true : false });
+                    });
+                } else callback({ error: 'Provided message id does not exist' });
+                /* not sure which one is faster T.T
                 let a = chat.messages.length;
                 while(a--) {
                     if (chat.messages[a]?.id == id) {
-                        let messages = (a && a > 7) ? chat.messages.slice(a - 7, a) : chat.messages.slice(0, a);
+                        let messages = (a && a > limit) ? chat.messages.slice(a - limit, a) : chat.messages.slice(0, a);
                         Promise.all(messages.map(message => client.database.functions.get_user(message.user))).then(users => {
                             for (let i = 0; i < users.length; i++) {
                                 let user = users[i];
                                 let message = messages.find(x => x.user == user.id);
                                 if (message) message.username = user.username;
                             }
-                            callback({ id: socket.room_id, messages, mm: a - 7 > 0 ? true : false })
+                            callback({ id: socket.room_id, messages, mm: a - limit > 0 ? true : false })
                         });
                         break;
                     }
                 }
+                */
+            }
+        }
+    });
+    socket.on('load-more-messages-down', async (id, limit, callback) => {
+        if (!is_function(callback)) return false;
+        if (id && id.length > 8) {
+            if (!socket.chat_id) return callback({ join_room: true });
+            let chat = await client.database.functions.get_chat(socket.chat_id);
+            if (chat && chat.room_id == socket.room_id) {
+                limit = Math.abs(limit > 20 ? 20 : limit);
+                let index = chat.messages.findIndex(x => x.id == id);
+                if (index > -1) {
+                    let messages = chat.messages.slice(index + 1, index + limit + 1);
+                    Promise.all(messages.map(message => client.database.functions.get_user(message.user))).then(users => {
+                        for (let i = 0; i < users.length; i++) {
+                            let user = users[i];
+                            let message = messages.find(x => x.user == user.id);
+                            if (message) message.username = user.username;
+                        }
+                        callback({ id: socket.room_id, messages, mm: chat.messages[index + limit + 1] ? true : false });
+                    });
+                } else callback({ error: 'Provided message id does not exist' });
             }
         }
     });
@@ -284,7 +321,7 @@ module.exports = (io, client, socket) => {
             if (!user) return callback({ err: true });
             let chat = await client.database.functions.get_chat(socket.chat_id);
             if (chat.room_id == socket.room_id) {
-                let error = [], success = [];
+                let error = [], success = [], delete_attachments = [];
                 for (i = 0;  i < ids.length; i++) {
                     let _a = chat.messages.findIndex(x => x.id == ids[i]);
                     if (_a > -1) {
@@ -292,7 +329,11 @@ module.exports = (io, client, socket) => {
                         if (!a.deleted && a.user == user.id) {
                             a.deleted = true;
                             a.message = null;
-                            a.attachments = [];
+                            if (a.attachments.length) {
+                                delete_attachments.push(...a.attachments.filter(x => x.url).map(x => path.join(__dirname, `/../public/uploads/rooms/${socket.room_id}/` + x.url?.split('/').pop())));
+                                delete_attachments.push(...a.attachments.filter(x => x.thumbnail).map(x => path.join(__dirname, `/../public/uploads/rooms/${socket.room_id}/` + x.thumbnail?.split('/').pop())));
+                                a.attachments = [];
+                            }
                             chat.mark_modified(`messages[${_a}]`);
                             await chat.save();
                             socket.broadcast.to(socket.room_id).emit('update-message', { id: socket.room_id, chat: a });
@@ -301,6 +342,8 @@ module.exports = (io, client, socket) => {
                     } else error.push(ids[i]);
                 }
                 callback({ error, success });
+                if (delete_attachments.length)
+                    Promise.all(delete_attachments.map(x => fs.promises.unlink(x))).catch(() => {});
             }
         }
     });

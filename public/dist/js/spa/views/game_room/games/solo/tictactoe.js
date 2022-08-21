@@ -174,7 +174,7 @@ function reset_game() {
     if (whose_turn == 'computer') {
         $('.ttt-turn').text(`computer\'s turn`).css('background-color', '#fa7268');
         computer();
-    };
+    } else $('.ttt-turn').text(`player\'s turn`).css('background-color', '#07c');
 }
 
 function display_result(winning_message) {

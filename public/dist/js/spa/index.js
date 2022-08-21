@@ -101,11 +101,11 @@ const router = async () => {
                 router_show(view);
                 $('.top-status').hide();
             }, 500);
-            else $.fn.on_socket_connect_1 = () => {
+            else on_socket_connect.spa_index_0 = () => {
                 setTimeout(() => {
                     router_show(view);
                     $('.top-status').hide();
-                    $.fn.on_socket_connect_1 = null;
+                    on_socket_connect.spa_index_0 = null;
                 }, 1000);
             };
             is_first_time = false;
@@ -114,11 +114,11 @@ const router = async () => {
         } else {
             if (socket.connected) router_show(view);
             else {
-                $.fn.on_socket_connect_1 = () => {
+                on_socket_connect.spa_index_0 = () => {
                     setTimeout(() => {
                         router_show(view);
                         $('.top-status').hide();
-                        $.fn.on_socket_connect_1 = null;
+                        on_socket_connect.spa_index_0 = null;
                     }, 1000);
                 };
                 $('.top-status').text('Waiting for connection')

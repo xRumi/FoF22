@@ -1,16 +1,22 @@
 let socket_connected = true,
+    on_socket_connect = {},
+    on_socket_disconnect = {},
+    on_socket_reconnect = {},
     nanobar = new Nanobar(),
     socket = io.connect().on('connect', () => {
-        if ($.fn.on_socket_connect_1) $.fn.on_socket_connect_1();
+        for (let key in on_socket_connect)
+            if (on_socket_connect.hasOwnProperty(key) && on_socket_connect[key]) on_socket_connect[key]();
         if (!socket_connected) {
+            socket_connected = true;
             $('.top-status').text('Connected')
                 .css('background-color', 'green').show();
-            setTimeout(() => {
-                $('.top-status').hide();
-            }, 2000);
-            socket_connected = true;
+            setTimeout(() => $('.top-status').hide(), 2000);
+            for (let key in on_socket_reconnect)
+                if (on_socket_reconnect.hasOwnProperty(key) && on_socket_reconnect[key]) on_socket_reconnect[key]();
         }
     }).on('disconnect', () => {
+        for (let key in on_socket_disconnect)
+            if (on_socket_disconnect.hasOwnProperty(key)) on_socket_disconnect[key]();
         socket_connected = false;
         $('.top-status').text(`Disonnected${!navigator.onLine ? `, No internet` : ''}`)
             .css('background-color', 'red').show();
@@ -120,7 +126,8 @@ function shuffle_array(array) {
 
 $(window).on('click', e => {
     let target = $(e.target);
-    if (!target.hasClass('messages-options') &&
+    if (client.messages.room_id &&
+        !target.hasClass('messages-options') &&
         !target.parent().hasClass('messages-options') &&
         !target.parent().parent().hasClass('messages-options') &&
         !target.hasClass('bx-dots-vertical')
