@@ -735,7 +735,8 @@ function send_message(_message, _attachments, _id, callback) {
     Promise.all(_attachments.map(attachment => {
         return new Promise((resolve, reject) => {
             upload_attachment(attachment, (result, errorThrown) => {
-                if (result) {
+                console.log(result);
+                if (result.url) {
                     attachment.url = result.url;
                     if (result.thumbnail) attachment.thumbnail = result.thumbnail;
                     resolve(attachment);

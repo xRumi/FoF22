@@ -51,6 +51,7 @@ module.exports = (client) => {
                 return res.status(400).send(err.msg || 'Something went wrong, try again later');
             }
             let { room_id } = req.body;
+            if (!room_id || !req.files?.attachment[0]) return res.sendStatus(400);
             res.status(200).send({
                 url: `/uploads/rooms/${room_id}/${req.files.attachment[0].filename}`,
                 thumbnail: req.files.thumbnail?.length ? `/uploads/rooms/${room_id}/${req.files.thumbnail[0].filename}` : false,
