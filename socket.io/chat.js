@@ -181,7 +181,7 @@ module.exports = (io, client, socket) => {
                         if (chat) {
                             let attachments = [], callback_done = false;;
                             for (let i = 0; i < _attachments.length; i++) {
-                                let { name, type, url, ext, thumbnail } = _attachments[i];
+                                let { name, type, url, ext, thumbnail, height, width } = _attachments[i];
                                 if (!name || !url) {
                                     callback({ error: `Attachment has missing informations` }); callback_done = true;
                                     break;
@@ -211,6 +211,14 @@ module.exports = (io, client, socket) => {
                                             size: attachment_info.size,
                                             name: xss((name?.substring(0, 200) || 'unknown') + (ext ? '.' + ext : '')),
                                         };
+                                        if (width) {
+                                            let width_float = Math.abs(parseFloat(width).toFixed(4));
+                                            if (width_float) attachment_data.width = width_float > 1000 ? 1000 : width_float;
+                                        }
+                                        if (height) {
+                                            let height_float = Math.abs(parseFloat(height).toFixed(4));
+                                            if (height_float) attachment_data.height = height_float > 1000 ? 1000 : height_float;
+                                        }
                                         if (type.match('video')) {
                                             attachment_data.thumbnail = `/uploads/rooms/${room.id}/${thumbnail_filename}`;
                                             attachment_data.duration = attachment_info.duration;

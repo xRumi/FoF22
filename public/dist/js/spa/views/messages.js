@@ -14,7 +14,7 @@ on_socket_reconnect.views_messages_01 = () => {
     if (!client.messages.room_id) return false;
     if (!socket.connected) return false;
     if (!navigator.onLine) return false;
-    loading_more_messages_down();
+    load_more_messages_down();
 }
 
 const people_list = (new_people_list) => {
@@ -353,6 +353,14 @@ export default class extends Constructor {
             });
 
             let _attachments = attachments.filter(x => x.file).map(x => Object.assign({}, x));
+            for (let i = 0; i < _attachments.length; i++) {
+                let _a = _attachments[i];
+                if (_a.type.match('image') || _a.type.match('video')) {
+                    let $t = $(`#${_a.id}`).find(_a.type.match('image') ? 'img' : 'video');
+                    _a.width = $t.width();
+                    _a.height = $t.height();
+                } else continue;
+            }
             function do_send_message() {
                 send_message(_message, _attachments, _id, (response) => {
                     if (response.error) {
@@ -735,7 +743,6 @@ function send_message(_message, _attachments, _id, callback) {
     Promise.all(_attachments.map(attachment => {
         return new Promise((resolve, reject) => {
             upload_attachment(attachment, (result, errorThrown) => {
-                console.log(result);
                 if (result.url) {
                     attachment.url = result.url;
                     if (result.thumbnail) attachment.thumbnail = result.thumbnail;
@@ -750,7 +757,9 @@ function send_message(_message, _attachments, _id, callback) {
             type: y.type,
             ext: y.ext,
             url: y.url,
-            thumbnail: y.thumbnail
+            thumbnail: y.thumbnail,
+            width: y.width,
+            height: y.height,
         })), _id, callback);
     }).catch(x => {
         console.log(x);
@@ -787,8 +796,9 @@ function upload_attachment(attachment, callback) {
                     if (evt.lengthComputable) {
                         let percent_complete = evt.loaded / evt.total;
                         percent_complete = parseInt(percent_complete * 100);
-                        attachment_progress.css('width', `${percent_complete}%`);
-                    }
+                        attachment_progress.css({ 'width': `${percent_complete}%`, 'color': '#07c', 'background-color': '#07co' });
+                        if (percent_complete == 100) attachment_progress.css({ 'color': 'green', 'background-color': 'green' });
+                    } else attachment_progress.css({ 'color': 'red', 'background-color': 'red' });
                 }, false);
             }
             return xhr;
@@ -863,13 +873,13 @@ function format_attachment(attachments) {
         return x.type.match('image') ? `
             <div class="msg-attachment" ${x.id ? `id="${x.id}"` : ''}>
                 <div class="msg-attachment-progress"><div></div></div>
-                <img src="${x.src_url || x.url}" data-name="${x.name}" ${x.url ? `data-url="${x.url}"` : ``} ${x.ext ? `data-ext="${x.ext}"` : ''} data-model>
+                <img ${x.width ? `width=\"${x.width}\"` : ''} ${x.height ? `height=\"${x.height}\"` : ''} src="${x.src_url || x.url}" data-name="${x.name}" ${x.url ? `data-url="${x.url}"` : ``} ${x.ext ? `data-ext="${x.ext}"` : ''} data-model>
             </div>` :
             x.type.match('video') ? `
             <div class="msg-attachment" ${x.id ? `id="${x.id}"` : ''}>
                 <div class="msg-attachment-progress"><div></div></div>
                 <img class="msg-attachment-video-play" src="/dist/img/play-button.png">
-                <video ${client.messages.should_mute_video ? `muted` : ''} preload="metadata" poster="${x.thumbnail || x.thumbnail_src}">
+                <video ${x.width ? `width=\"${x.width}\"` : ''} ${x.height ? `height=\"${x.height}\"` : ''} ${client.messages.should_mute_video ? `muted` : ''} preload="metadata" poster="${x.thumbnail || x.thumbnail_src}">
                     <source src="${x.url || x.src_url}" type="${x.type}">
                     Your browser does not support the video tag.
                 </video>
