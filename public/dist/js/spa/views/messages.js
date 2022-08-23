@@ -779,14 +779,13 @@ function upload_attachment(attachment, callback) {
         data: form_data,
         processData: false,
         contentType: false,
-        timeout: 30000,
         success: (result, textStatus, xhr) => {
             $(`#${attachment.id}`).attr('data-url', result.url);
             callback(result);
         },
         error: (xhr, textStatus, errorThrown) => {
             if (xhr.code == 403) window.location.replace(`/login?back_to=/spa/messages/${client.messages.room_id}`);
-            else callback(false, xhr.responseText);
+            else callback(false, xhr.responseText || errorThrown || textStatus);
         },
         xhr: () => {
             let xhr = new window.XMLHttpRequest();
