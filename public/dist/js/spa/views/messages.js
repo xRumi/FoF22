@@ -8,7 +8,8 @@ let attachments = [],
     loading_more_messages_down = false,
     is_private,
     members = [],
-    msg_opt_delete_selected = [];
+    msg_opt_delete_selected = [],
+    ignore_attachment_ids = [];
 
 on_socket_reconnect.views_messages_01 = () => {
     if (!client.messages.room_id) return false;
@@ -31,7 +32,7 @@ const people_list = (new_people_list) => {
                     <span class="_people-name">${x.name}</span>
                     <p>${!x.deleted ? `${x.has_attachment ? 
                         `<i class="bx bx-paperclip"></i> ` : ''}
-                        <span>${x.last_message ? x.last_message.replace(/[&<>]/g, (t) => ttr[t] || t) : ''}</span>` : '<i>This message was deleted</i>'}
+                        <span>${x.last_message ? x.last_message.replace(/[&<>]/g, (t) => ttr[t] || t) : ''}</span>` : '<span>This message was deleted</span>'}
                     </p>
                 </div>
             </div>
@@ -452,7 +453,7 @@ export default class extends Constructor {
                 if (attachment_length >= attachment_limit) {
                     $('#message-input-files-button').prop('disabled', true);
                     $('#message-input-file-text').text(`limit reached, click to remove`);
-                    break;
+                    break; return;
                 } else {
                     $('#message-input-file-text').text(`${attachment_length} file${attachment_length > 1 ? 's' : ''} selected, click to remove`);
                     $('.message-input-files-preview').append(`<div data-id="preview-${attachment_data.id}">
@@ -469,6 +470,7 @@ export default class extends Constructor {
                     let image = new Image(), src_url = URL.createObjectURL(file);
                     image.src = src_url;
                     image.onload = () => {
+                        if (ignore_attachment_ids.includes(attachment_data.id)) return false;
                         const canvas = document.createElement('canvas');
                         canvas.setAttribute("style", "background-color: red;");
                         canvas.width = image.width;
@@ -476,6 +478,7 @@ export default class extends Constructor {
                         let ctx = canvas.getContext('2d');
                         ctx.drawImage(image, 0, 0, image.width, image.height);
                         canvas.toBlob(blob => {
+                            if (ignore_attachment_ids.includes(attachment_data.id)) return false;
                             message_input_file_preview.html(`<img src="${src_url}">`);
                             attachment_data.file = blob;
                             attachment_data.src_url = src_url;
@@ -489,6 +492,7 @@ export default class extends Constructor {
                     video.src = src_url;
                     video.load();
                     video.onerror = () => {
+                        if (ignore_attachment_ids.includes(attachment_data.id)) return false;
                         alert(`video error while processing ${file.name}`);
                         message_input_file_preview.remove();
                         let attachment_length = attachments.length;
@@ -496,9 +500,11 @@ export default class extends Constructor {
                         $('#message-input-files-button').prop('disabled', false);
                     }
                     video.onloadeddata = () => {
+                        if (ignore_attachment_ids.includes(attachment_data.id)) return false;
                         let seek_to = parseInt(video.duration / 3);
                         setTimeout(() => video.currentTime = seek_to, 200);
                         video.onseeked = () => {
+                            if (ignore_attachment_ids.includes(attachment_data.id)) return false;
                             const canvas = document.createElement('canvas');
                             canvas.width = video.videoWidth;
                             canvas.height = video.videoHeight;
@@ -506,6 +512,7 @@ export default class extends Constructor {
                             ctx.drawImage(video, 0, 0);
                             let thumbnail_src = canvas.toDataURL("image/png");
                             canvas.toBlob(blob => {
+                                if (ignore_attachment_ids.includes(attachment_data.id)) return false;
                                 message_input_file_preview.html(`<img src="${thumbnail_src}">`);
                                 attachment_data.file = file;
                                 attachment_data.thumbnail_blob = blob;
@@ -520,6 +527,7 @@ export default class extends Constructor {
                 } else {
                     attachment_data.src_url = URL.createObjectURL(file);
                     attachment_data.file = file;
+                    if (ignore_attachment_ids.includes(attachment_data.id)) return false;
                     message_input_file_preview.html(`<span>${ext ? '.' + ext : '?'}</span>`);
                     attachments.push(attachment_data);
                     $('#message-input-files-button').prop('disabled', false);
@@ -536,9 +544,14 @@ export default class extends Constructor {
                 attachments.splice(attachment_index, 1);
                 that.remove();
                 $('#message-input-files-button').prop('disabled', false);
-                let attachment_length = attachments.length;
-                $('#message-input-file-text').text(attachment_length ? `${attachment_length} file${attachment_length > 1 ? 's' : ''} selected, click to remove` : 'No file selected');
+            } else if (!ignore_attachment_ids.includes(id)) {
+                ignore_attachment_ids.push(id);
+                that.remove();
+                if (!$('.message-input-files-preview > div > span > svg').length)
+                    $('#message-input-files-button').prop('disabled', false);
             }
+            let attachment_length = attachments.length;
+            $('#message-input-file-text').text(attachment_length ? `${attachment_length} file${attachment_length > 1 ? 's' : ''} selected, click to remove` : 'No file selected');
         }).on('click', '.message-content img[data-model]', (e) => {
             let that = $(e.currentTarget).clone();
             history.pushState(null, null, window.location.href.replace(window.location.origin, ""));
@@ -869,37 +882,34 @@ function format_attachment(attachments) {
     if (!attachments) return '';
     return '<div class="msg-attachments">' + attachments.map(x => {
         if (!x) return '';
-        return x.type.match('image') ? `
-            <div class="msg-attachment" ${x.id ? `id="${x.id}"` : ''}>
+        return `<div class="msg-attachment" ${x.id ? `id="${x.id}"` : ''}>` +
+            (x.type.match('image') ? `
                 <div class="msg-attachment-progress"><div></div></div>
                 <img ${x.width ? `width=\"${x.width}\"` : ''} ${x.height ? `height=\"${x.height}\"` : ''} src="${x.src_url || x.url}" data-name="${x.name}" ${x.url ? `data-url="${x.url}"` : ``} ${x.ext ? `data-ext="${x.ext}"` : ''} data-model>
-            </div>` :
+            ` :
             x.type.match('video') ? `
-            <div class="msg-attachment" ${x.id ? `id="${x.id}"` : ''}>
                 <div class="msg-attachment-progress"><div></div></div>
                 <img class="msg-attachment-video-play" src="/dist/img/play-button.png">
-                <video ${x.width ? `width=\"${x.width}\"` : ''} ${x.height ? `height=\"${x.height}\"` : ''} ${client.messages.should_mute_video ? `muted` : ''} preload="metadata" poster="${x.thumbnail || x.thumbnail_src}">
+                <video ${x.width ? `width=\"${x.width}\"` : ''} ${x.height ? `height=\"${x.height}\"` : ''} ${client.messages.should_mute_video ? `muted` : ''} preload="none" poster="${x.thumbnail || x.thumbnail_src}">
                     <source src="${x.url || x.src_url}" type="${x.type}">
                     Your browser does not support the video tag.
                 </video>
-            </div>` :
+            ` :
             x.type.match('audio') ? `
-            <div class="msg-attachment" ${x.id ? `id="${x.id}"` : ''}>
                 <div class="msg-attachment-progress"><div></div></div>
                 <audio controls ${client.messages.should_mute_audio ? 'muted' : ''} preload="metadata">
                     <source src="${x.url || x.src_url}" type="${x.type}">
                     Your browser does not support the video tag. 
                 </audio>
-            </div>` :
+            ` :
             `
-            <div class="msg-attachment" ${x.id ? `id="${x.id}"` : ''}>
                 <div class="msg-attachment-progress"><div></div></div>
                 <a class="msg-attachment-file" href="${x.url || x.src_url}" download="${x.ext ? (x.name + '.' + x.ext) : x.name}" ${x.url ? `data-url="${x.url}"` : ''}>
-                    <div class="msg-attachment-file-icon"><i class="bx bx-file"></i></div>
-                    <div class="msg-attachment-file-name">${x.ext ? (x.name + '.' + x.ext) : x.name}</div>
-                    <div class="msg-attachment-file-size">${x.size ? filesize(x.size) : '∞'}</div>
+                    <div style="font-size: 13px;">${x.ext ? (x.name + '.' + x.ext) : x.name}</div>
+                    <div style="color: grey; margin-top: 1px; font-size: 11px;">${x.size ? filesize(x.size) : '∞'}</div>
                 </a>
-            </div>`;
+            `)
+        + `</div>`;
     }).join('') + '</div>';
 }
 

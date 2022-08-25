@@ -264,11 +264,12 @@
 .system-message {
 	display: flex;
 	justify-content: center;
-	margin-bottom: 30px;
+	margin-bottom: 20px;
+    margin-top: 10px;
     border: solid 1px lightgray;
     padding: 10px;
     border-radius: 10px;
-    letter-spacing: 1.2px;
+    letter-spacing: 1.1px;
 }
 
 .messages-bottom form {
@@ -451,6 +452,7 @@
     position: relative;
     width: fit-content;
     height: fit-content;
+    margin-top: 2px;
 }
 
 .outgoing .msg-attachment {
@@ -485,36 +487,12 @@
 }
 
 .msg-attachment-file {
-    border: solid 1px darkgray;
-    border-radius: 10px;
-    padding: 12px 18px 10px 10px;
-    width: auto;
+    border: solid 1px lightgrey;
+    border-radius: 5px;
+    padding: 7px 10px 7px 10px;
     display: block;
     color: black;
-}
-
-.msg-attachment-file-icon {
-    font-size: 35px;
-    float: left;
-    position: relative;
-    margin-right: 6px;
-    bottom: 4px;
-}
-
-.msg-attachment-file-name {
-    width: auto;
-    font-size: 13px;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 85%;
-    min-width: 50px;
-}
-
-.msg-attachment-file-size {
-    color: darkgray;
-    font-size: 11px;
+    min-width: 10%;
 }
 
 .pending-message .msg-attachment-file,
