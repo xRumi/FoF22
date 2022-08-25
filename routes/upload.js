@@ -43,13 +43,8 @@ module.exports = (client) => {
 
     router.post('/room', (req, res) => {
         room_upload(req, res, (err) => {
-            if (err instanceof multer.MulterError) {
-                console.log(err);
-                return res.status(400).send('Something went wrong, try again later');
-            } else if (err) {
-                if (!err.msg) console.log(err);
-                return res.status(400).send(err.msg || 'Something went wrong, try again later');
-            }
+            if (err instanceof multer.MulterError) return res.status(400).send('Something went wrong, try again later');
+            else if (err) return res.status(400).send(err.msg || 'Something went wrong, try again later');
             let { room_id } = req.body;
             if (!room_id || !req.files?.attachment[0]) return res.sendStatus(400);
             res.status(200).send({

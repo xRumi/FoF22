@@ -112,7 +112,6 @@
 	vertical-align: top;
 	width: auto;
 	max-width: 88%;
-    margin-left: 5px;
 }
 
 .message-content p {
@@ -452,7 +451,7 @@
     position: relative;
     width: fit-content;
     height: fit-content;
-    margin-top: 2px;
+    margin-top: 4px;
 }
 
 .outgoing .msg-attachment {
@@ -487,12 +486,12 @@
 }
 
 .msg-attachment-file {
-    border: solid 1px lightgrey;
+    border: solid 1px grey;
     border-radius: 5px;
     padding: 7px 10px 7px 10px;
     display: block;
     color: black;
-    min-width: 10%;
+    min-width: 150px;
 }
 
 .pending-message .msg-attachment-file,
