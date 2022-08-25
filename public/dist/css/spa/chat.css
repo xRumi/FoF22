@@ -100,11 +100,13 @@
 .message-profile-img {
 	width: 40px;
 	height: 40px;
-	overflow: hidden;
-	border-radius: 50%;
 	position: relative;
 	float: left;
-    margin-right: 8px;
+    margin-right: 10px;
+}
+
+.message-profile-img img {
+    border-radius: 50%;
 }
 
 .message-content {
@@ -451,7 +453,10 @@
     position: relative;
     width: fit-content;
     height: fit-content;
-    margin-top: 4px;
+}
+
+.msg-attachment {
+    margin-bottom: 4px;
 }
 
 .outgoing .msg-attachment {
@@ -465,6 +470,7 @@
     height: auto;
     border-radius: 6px;
     border: solid 1px lightgrey;
+    margin-bottom: -5px;
 }
 
 .msg-attachment > video {
@@ -473,6 +479,7 @@
     border-radius: 6px;
     background-color: darkgray;
     border: solid 1px lightgrey;
+    margin-bottom: -5px;
 }
 
 .msg-attachment-video-play {
@@ -491,7 +498,7 @@
     padding: 7px 10px 7px 10px;
     display: block;
     color: black;
-    min-width: 150px;
+    min-width: 140px;
 }
 
 .pending-message .msg-attachment-file,
