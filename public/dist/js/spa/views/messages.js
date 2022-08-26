@@ -905,8 +905,8 @@ function format_attachment(attachments) {
             `
                 <div class="msg-attachment-progress"><div></div></div>
                 <a class="msg-attachment-file" href="${x.url || x.src_url}" download="${x.ext ? (x.name + '.' + x.ext) : x.name}" ${x.url ? `data-url="${x.url}"` : ''}>
-                    <div style="word-break: break-all; font-size: 13.8px;">${x.ext ? (x.name + '.' + x.ext) : x.name}</div>
-                    <div style="color: grey; margin-top: 2.6px; font-size: 11px;">${x.size ? filesize(x.size) : '∞'}</div>
+                    <div style="word-break: break-all;">${x.ext ? (x.name + '.' + x.ext) : x.name}</div>
+                    <div style="color: grey; margin-top: 2.8px; font-size: 11px;">${x.size ? filesize(x.size) : '∞'}</div>
                 </a>
             `)
         + `</div>`;
