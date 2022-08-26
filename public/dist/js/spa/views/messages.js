@@ -932,7 +932,7 @@ function filesize(bytes, si = false, dp = 1) {
 
 function format_message(m, lm = {}) {
     return m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
-        <div class="message${client.id !== m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${m.deleted ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
+        <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${m.deleted ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
             <div class="message-profile-img">
                 <img src="/uploads/users/${m.user}/profile.png" onclick="$.fn.chat_show_profile('${m.user}');">
             </div>
