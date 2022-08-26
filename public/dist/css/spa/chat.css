@@ -98,15 +98,13 @@
 }
 
 .message-profile-img {
-	width: 40px;
-	height: 40px;
+	width: 35px;
+	height: 35px;
 	position: relative;
 	float: left;
     margin-right: 10px;
-}
-
-.message-profile-img img {
     border-radius: 50%;
+    overflow: hidden;
 }
 
 .message-content {
@@ -233,6 +231,11 @@
 .message {
 	display: flex;
 	flex-direction: row;
+    margin-top: 10px;
+}
+
+.message.stack-message {
+    margin-top: 2px;
 }
 
 .outgoing {
@@ -455,7 +458,7 @@
     height: fit-content;
 }
 
-.msg-attachment {
+.msg-attachment:not(:last-child) {
     margin-bottom: 4px;
 }
 
@@ -498,7 +501,7 @@
     padding: 7px 10px 7px 10px;
     display: block;
     color: black;
-    min-width: 140px;
+    min-width: 100px;
 }
 
 .pending-message .msg-attachment-file,

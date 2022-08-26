@@ -932,14 +932,14 @@ function filesize(bytes, si = false, dp = 1) {
 
 function format_message(m, lm = {}) {
     return m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
-        <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${m.deleted ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
+        <div class="message${client.id !== m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${m.deleted ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
             <div class="message-profile-img">
                 <img src="/uploads/users/${m.user}/profile.png" onclick="$.fn.chat_show_profile('${m.user}');">
             </div>
             <div class="message-content">
                 ${!m.deleted ? `
                     ${format_attachment(m.attachments)}
-                    ${m.message ? '<p>' + m.message.replace(/[&<>]/g, (t) => ttr[t] || t) + '</p>' : ''}
+                    ${m.message ? `<p ${m.attachments && m.attachments.length ? 'style=\"margin-top: 5px;\"' : ''}>` + m.message.replace(/[&<>]/g, (t) => ttr[t] || t) + '</p>' : ''}
                 ` : `<p><i>This message was deleted</i>`}
             </div>
         </div>
@@ -967,11 +967,12 @@ function load_more_messages_up() {
                 }
                 message_time(html, (_html) => {
                     _html = $(_html);
-                    let llm = _html.filter(':last-child'),
-                        llmt = llm.data('time'),
-                        plmt = $('.message:first-child').data('time');
-                    if (llmt && plmt && Math.abs(parseInt(llmt) - parseInt(plmt)) < 7 * 60 * 1000)
-                        llm.find('.message-foot').hide();
+                    let last_message = _html.filter(':last-child'),
+                        last_message_time = last_message.data('time'),
+                        previous_first_message = $('.message:first-child'),
+                        previous_first_message_time = previous_first_message.data('time');
+                    if (last_message_time && previous_first_message_time && Math.abs(parseInt(last_message_time) - parseInt(previous_first_message_time)) < 7 * 60 * 1000) last_message.find('.message-foot').hide();
+                    if (!last_message.hasClass('outgoing') && !previous_first_message.hasClass('outgoing')) previous_first_message.addClass('stack-message');
                     if ($('#mod-selected-messages').length) {
                         _html.each((index, value) => {
                             let msg = $(value);
@@ -1017,14 +1018,15 @@ function load_more_messages_down() {
                 }
                 message_time(html, (_html) => {
                     _html = $(_html);
-                    let llm = _html.filter(':first-child'),
-                        llmt = llm.data('time'),
-                        plm = $('.message:last-child'),
-                        plmt = plm.data('time');
-                    if (llmt && plmt && Math.abs(parseInt(plmt) - parseInt(llmt)) < 7 * 60 * 1000) {
-                        llm.find('.message-foot').hide();
-                        plm.find('.message-foot').hide();
+                    let first_message = _html.filter(':first-child'),
+                        first_message_time = first_message.data('time'),
+                        previous_last_message = $('.message:last-child'),
+                        previous_last_message_time = previous_last_message.data('time');
+                    if (first_message_time && previous_last_message_time && Math.abs(parseInt(previous_last_message_time) - parseInt(first_message_time)) < 7 * 60 * 1000) {
+                        first_message.find('.message-foot').hide();
+                        previous_last_message.find('.message-foot').hide();
                     }
+                    if (!first_message.hasClass('outgoing') && !previous_last_message.hasClass('outgoing')) first_message.addClass('stack-message');
                     if ($('#mod-selected-messages').length) {
                         _html.each((index, value) => {
                             let msg = $(value);
