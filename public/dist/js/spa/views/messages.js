@@ -745,6 +745,7 @@ function join_room(response) {
             if (mm) $('.load-more-messages-up').show();
             $(`._people[data-id="${id}"]`).css('background-color', '');
             nanobar.go(100);
+            format_link_embed();
         }
     }
 }
@@ -906,7 +907,7 @@ function format_attachment(attachments) {
                 <div class="msg-attachment-progress"><div></div></div>
                 <a class="msg-attachment-file" href="${x.url || x.src_url}" download="${x.ext ? (x.name + '.' + x.ext) : x.name}" ${x.url ? `data-url="${x.url}"` : ''}>
                     <div style="word-break: break-all;">${x.ext ? (x.name + '.' + x.ext) : x.name}</div>
-                    <div style="color: grey; margin-top: 2.8px; font-size: 11px;">${x.size ? filesize(x.size) : '∞'}</div>
+                    <div style="color: grey; margin-top: 1px; font-size: 11px;">${x.size ? filesize(x.size) : '∞'}</div>
                 </a>
             `)
         + `</div>`;
@@ -939,7 +940,9 @@ function format_message(m, lm = {}) {
             <div class="message-content">
                 ${!m.deleted ? `
                     ${format_attachment(m.attachments)}
-                    ${m.message ? `<p ${m.attachments && m.attachments.length ? 'style=\"margin-top: 5px;\"' : ''}>` + m.message.replace(/[&<>]/g, (t) => ttr[t] || t) + '</p>' : ''}
+                    ${m.message ? `<p style="${m.message.match(emoji_regex) ? 'background-color: unset; padding-left: unset; padding-right: unset; font-size: 45px; line-height: 1;' : ''}${m.attachments && m.attachments.length ? 'margin-top: 5px;' : ''}">` + 
+                        linkify(m.message.replace(/[&<>]/g, (t) => ttr[t] || t))
+                    + '</p>' : ''}
                 ` : `<p><i>This message was deleted</i>`}
             </div>
         </div>
@@ -992,6 +995,7 @@ function load_more_messages_up() {
                 }, {});
             } else $('.load-more-messages-up .spinner').hide();
             if (!mm) $('.load-more-messages-up').hide();
+            format_link_embed();
         }
     });
 }
@@ -1057,4 +1061,25 @@ function load_more_messages_down() {
             }
         }
     });
+}
+
+function format_link_embed() {
+    $('.message-content > p a[data-linkify="link"]:not([data-embeded]):not([data-embeding])').each((index, value) => {
+        let that = $(value);
+        that.attr('data-embeding', true);
+
+    });
+}
+
+function linkify(input_text) {
+    let replaced_text,
+        replace_pattern_1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim,
+        replace_pattern_2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim,
+        replace_pattern_3 = /(([a-zA-Z0-9\-\_\.])+@[a-zA-Z\_]+?(\.[a-zA-Z]{2,6})+)/gim;
+
+    replaced_text = input_text.replace(replace_pattern_1, '<a href="$1" target="_blank" data-linkify="link">$1</a>');
+    replaced_text = replaced_text.replace(replace_pattern_2, '$1<a href="http://$2" target="_blank" data-linkify="link">$2</a>');
+    replaced_text = replaced_text.replace(replace_pattern_3, '<a href="mailto:$1" data-linkify="mail">$1</a>');
+
+    return replaced_text;
 }

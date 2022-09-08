@@ -12,7 +12,8 @@ const router = require('express').Router(),
     notifications = require('./notifications'),
     mail = require('./mail'),
     upload = require('./upload'),
-    game_room = require('./game_room');
+    game_room = require('./game_room'),
+    helper = require('./helper');
 
 
 module.exports = (client) => {
@@ -33,6 +34,7 @@ module.exports = (client) => {
     router.use('/mail', mail(client));
     router.use('/upload', upload(client));
     router.use('/game-room', game_room(client));
+    router.use('/helper', helper(client));
 
     router.get('/spa', async (req, res) => {
         if (req.user) {

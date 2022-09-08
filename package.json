@@ -25,6 +25,7 @@
     "humanize-duration": "^3.27.2",
     "ioredis": "^5.2.0",
     "mailgun-js": "^0.22.0",
+    "metadata-scraper": "^0.2.59",
     "mongodb": "^4.7.0",
     "mongoose": "^6.4.4",
     "multer": "^1.4.5-lts.1",

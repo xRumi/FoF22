@@ -120,13 +120,12 @@
 	background: #efefef none repeat scroll 0 0;
 	border-radius: 8px;
 	font-size: 14px;
-	padding: 7px 8.5px;
+	padding: 8px 9px;
 	width: fit-content;
-	word-break: break-all;
+	word-break: break-word;
     clear: both;
     height: auto;
-    min-width: 35px;
-    text-align: center;
+    min-width: 15px;
 }
 
 .message-foot {
@@ -496,9 +495,9 @@
 }
 
 .msg-attachment-file {
-    border: solid 1px grey;
+    border: solid 1px lightgrey;
     border-radius: 5px;
-    padding: 7px 10px 7px 10px;
+    padding: 6px 10px;
     display: block;
     color: black;
     min-width: 100px;
