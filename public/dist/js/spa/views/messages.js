@@ -343,7 +343,9 @@ export default class extends Constructor {
                 <div id="${_id}" class="message outgoing pending-message" data-username="${client.username}">
                     <div class="message-content">
                         ${format_attachment(attachments)}
-                        ${_message ? '<p>' + _message.replace(/[&<>]/g, (t) => ttr[t] || t) + '</p>' : ''}
+                        ${_message ? '<p>' +
+                            linkify(_message.replace(/[&<>]/g, (t) => ttr[t] || t))
+                        + '</p>' : ''}
                     </div>
                     <div class="message-error"></div>
                 </div>
@@ -390,6 +392,7 @@ export default class extends Constructor {
                                 `);
                             }
                             $('.message.outgoing:not(:last-child) .message-foot .message-seen').remove();
+                            format_url_embed();
                         }
                     }
                 });
@@ -745,7 +748,7 @@ function join_room(response) {
             if (mm) $('.load-more-messages-up').show();
             $(`._people[data-id="${id}"]`).css('background-color', '');
             nanobar.go(100);
-            format_link_embed();
+            format_url_embed();
         }
     }
 }
@@ -995,7 +998,7 @@ function load_more_messages_up() {
                 }, {});
             } else $('.load-more-messages-up .spinner').hide();
             if (!mm) $('.load-more-messages-up').hide();
-            format_link_embed();
+            format_url_embed();
         }
     });
 }
@@ -1063,13 +1066,98 @@ function load_more_messages_down() {
     });
 }
 
-function format_link_embed() {
-    $('.message-content > p a[data-linkify="link"]:not([data-embeded]):not([data-embeding])').each((index, value) => {
-        let that = $(value);
+function format_url_embed() {
+    let urls = [],
+        as = $('.message-content > p a[data-linkify="link"]:not([data-embedded]):not([data-embeding])');
+    for (let i = 0; i < as.length; i++) {
+        let that = $(as.get(i));
         that.attr('data-embeding', true);
-
+        urls.push({
+            that,
+            url: that.attr('href'),
+            id: Math.random().toString(36).substring(2, 15),
+        });
+    }
+    if (urls.length) $.ajax({
+        type: 'POST',
+        url: `/helper/metadata-scraper`,
+        data: {
+            urls: urls.filter((value, index, self) => self.findIndex(x => (x.url == value.url)) == index).map(x => ({
+                url: x.url,
+                id: x.id
+            })),
+        },
+        timeout: 30000,
+        success: function(_result, textStatus, xhr) {
+            if (Array.isArray(_result) && _result.length) {
+                for (let i = 0; i < _result.length; i++) {
+                    let url = urls.find(x => x.id == _result[i].id);
+                    if (url) {
+                        if (!_result[i].result) {
+                            url.that.attr('data-embedded', true);
+                            url.that.removeAttr('data-embeding');
+                            break;
+                        }
+                        let result = _result[i].result,
+                            that = url.that,
+                            message_content = that.parent().parent(),
+                            message_foot = message_content.find('.message-foot');
+                        if (result.icon && result.icon.startsWith('/')) {
+                            result.icon = null;
+                            /*
+                            let icon_url = new URL(result.url || url.url);
+                            result.icon = `${icon_url.protocal ? (icon_url.protocal + `//`) : ''}${icon_url.hostname}${icon_url.pathname}${result.icon.split('/').slice(1).join('/')}`;
+                            */
+                        }
+                        let html = `<div class=\"message-embed\" style=\"border-left: solid 2px ${result.color || random_color()};\">`;
+                        if (result.title || result.icon) {
+                            html += `<div class=\"msg-embed-head\">`;
+                            if (result.icon) html += `<div class="msg-embed-icon"> <img src="${result.icon}" /></div>`;
+                            if (result.title) {
+                                html += `<div class="msg-embed-title">`;
+                                if (result.url) html += `<a class="msg-embed-url" href="${result.url}">${result.title || 'No Title'}</a>`;
+                                else html += result.title || 'No Title';
+                                html += `</div>`;
+                            }
+                            html += '</div>';
+                        }
+                        if (result.description || result.image) {
+                            html += `<div class="msg-embed-body" ${result.title || result.icon ? `style=\"margin-top: 5px;\"` : ''}>`;
+                            if (result.description) html += `<div class="msg-embed-description">${result.description}</div>`;
+                            if (result.image) html += `<img class="msg-embed-image" src="${result.image}" />`
+                            html += `</div>`;
+                        }
+                        html += '</div>';
+                        that.attr('data-embedded', true);
+                        that.removeAttr('data-embeding');
+                        if (message_foot.length) $(html).insertBefore(message_foot);
+                        else message_content.append(html);
+                    }
+                }
+            }
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            for (let i = 0; i < urls.length; i++)
+                urls[i].that.removeAttr('data-embeding');
+        },
     });
 }
+/*
+<div class="message-embed">
+    <div class="msg-embed-head">
+            <img class="msg-embed-icon" src="https://www.youtube.com/s/desktop/4521f1ab/img/favicon_144x144.png" />
+        <div class="msg-embed-title">
+            <a class="msg-embed-url" href="#">FoF22</a>
+        </div>
+    </div>
+    <div class="msg-embed-body">
+        <div class="msg-embed-description">
+            https://fof22.me/ is Friends of Friends 2022. Welcome to FoF22. You can semd message, receive them, play games and many other things.
+        </div>
+        <img class="msg-embed-image" src="https://i.ytimg.com/vi/vRXZj0DzXIA/maxresdefault.jpg" />
+    </div>
+</div>
+*/
 
 function linkify(input_text) {
     let replaced_text,
@@ -1083,3 +1171,11 @@ function linkify(input_text) {
 
     return replaced_text;
 }
+
+function random_color() {
+    let letters = '0123456789ABCDEF',
+        color = '#';
+    for (var i = 0; i < 6; i++) color += letters[Math.floor(Math.random() * 16)];
+    return color;
+}
+

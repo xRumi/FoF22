@@ -114,7 +114,7 @@
 	max-width: 88%;
 }
 
-.message-content p {
+.message-content > p {
 	float: left;
 	margin: 0;
 	background: #efefef none repeat scroll 0 0;
@@ -122,10 +122,15 @@
 	font-size: 14px;
 	padding: 8px 9px;
 	width: fit-content;
-	word-break: break-word;
+	word-break: break-all;
     clear: both;
     height: auto;
     min-width: 15px;
+}
+
+.message-content > p > a {
+    text-decoration: underline;
+    color: unset;
 }
 
 .message-foot {
@@ -140,7 +145,7 @@
 	float: right;
 }
 
-.outgoing .message-content p {
+.outgoing .message-content > p {
 	margin-left: 0;
 	float: right;
 	background: #007bff none repeat scroll 0 0;
@@ -529,4 +534,45 @@
     border: solid 2px;
     border-radius: 10px;
     opacity: 1;
+}
+
+.message.outgoing .message-embed {
+    float: right;
+}
+
+.message-embed {
+    clear: both;
+    border: solid 1px darkgray;
+    padding: 10px;
+    margin-top: 3px;
+}
+
+.msg-embed-head {
+    display: flex;
+    align-items: center;
+}
+
+.msg-embed-icon {
+    width: 25px;
+    height: 25px;
+    margin-right: 10px;
+}
+
+.msg-embed-title {
+    font-size: 14px;
+    word-break: break-all;
+    font-weight: 600;
+}
+
+.msg-embed-body > *:not(:first-child) {
+    margin-top: 5px;
+}
+
+.msg-embed-description {
+}
+
+.msg-embed-image {
+    max-width: 90%;
+    max-height: 200px;
+    text-align: center;
 }
