@@ -543,8 +543,14 @@
 .message-embed {
     clear: both;
     border: solid 1px darkgray;
-    padding: 10px;
+    padding: 8px 6px 6px 8px;
     margin-top: 3px;
+}
+
+@media screen and (max-width: 768px) {
+    .message-embed {
+        max-width: unset !important;
+    }
 }
 
 .msg-embed-head {
@@ -555,20 +561,17 @@
 .msg-embed-icon {
     width: 25px;
     height: 25px;
-    margin-right: 10px;
+    margin-right: 5px;
 }
 
 .msg-embed-title {
-    font-size: 14px;
+    font-size: 12px;
     word-break: break-all;
     font-weight: 600;
 }
 
 .msg-embed-body > *:not(:first-child) {
     margin-top: 5px;
-}
-
-.msg-embed-description {
 }
 
 .msg-embed-image {

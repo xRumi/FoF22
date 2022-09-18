@@ -1078,11 +1078,34 @@ function format_url_embed() {
             id: Math.random().toString(36).substring(2, 15),
         });
     }
+    if (urls.length) {
+        urls = urls.filter((value, index, self) => self.findIndex(x => (x.url == value.url)) == index).map(x => ({
+            url: x.url,
+            id: x.id,
+            that: x.that
+        }));
+        let _result = [], _urls = [];
+        for (let i = 0; i < urls.length; i++) {
+            let metadata_scraper_cached = localStorage["metadata-scraper:" + urls[i].url];
+            if (metadata_scraper_cached) {
+                let url = urls[i];
+                _result.push({
+                    url: url.url,
+                    id: url.id,
+                    result: JSON.parse(metadata_scraper_cached)
+                });
+                _urls.push(url);
+                urls[i] = null;
+            }
+        }
+        if (_urls.length) _format_url_embed(_urls, _result);
+    }
+    if (urls.length) urls = urls.filter(x => x);
     if (urls.length) $.ajax({
         type: 'POST',
         url: `/helper/metadata-scraper`,
         data: {
-            urls: urls.filter((value, index, self) => self.findIndex(x => (x.url == value.url)) == index).map(x => ({
+            urls: urls.map(x => ({
                 url: x.url,
                 id: x.id
             })),
@@ -1090,50 +1113,8 @@ function format_url_embed() {
         timeout: 30000,
         success: function(_result, textStatus, xhr) {
             if (Array.isArray(_result) && _result.length) {
-                for (let i = 0; i < _result.length; i++) {
-                    let url = urls.find(x => x.id == _result[i].id);
-                    if (url) {
-                        if (!_result[i].result) {
-                            url.that.attr('data-embedded', true);
-                            url.that.removeAttr('data-embeding');
-                            break;
-                        }
-                        let result = _result[i].result,
-                            that = url.that,
-                            message_content = that.parent().parent(),
-                            message_foot = message_content.find('.message-foot');
-                        if (result.icon && result.icon.startsWith('/')) {
-                            result.icon = null;
-                            /*
-                            let icon_url = new URL(result.url || url.url);
-                            result.icon = `${icon_url.protocal ? (icon_url.protocal + `//`) : ''}${icon_url.hostname}${icon_url.pathname}${result.icon.split('/').slice(1).join('/')}`;
-                            */
-                        }
-                        let html = `<div class=\"message-embed\" style=\"border-left: solid 2px ${result.color || random_color()};\">`;
-                        if (result.title || result.icon) {
-                            html += `<div class=\"msg-embed-head\">`;
-                            if (result.icon) html += `<div class="msg-embed-icon"> <img src="${result.icon}" /></div>`;
-                            if (result.title) {
-                                html += `<div class="msg-embed-title">`;
-                                if (result.url) html += `<a class="msg-embed-url" href="${result.url}">${result.title || 'No Title'}</a>`;
-                                else html += result.title || 'No Title';
-                                html += `</div>`;
-                            }
-                            html += '</div>';
-                        }
-                        if (result.description || result.image) {
-                            html += `<div class="msg-embed-body" ${result.title || result.icon ? `style=\"margin-top: 5px;\"` : ''}>`;
-                            if (result.description) html += `<div class="msg-embed-description">${result.description}</div>`;
-                            if (result.image) html += `<img class="msg-embed-image" src="${result.image}" />`
-                            html += `</div>`;
-                        }
-                        html += '</div>';
-                        that.attr('data-embedded', true);
-                        that.removeAttr('data-embeding');
-                        if (message_foot.length) $(html).insertBefore(message_foot);
-                        else message_content.append(html);
-                    }
-                }
+                for (let i = 0; i < _result.length; i++) localStorage["metadata-scraper:" + _result[i].url] = JSON.stringify(_result[i].result);
+                _format_url_embed(urls, _result);
             }
         },
         error: function(xhr, textStatus, errorThrown) {
@@ -1158,6 +1139,53 @@ function format_url_embed() {
     </div>
 </div>
 */
+function _format_url_embed(urls, _result) {
+    for (let i = 0; i < _result.length; i++) {
+        let url = urls.find(x => x.id == _result[i].id);
+        if (url) {
+            if (!_result[i].result) {
+                url.that.attr('data-embedded', true);
+                url.that.removeAttr('data-embeding');
+                break;
+            }
+            let result = _result[i].result,
+                that = url.that,
+                message_content = that.parent().parent(),
+                message_foot = message_content.find('.message-foot'),
+                message_content_p_width = message_content.find('p').width();
+            if (result.icon && result.icon.startsWith('/')) {
+                result.icon = null;
+                /*
+                let icon_url = new URL(result.url || url.url);
+                result.icon = `${icon_url.protocal ? (icon_url.protocal + `//`) : ''}${icon_url.hostname}${icon_url.pathname}${result.icon.split('/').slice(1).join('/')}`;
+                */
+            }
+            let html = `<div class=\"message-embed\" style=\"border-left: solid 3px ${result.color || random_color()}; width: fit-content; max-width: ${message_content_p_width ? (message_content_p_width + 17) + 'px' : 'unset'};\">`;
+            if (result.title || result.icon) {
+                html += `<div class=\"msg-embed-head\">`;
+                if (result.icon) html += `<div class="msg-embed-icon"><img src="${result.icon}" /></div>`;
+                if (result.title) {
+                    html += `<div class="msg-embed-title">`;
+                    if (result.url) html += `<a class="msg-embed-url" href="${result.url}">${result.title || 'No Title'}</a>`;
+                    else html += result.title || 'No Title';
+                    html += `</div>`;
+                }
+                html += '</div>';
+            }
+            if (result.description || result.image) {
+                html += `<div class="msg-embed-body" ${result.title || result.icon ? `style=\"margin-top: 5px;\"` : ''}>`;
+                if (result.description) html += `<div class="msg-embed-description">${result.description}</div>`;
+                if (result.image) html += `<img class="msg-embed-image" src="${result.image}" />`
+                html += `</div>`;
+            }
+            html += '</div>';
+            that.attr('data-embedded', true);
+            that.removeAttr('data-embeding');
+            if (message_foot.length) $(html).insertBefore(message_foot);
+            else message_content.append(html);
+        }
+    }
+}
 
 function linkify(input_text) {
     let replaced_text,
