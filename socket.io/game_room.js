@@ -58,8 +58,8 @@ module.exports = (io, client, socket) => {
                 game_room.messages.push({
                     message: `User ${user.username} joined the game!`,
                 });
-                game.mark_modified(`rooms[${_game_room}]`);
-                await game.save();
+                game_room.mark_modified(`rooms[${_game_room}]`);
+                await game_room.save();
             }
             if (socket.game_room_id !== game_room.id) {
                 socket.leave(socket.game_room_id);
@@ -162,7 +162,7 @@ module.exports = (io, client, socket) => {
                 time: Date.now(),
             }
             game_room.messages.push(chat_data);
-            game_room.mark_modified(`messages[${game.messages.length - 1}]`);
+            game_room.mark_modified(`messages[${game_room.messages.length - 1}]`);
             await game_room.save();
             callback({ error: false, user: user.id, id: game_room.id, chat: chat_data, _id });
         }
