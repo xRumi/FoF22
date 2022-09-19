@@ -47,7 +47,7 @@ module.exports = (io, client, socket) => {
             let game_room = await client.database.functions.get_game_room(id);
             if (!game_room) return callback({ error: 'Room not found, deleted or is temporarily unavailable' });
             if (!game_room.players.includes(user.id)) {
-            if (game_room.players.length >= _game.player_limit) return callback({ error: `Room is full` });
+                if (game_room.players.length >= game_room.player_limit) return callback({ error: `Room is full` });
                 game_room.players.push(user.id);
                 game_room.leaderboard.push({
                     user: user.id,
