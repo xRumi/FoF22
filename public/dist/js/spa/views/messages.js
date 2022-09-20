@@ -343,7 +343,7 @@ export default class extends Constructor {
                 <div id="${_id}" class="message outgoing pending-message" data-username="${client.username}">
                     <div class="message-content">
                         ${format_attachment(attachments)}
-                        ${_message ? '<p>' +
+                        ${_message ? `<p style="${(_message.match(emoji_regex) || []).length == 1 ? 'background-color: unset; padding-left: unset; padding-right: unset; font-size: 45px; line-height: 1;' : ''}${attachments && attachments.length ? 'margin-top: 5px;' : ''}">` + 
                             linkify(_message.replace(/[&<>]/g, (t) => ttr[t] || t))
                         + '</p>' : ''}
                     </div>
@@ -354,7 +354,6 @@ export default class extends Constructor {
                 $(`#${_id} .message-content`).show();
                 do_send_message();
             });
-
             let _attachments = attachments.filter(x => x.file).map(x => Object.assign({}, x));
             for (let i = 0; i < _attachments.length; i++) {
                 let _a = _attachments[i];
@@ -935,6 +934,7 @@ function filesize(bytes, si = false, dp = 1) {
 }
 
 function format_message(m, lm = {}) {
+    if (m.message) m.message = m.message.trim();
     return m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
         <div class="message${client.id == m.user ? ' outgoing' : lm.user == m.user ? ' stack-message' : ''}${m.deleted ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
             <div class="message-profile-img">
@@ -943,7 +943,7 @@ function format_message(m, lm = {}) {
             <div class="message-content">
                 ${!m.deleted ? `
                     ${format_attachment(m.attachments)}
-                    ${m.message ? `<p style="${m.message.match(emoji_regex) ? 'background-color: unset; padding-left: unset; padding-right: unset; font-size: 45px; line-height: 1;' : ''}${m.attachments && m.attachments.length ? 'margin-top: 5px;' : ''}">` + 
+                    ${m.message ? `<p style="${(m.message.match(emoji_regex) || []).length == 1 ? 'background-color: unset; padding-left: unset; padding-right: unset; font-size: 45px; line-height: 1;' : ''}${m.attachments && m.attachments.length ? 'margin-top: 5px;' : ''}">` + 
                         linkify(m.message.replace(/[&<>]/g, (t) => ttr[t] || t))
                     + '</p>' : ''}
                 ` : `<p><i>This message was deleted</i>`}

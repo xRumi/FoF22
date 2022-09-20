@@ -398,12 +398,8 @@
     border-bottom: solid 1px lightgray;
 }
 
-.pending-message > .message-content > .msg-attachments > .msg-attachment {
+.pending-message > .message-content > p, .pending-message > .msg-attachment {
     opacity: 0.5;
-}
-
-.pending-message > .message-content > p {
-    background-color: lightblue;
 }
 
 .message-foot button {
