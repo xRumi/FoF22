@@ -343,7 +343,7 @@ export default class extends Constructor {
                 <div id="${_id}" class="message outgoing pending-message" data-username="${client.username}">
                     <div class="message-content">
                         ${format_attachment(attachments)}
-                        ${_message ? `<p style="${(_message.match(emoji_regex) || []).length == 1 ? 'background-color: unset; padding-left: unset; padding-right: unset; font-size: 45px; line-height: 1;' : ''}${attachments && attachments.length ? 'margin-top: 5px;' : ''}">` + 
+                        ${_message ? `<p style="${(_message.match(emoji_regex) || []).length == 1 && (_message == '❤️' || !_message.replace(emoji_regex, '').length) ? 'background-color: unset; padding-left: unset; padding-right: unset; font-size: 45px; line-height: 1;' : ''}${attachments && attachments.length ? 'margin-top: 5px;' : ''}">` + 
                             linkify(_message.replace(/[&<>]/g, (t) => ttr[t] || t))
                         + '</p>' : ''}
                     </div>
@@ -943,7 +943,7 @@ function format_message(m, lm = {}) {
             <div class="message-content">
                 ${!m.deleted ? `
                     ${format_attachment(m.attachments)}
-                    ${m.message ? `<p style="${(m.message.match(emoji_regex) || []).length == 1 ? 'background-color: unset; padding-left: unset; padding-right: unset; font-size: 45px; line-height: 1;' : ''}${m.attachments && m.attachments.length ? 'margin-top: 5px;' : ''}">` + 
+                    ${m.message ? `<p style="${(m.message.match(emoji_regex) || []).length == 1 && (m.message == '❤️' || !m.message.replace(emoji_regex, '').length) ? 'background-color: unset; padding-left: unset; padding-right: unset; font-size: 45px; line-height: 1;' : ''}${m.attachments && m.attachments.length ? 'margin-top: 5px;' : ''}">` + 
                         linkify(m.message.replace(/[&<>]/g, (t) => ttr[t] || t))
                     + '</p>' : ''}
                 ` : `<p><i>This message was deleted</i>`}
