@@ -12,24 +12,53 @@ module.exports = (io, client) => {
         if (user) {
             socket.join(user.id);
             socket.user_id = user.id;
+            let presence_ack_interval;
             if (user.hide_presence) {
                 if (user.presence.status !== 'offline') {
                     client.redis.call('JSON.SET', `user:${user.id}`, `$.presence.status`, '"offline"');
-                    io.to(user.room.map(x => x.id)).emit('member-presence-update', { id: user.id, username: user.username, name: user.name, status: 'offline', date: Date.now() });
+                    io.to(user.rooms.map(x => x.id)).emit('member-presence-update', { id: user.id, username: user.username, name: user.name, status: 'offline', date: Date.now() });
                 }
             } else {
                 if (user.presence.status !== 'online') {
                     client.redis.call('JSON.SET', `user:${user.id}`, '$.presence', `{"status":"online","date":${Date.now()}}`);
                     io.to(user.rooms.map(x => x.id)).emit('member-presence-update', { id: user.id, username: user.username, name: user.name, status: 'online', date: Date.now() });
+                    presence_ack_interval = setInterval(async () => {
+                        user = await client.database.functions.get_user(socket.request.session?.passport?.user);
+                        if (user.hide_presence) {
+                            if (user.presence.status !== 'offline') {
+                                user.presence.status = 'offline';
+                                client.redis.call('JSON.SET', `user:${user.id}`, `$.presence.status`, '"offline"');
+                                io.to(user.rooms.map(x => x.id)).emit('member-presence-update', { id: user.id, username: user.username, name: user.name, status: 'offline', date: Date.now() });
+                            }
+                        } else {
+                            let presence_ack_timeout = setTimeout(() => {
+                                if (user.presence.status !== 'offline') {
+                                    user.presence.status = 'offline';
+                                    client.redis.call('JSON.SET', `user:${user.id}`, `$.presence.status`, '"offline"');
+                                    io.to(user.rooms.map(x => x.id)).emit('member-presence-update', { id: user.id, username: user.username, name: user.name, status: 'offline', date: Date.now() });
+                                }
+                            }, 20 * 1000);
+                            socket.emit('member-presence-ack', callback => {
+                                clearTimeout(presence_ack_timeout);
+                                if (user.presence.status !== 'online') {
+                                    user.presence.status = 'online';
+                                    client.redis.call('JSON.SET', `user:${user.id}`, '$.presence', `{"status":"online","date":${Date.now()}}`);
+                                    io.to(user.rooms.map(x => x.id)).emit('member-presence-update', { id: user.id, username: user.username, name: user.name, status: 'online', date: Date.now() });
+                                }
+                            });
+                        }
+                    }, 5 * 60 * 1000);
                 }
             }
             socket.on('disconnect', async () => {
                 if (!io.sockets.adapter.rooms.has(user.id)) {
                     if (user.presence.type !== 'online') {
+                        user.presence.status = 'offline';
                         client.redis.call('JSON.SET', `user:${user.id}`, '$.presence', `{"status":"offline","date":${Date.now()}}`);
                         io.to(user.rooms.map(x => x.id)).emit('member-presence-update', { id: user.id, username: user.username, name: user.name, status: 'offline', date: Date.now() });
                     }
                 }
+                clearInterval(presence_ack_interval);
             });
             
             // messaging stuff start
@@ -56,7 +85,7 @@ module.exports = (io, client) => {
                             { name: name_regex }
                         ]
                     }).sort({ 'updated_at': -1, 'created_at': -1 }).limit(10) ]);
-            
+
                     if (names && names.length) result.names = names.map(x => {
                         let is_req_has_less_friends = user.friends.length < x.friends.length;
                         let mutual_friends = is_req_has_less_friends ? user.friends.filter(y => x.friends.includes(y)) : x.friends.filter(y => user.friends.includes(y));

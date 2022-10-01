@@ -64,6 +64,8 @@ const routes = [
     { path: "/spa/game-room/:id", view: Game_Room },
 ];
 
+let before_new_render, current_need_refresh;
+
 const router = async () => {
 
     $.fn._go_back = null;
@@ -94,6 +96,8 @@ const router = async () => {
     }
 
     const view = new match.route.view(get_params(match));
+
+    if (view.need_refresh) current_need_refresh = view.need_refresh;
 
     if (view.wait_for_socket) {
         if (is_first_time) {
@@ -188,3 +192,28 @@ jQuery.fn.shake = function(interval,distance,times){
    }
    return jTarget.animate({ left: 0},interval);
 }
+
+let hidden;
+let visibility_change;
+if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
+    hidden = "hidden";
+    visibility_change = "visibilitychange";
+} else if (typeof document.msHidden !== "undefined") {
+    hidden = "msHidden";
+    visibility_change = "msvisibilitychange";
+} else if (typeof document.webkitHidden !== "undefined") {
+    hidden = "webkitHidden";
+    visibility_change = "webkitvisibilitychange";
+}
+
+if (typeof document.addEventListener === "undefined" || hidden === undefined) {
+    console.log("Your browser does not support the Page Visibility API, fallback to native api");
+    window.onfocus = () => current_need_refresh();
+    let temp_timesteps = Date.now();
+    setInterval(() => {
+        if (Date.now() - temp_timesteps > 4000) current_need_refresh();
+        temp_timesteps = Date.now();
+    }, 3000);
+} else document.addEventListener(visibility_change, () => {
+    if (!document[hidden]) current_need_refresh();
+}, false);

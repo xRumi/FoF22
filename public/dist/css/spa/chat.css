@@ -180,10 +180,6 @@
 		display: none;
 	}
 
-	.chat-active.navbar {
-		display: none;
-	}
-
     ._people-name {
         width: 60%;
     }
@@ -252,20 +248,20 @@
 	visibility: hidden;
 }
 
-.load-more-messages-up {
+.message-load-more-up {
 	font-size: 15px;
 	cursor: pointer;
     padding: 10px;
-    border-bottom: solid 1px grey;
+    border-bottom: solid 1px lightgrey;
     color: #007fff;
 }
 
-.load-more-messages-down {
+.message-load-more-down {
 	font-size: 15px;
 	cursor: pointer;
     padding: 10px;
-    border-bottom: solid 1px grey;
-    border-top: solid 1px grey;
+    border-bottom: solid 1px lightgrey;
+    border-top: solid 1px lightgrey;
     color: #007fff;
 }
 
@@ -343,21 +339,25 @@
 }
 
 .messages-top {
-    border-bottom: solid 1px grey;
+    border-bottom: solid 1px lightgrey;
     padding: 10px;
     position: relative;
 }
 
-.messages-top-text {
+.messages-top-name {
     font-size: 14px;
+    font-weight: 600;
+}
+
+.messages-top-status {
+    font-size: 13px;
     color: grey;
-    display: inline;
 }
 
 .messages-top > i {
     float: right;
     font-size: 25px;
-    transform: translateY(-4px);
+    transform: translateY(-30px);
 }
 
 .messages-options {
@@ -366,7 +366,7 @@
     background-color: white;
     right: 0;
     margin-right: 10px;
-    margin-top: 5px;
+    margin-top: 2px;
     border: solid 1px lightgray;
     border-radius: 5px;
     display: none;
