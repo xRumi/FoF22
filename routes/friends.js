@@ -214,49 +214,79 @@ module.exports = (client) => {
                             user.friends.push(req.user.id);
                             let id0 = Math.random().toString(36).substring(2, 15),
                                 id1 = Math.random().toString(36).substring(2, 15);
-                            req.user.notifications.push({
-                                id: id0,
-                                user_id: user.id,
-                                title: `You are now friends with <b>${user.username}</b>, say Hi to your new friend!`,
-                                time: Date.now(),
-                                navigate_to: `/spa/profile/${user.id}`,
-                                unread: true,
-                                image: `/uploads/users/${user.id}/profile.png`,
-                            });
-                            user.notifications.push({
-                                id: id1,
-                                user_id: req.user.id,
-                                title: `You are now friends with <b>${req.user.username}</b>, say Hi to your new friend!`,
-                                time: Date.now(),
-                                navigate_to: `/spa/profile/${req.user.id}`,
-                                unread: true,
-                                image: `/uploads/users/${req.user.id}/profile.png`,
-                            });
+
+                            let similar_notification_0 = req.user.notifications.findIndex(x => x.user_id == user.id && x.type == 'friend_request'), move_to_top_0 = false;
+                            if (similar_notification_0 > -1) {
+                                let _similar_notification_0 = req.user.notifications[similar_notification_0];
+                                req.user.notifications.splice(similar_notification_0, 1);
+                                _similar_notification_0.time = Date.now();
+                                _similar_notification_0.title = 2;
+                                _similar_notification_0.unread = true;
+                                req.user.notifications.push(_similar_notification_0);
+                                req.user.mark_modified('notifications');
+                                move_to_top_0 = true;
+                            } else {
+                                req.user.notifications.push({
+                                    id: id0,
+                                    type: 'friend_request',
+                                    user_id: user.id,
+                                    title: 2,
+                                    time: Date.now(),
+                                    navigate_to: `/spa/profile/${user.id}`,
+                                    unread: true,
+                                    image: `/uploads/users/${user.id}/profile.png`,
+                                });
+                                req.user.mark_modified('notifications');
+                            }
+                            let similar_notification_1 = user.notifications.findIndex(x => x.user_id == req.user.id && x.type == 'friend_request'), move_to_top_1;
+                            if (similar_notification_1 > -1) {
+                                let _similar_notification_1 = user.notifications[similar_notification_1];
+                                user.notifications.splice(similar_notification_1, 1);
+                                _similar_notification_1.time = Date.now();
+                                _similar_notification_1.title = 2;
+                                _similar_notification_1.unread = true;
+                                user.notifications.push(_similar_notification_1);
+                                user.mark_modified('notifications');
+                                move_to_top_0 = true;
+                            } else {
+                                user.notifications.push({
+                                    id: id0,
+                                    type: 'friend_request',
+                                    user_id: user.id,
+                                    title: 2,
+                                    time: Date.now(),
+                                    navigate_to: `/spa/profile/${user.id}`,
+                                    unread: true,
+                                    image: `/uploads/users/${user.id}/profile.png`,
+                                });
+                                user.mark_modified('notifications');
+                            }
                             client.io.to(req.user.id).emit('unread', ({ notifications: {
                                 count: req.user.notifications.filter(x => x.unread).length,
                                 unread: [{
                                     id: id0,
                                     user_id: user.id,
                                     header: 'Friend Request Accepted',
-                                    title: `You are now friends with <b>${user.username}</b>, say Hi to your new friend!`,
+                                    title: client.parse(client.common_notification_texts[2], user.username),
                                     navigate_to: `/spa/profile/${user.id}`,
+                                    move_to_top: move_to_top_0
                                 }]
                             } }));
                             client.io.to(user.id).emit('unread', ({ notifications: {
                                 count: user.notifications.filter(x => x.unread).length,
                                 unread: [{
                                     id: id1,
+                                    type: 'friend_request',
                                     user_id: req.user.id,
                                     header: 'Friend Request Accepted',
-                                    title: `You are now friends with <b>${req.user.username}</b>, say Hi to your new friend!`,
+                                    title: client.parse(client.common_notification_texts[2], req.user.username),
                                     navigate_to: `/spa/profile/${user.id}`,
+                                    move_to_top: move_to_top_1
                                 }]
                             } }));
-                            user.mark_modified(`notifications[${user.notifications.length - 1}]`);
-                            req.user.mark_modified(`notifications[${req.user.notifications.length - 1}]`);
                             req.user.mark_modified(`friend_requests`);
-                            user.mark_modified(`friends[${user.friends.length - 1}]`);
-                            req.user.mark_modified(`friends[${req.user.friends.length - 1}]`);
+                            user.mark_modified(`friends`);
+                            req.user.mark_modified(`friends`);
                             await req.user.save();
                             await user.save();
                             res.sendStatus(200);
@@ -308,52 +338,81 @@ module.exports = (client) => {
                         user.friends.push(req.user.id);
                         let id0 = Math.random().toString(36).substring(2, 15),
                             id1 = Math.random().toString(36).substring(2, 15);
-                        req.user.notifications.push({
-                            id: id0,
-                            user_id: user.id,
-                            title: `You are now friends with <b>${user.username}</b>`,
-                            time: Date.now(),
-                            navigate_to: `/spa/profile/${user.id}`,
-                            image: `/uploads/users/${user.id}/profile.png`,
-                            unread: true
-                        });
-                        user.notifications.push({
-                            id: id1,
-                            user_id: req.user.id,
-                            title: `<b>${req.user.username}</b> has accepted your friend request, say Hi to your new friend`,
-                            time: Date.now(),
-                            navigate_to: `/spa/profile/${req.user.id}`,
-                            image: `/uploads/users/${req.user.id}/profile.png`,
-                            unread: true
-                        });
-                        /*
+
+                        let similar_notification_0 = req.user.notifications.findIndex(x => x.user_id == user.id && x.type == 'friend_request'), move_to_top_0;
+                        if (similar_notification_0 > -1) {
+                            let _similar_notification_0 = req.user.notifications[similar_notification_0];
+                            req.user.notifications.splice(similar_notification_0, 1);
+                            _similar_notification_0.time = Date.now();
+                            _similar_notification_0.title = 2;
+                            _similar_notification_0.unread = true;
+                            req.user.notifications.push(_similar_notification_0);
+                            req.user.mark_modified('notifications');
+                            move_to_top_0 = true;
+                        } else {
+                            req.user.notifications.push({
+                                id: id0,
+                                type: 'friend_request',
+                                user_id: user.id,
+                                title: 2,
+                                time: Date.now(),
+                                navigate_to: `/spa/profile/${user.id}`,
+                                unread: true,
+                                image: `/uploads/users/${user.id}/profile.png`,
+                            });
+                            req.user.mark_modified('notifications');
+                        }
+                        let similar_notification_1 = user.notifications.findIndex(x => x.user_id == req.user.id && x.type == 'friend_request'), move_to_top_1;
+                        if (similar_notification_1 > -1) {
+                            let _similar_notification_1 = user.notifications[similar_notification_1];
+                            user.notifications.splice(similar_notification_1, 1);
+                            _similar_notification_1.time = Date.now();
+                            _similar_notification_1.title = 1;
+                            _similar_notification_1.unread = true;
+                            user.notifications.push(_similar_notification_1);
+                            user.mark_modified('notifications');
+                        } else {
+                            user.notifications.push({
+                                id: id0,
+                                type: 'friend_request',
+                                user_id: req.user.id,
+                                title: 1,
+                                time: Date.now(),
+                                navigate_to: `/spa/profile/${req.user.id}`,
+                                unread: true,
+                                image: `/uploads/users/${req.user.id}/profile.png`,
+                            });
+                            user.mark_modified('notifications');
+                            move_to_top_1 = true;
+                        }
                         client.io.to(req.user.id).emit('unread', ({ notifications: {
                             count: req.user.notifications.filter(x => x.unread).length,
                             unread: [{
                                 id: id0,
                                 user_id: user.id,
                                 header: 'Friend Request Accepted',
-                                title: `You are now friends with <b>${user.username}</b>, say Hi to your new friend!`,
+                                title: client.parse(client.common_notification_texts[2], user.username),
                                 navigate_to: `/spa/profile/${user.id}`,
+                                move_to_top: move_to_top_0,
+                                no_alert: true
                             }]
                         } }));
-                        */
                         client.io.to(user.id).emit('unread', ({ notifications: {
                             count: user.notifications.filter(x => x.unread).length,
                             unread: [{
                                 id: id1,
+                                type: 'friend_request',
                                 user_id: req.user.id,
                                 header: 'Friend Request Accepted',
-                                title: `You are now friends with <b>${req.user.username}</b>, say Hi to your new friend!`,
+                                title: client.parse(client.common_notification_texts[1], req.user.username),
                                 navigate_to: `/spa/profile/${req.user.id}`,
+                                move_to_top: move_to_top_1
                             }]
                         } }));
-                        user.mark_modified(`notifications[${user.notifications.length - 1}]`);
-                        req.user.mark_modified(`notifications[${req.user.notifications.length - 1}]`);
                         req.user.mark_modified(`friend_requests`);
-                        user.mark_modified(`friends[${user.friends.length - 1}]`);
-                        req.user.mark_modified(`friends[${req.user.friends.length - 1}]`);
+                        req.user.mark_modified(`friends`);
                         user.mark_modified('friend_requests');
+                        user.mark_modified(`friends`);
                         await req.user.save();
                         await user.save();
                         res.sendStatus(200);

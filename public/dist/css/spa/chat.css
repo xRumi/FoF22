@@ -5,11 +5,36 @@
 }
 
 .chat .people {
-	width: 300px;
+	width: 310px;
 	float: left;
 	height: calc(100vh - 50px);
 	overflow: hidden;
 	box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
+
+.chat .messages {
+	width: calc(100% - 310px);
+	float: left;
+	height: calc(100vh - 50px);
+	overflow: auto;
+	display: none;
+}
+
+.chat .people-info {
+    display: none;
+    width: 310px;
+    float: left;
+    height: calc(100vh - 50px);
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
+
+@media (min-width: 1300px) {
+    .chat .people-info {
+        display: block;
+    }
+    .chat .messages {
+        width: calc(100% - 620px);
+    }
 }
 
 .people-header {
@@ -82,19 +107,10 @@
     float: left;
 }
 
-.chat .messages {
-	width: calc(100% - 300px);
-	float: right;
-	height: calc(100vh - 50px);
-	overflow: auto;
-	display: none;
-}
-
 .messages-list {
 	margin-top: 10px;
 	padding: 10px;
 	height: auto;
-	overflow: auto;
 }
 
 .message-profile-img {

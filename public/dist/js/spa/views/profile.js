@@ -22,6 +22,7 @@ export default class extends Constructor {
                     user_data = result;
                     _ajax0 = false;
                     document.title = user_data.name;
+                    $('.profile').attr('data-id', user_data.id);
                     $('.profile-header p').text(user_data.name);
                     $('.pc-user-cover').css('background-image', `uploads/users/${user_data.id}/cover.png`);
                     $('.pc-user-img img').attr('src', `/uploads/users/${user_data.id}/profile.png`);

@@ -194,6 +194,8 @@ export default class extends Constructor {
                         </form>
                     </div>
                 </div>
+                <div class="people-info">
+                </div>
             </div>
             <div class="profile-" style="display: none;"></div>
         `).on('click', '.bx-dots-vertical', e => {
@@ -857,10 +859,11 @@ function update_messages_top_text() {
         let member = room_data.members.find(x => x.id !== client.id);
         if (member) {
             $('.messages-top-name').text(member.name);
+            console.log(Date.now() - member.date)
             $('.messages-top-status').replaceWith(`
                 <div class="messages-top-status" style="${member.status == 'online' ? 'color: green;' : ''}">
-                    <span class="dot" style="background-color: ${member.status == 'online' ? 'green' : member.status == 'offline' ? 'grey' : member.status == 'idle' ? 'yellow' : 'red'}; margin-right: 1px;"></span>
-                    <span>${member.status == 'offline' && member.date && (Date.now() - member.date < 22 * 60 * 60 * 1000) ? `active ${humanizeDuration(Date.now() - member.date, { largest: 1, round: true, delimiter: ' ' })} ago` : (member.status ||'unknown')}</span>
+                    <span class="dot" style="background-color: ${member.status == 'online' ? 'green' : member.status == 'offline' ? 'grey' : member.status == 'idle' ? 'yellow' : 'grey'}; margin-right: 1px;"></span>
+                    <span style="letter-spacing: 0.8px;">${member.status == 'offline' && member.date && (Date.now() - member.date < 22 * 60 * 60 * 1000) ? `active ${Date.now() - member.date > 1000 ? humanizeDuration(Date.now() - member.date, { largest: 1, round: true, delimiter: ' ' }) : 'a moment' } ago` : (member.status || 'offline')}</span>
                 </div>
             `);
             $('.messages-top').show();

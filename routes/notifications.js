@@ -16,10 +16,25 @@ module.exports = (client) => {
                         });
                     }
                 }
+            } else {
+                let notifications = [];
+                for (let i = req.user.notifications.length; i--;) {
+                    let notification = req.user.notifications[i];
+                    if (!notification) break;
+                    if (!isNaN(notification.title) && notification.user_id) {
+                        let user = await client.database.functions.get_user(notification.user_id);
+                        notification.title = client.parse(client.common_notification_texts[notification.title], user.name);
+                    }
+                    notifications.push(notification);
+                }
+                res.status(200).send({ notifications, mm: false });
+            }
+            /*
             } else res.status(200).send({ 
                 notifications: req.user.notifications.slice(req.user.notifications.length - 10).reverse(),
                 mm: req.user.notifications.length - 10 > 0 ? true : false
             });
+            */
         } else res.status(403).send('forbidden');
     });
 

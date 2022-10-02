@@ -135,3 +135,16 @@ process.stdin.on('data', async data => {
         .then(console.log)
         .catch(console.log);
 });
+
+const common_notification_texts = {
+    1: 'Your friend request to <b>%s</b> was accepted, say Hi to your new friend!',
+    2: 'You are now friends with <b>%s</b>!'
+}
+
+client.common_notification_texts = common_notification_texts;
+
+client.parse = function (str) {
+    var args = [].slice.call(arguments, 1),
+        i = 0;
+    return str.replace(/%s/g, () => args[i++]);
+}

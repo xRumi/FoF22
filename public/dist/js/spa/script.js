@@ -94,12 +94,14 @@ socket.on('unread', unread => {
             if (unread[key].read) unread[key].read.forEach(m => $(`._people[data-id=${m}]`).removeClass('_people-unread'));
             if (unread[key].npr && !client.messages.npr) client.messages.npr;
         } else if (key == 'notifications') {
-            if (unread[key].unread) unread[key].unread.forEach(unread_info => _alert.render({
-                head: unread_info.header,
-                content: unread_info.title,
-                click_to_close: true,
-                delay: 5000
-            }));
+            if (unread[key].unread) unread[key].unread.forEach(unread_info => {
+                if (!unread_info.no_alert) _alert.render({
+                    head: unread_info.header,
+                    content: unread_info.title,
+                    click_to_close: true,
+                    delay: 5000
+                });
+            });
             if (unread[key].read) unread[key].read.forEach(x => $(`.notifications-item.nic-unread[data-id="${x}"]`).removeClass('nic-unread'));
         }
     });
