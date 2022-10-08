@@ -6,4 +6,4 @@ http.http
 public/uploads/*
 extensions/
 memos.json
-
+dump.rdp

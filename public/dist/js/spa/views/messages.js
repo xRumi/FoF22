@@ -54,7 +54,7 @@ const update_message_rooms = (new_message_rooms) => {
     if (new_message_rooms) old_message_rooms = new_message_rooms;
     if (old_message_rooms && old_message_rooms.length && Array.isArray(old_message_rooms)) $('.people-list').html(old_message_rooms.map(x => {
         return $(`
-            <div data-id="${x.id}" class="_people${client.messages.room_id == x.id ? ' _people-active' : ''}${x.unread ? ` _people-unread` : ''}">
+            <div data-id="${x.id}" class="_people${client.messages.room_id == x.id ? ' _people-active' : ''}${x.unread ? ` _people-unread` : ''}" data-last-message-id="${x.last_message_id}">
                 <div class="_people-img">
                     <img src="${x.image}">
                 </div>
@@ -194,7 +194,8 @@ export default class extends Constructor {
                         </form>
                     </div>
                 </div>
-                <div class="people-info">
+                <div class="people-info" style="padding: 20px;">
+                    some informations
                 </div>
             </div>
             <div class="profile-" style="display: none;"></div>
@@ -612,7 +613,7 @@ export default class extends Constructor {
     }
 }
 
-socket.on('receive-message', ({ id, chat, _id, pm }, callback) => {
+socket.on('message-receive', ({ id, chat, _id, pm }) => {
     if (client.messages.room_id == id) {
         let message = $(`#${_id}`);
         if (message.length) {
@@ -644,6 +645,7 @@ socket.on('receive-message', ({ id, chat, _id, pm }, callback) => {
             `<i class="bx bx-paperclip"></i> ` : ''}
             <span>${chat.message ? chat.message.replace(/[&<>]/g, (t) => ttr[t] || t) : ''}</span>` : '<i>This message was deleted</i>'}
         `);
+        $(`._people[data-id="${id}"]`).removeClass("_people-unread");
         format_url_embed();
     }
 });
@@ -674,13 +676,14 @@ socket.on('message-update', ({ id, chat }) => {
 socket.on('message-seen', ({ id, seen_by }) => {
     let tm = $(`.outgoing[data-id=${id}]`);
     if (tm.length) {
-        if (room_data.is_private) { 
+        if (room_data.is_private) {
             let member = room_data.members.find(x => x.id !== client.id);
             if (!seen_by.some(x => x.id == member.id)) return;
             let seen_by_html = format_seen(seen_by);
             let message_seen = tm.find('.message-foot .message-seen');
             if (message_seen.length) message_seen.html(seen_by_html);
             else tm.find('.message-foot').prepend(seen_by_html);
+            $(`._people[data-last-message-id="${id}"]`).removeClass('_people-unread');
         }
     }
 });
@@ -1152,21 +1155,24 @@ function format_url_embed() {
     });
 }
 /*
-<div class="message-embed">
-    <div class="msg-embed-head">
-            <img class="msg-embed-icon" src="https://www.youtube.com/s/desktop/4521f1ab/img/favicon_144x144.png" />
-        <div class="msg-embed-title">
-            <a class="msg-embed-url" href="#">FoF22</a>
+    Embed message figure
+
+    <div class="message-embed">
+        <div class="msg-embed-head">
+                <img class="msg-embed-icon" src="https://www.youtube.com/s/desktop/4521f1ab/img/favicon_144x144.png" />
+            <div class="msg-embed-title">
+                <a class="msg-embed-url" href="#">FoF22</a>
+            </div>
+        </div>
+        <div class="msg-embed-body">
+            <div class="msg-embed-description">
+                https://fof22.me/ is Friends of Friends 2022. Welcome to FoF22. You can semd message, receive them, play games and many other things.
+            </div>
+            <img class="msg-embed-image" src="https://i.ytimg.com/vi/vRXZj0DzXIA/maxresdefault.jpg" />
         </div>
     </div>
-    <div class="msg-embed-body">
-        <div class="msg-embed-description">
-            https://fof22.me/ is Friends of Friends 2022. Welcome to FoF22. You can semd message, receive them, play games and many other things.
-        </div>
-        <img class="msg-embed-image" src="https://i.ytimg.com/vi/vRXZj0DzXIA/maxresdefault.jpg" />
-    </div>
-</div>
 */
+
 function _format_url_embed(urls, _result) {
     for (let i = 0; i < _result.length; i++) {
         let url = urls.find(x => x.id == _result[i].id);
@@ -1181,6 +1187,9 @@ function _format_url_embed(urls, _result) {
                 message_content = that.parent().parent(),
                 message_foot = message_content.find('.message-foot'),
                 message_content_p_width = message_content.find('p').width();
+
+            if (!result.description) continue;
+
             if (result.icon && result.icon.startsWith('/')) {
                 result.icon = null;
                 /*
@@ -1234,4 +1243,3 @@ function random_color() {
     for (var i = 0; i < 6; i++) color += letters[Math.floor(Math.random() * 16)];
     return color;
 }
-

@@ -245,15 +245,19 @@ module.exports = async (io, client, socket) => {
                             let pm = chat.messages[chat.messages.length - 2]?.id;
                             
                             callback({ success: true, user: user.id, id: room.id, chat: chat_data, _id, pm });
-                            socket.broadcast.to(socket.room_id).emit('receive-message', { user: user.id, id: room.id, chat: chat_data, _id, pm });
+                            socket.broadcast.to(socket.room_id).emit('message-receive', { user: user.id, id: room.id, chat: chat_data, _id, pm });
 
-                            /*io.to('6241d152216bc87c370928f6').emit('receive-message', { user: '61d001de9b64b8c435985da5e', id: '6241d152216bc87c370928f6', chat_data: {
-                                id: Math.random().toString(36).substring(2, 15),
-                                user: '61d001de9b64b8c435985da5',
-                                message: 'hey!',
-                                time: Date.now(),
-                                seen_by: []
-                            } });*/
+                            /*
+                                Send a message to a user figure
+                                
+                                io.to('6241d152216bc87c370928f6').emit('message-receive', { user: '61d001de9b64b8c435985da5e', id: '6241d152216bc87c370928f6', chat_data: {
+                                    id: Math.random().toString(36).substring(2, 15),
+                                    user: '61d001de9b64b8c435985da5',
+                                    message: 'hey!',
+                                    time: Date.now(),
+                                    seen_by: []
+                                } });
+                            */
 
                             Promise.all(room.members.map(user => client.database.functions.get_user(user))).then(users => {
                                 Promise.all(users.filter(x => x).map(user => {

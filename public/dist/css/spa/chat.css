@@ -29,7 +29,7 @@
 }
 
 @media (min-width: 1300px) {
-    .chat .people-info {
+    .chat-active .people-info {
         display: block;
     }
     .chat .messages {

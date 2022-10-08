@@ -31,6 +31,7 @@ module.exports = (client) => {
                                 image: image || '',
                                 time: last_message?.time,
                                 last_message: last_message?.message,
+                                last_message_id: last_message.id,
                                 unread: user_room_unread,
                                 deleted: last_message?.deleted,
                                 has_attachment: last_message?.attachments?.length
