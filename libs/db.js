@@ -253,7 +253,7 @@ module.exports = (client) => {
             if (err) return false;
             else if (ids.length) {
                 await client.redis.del.apply(client.redis, ids.map(x => `session:${x}`));
-                await client.del(`sessions:${id}`);
+                await client.redis.del(`sessions:${id}`);
                 return true;
             } else return true;
         });

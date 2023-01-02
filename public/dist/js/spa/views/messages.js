@@ -730,6 +730,8 @@ function message_time(html, callback, last_message = {}) {
 }
 
 function format_seen(seen_by) {
+    console.log(room_data);
+    console.log(seen_by);
     if (!room_data.is_private) {
         let result = [];
         for (let i = 0; i < seen_by.length; i++) {
@@ -740,7 +742,7 @@ function format_seen(seen_by) {
         }
         if (result.length) return `<span class="message-seen">Seen by <b>${result.join('</b>, <b>')}</b> • </span>`;
     } else {
-        let member = room_data.members.find(x => x.id !== seen_by.find(y => y !== client.id));
+        let member = room_data.members.find(x => x.id == seen_by.find(y => y !== client.id));
         if (member) return `<span class="message-seen"><b>Seen</b> • </span>`;
     }
 }
