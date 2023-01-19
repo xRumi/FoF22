@@ -742,7 +742,11 @@ function format_seen(seen_by) {
         }
         if (result.length) return `<span class="message-seen">Seen by <b>${result.join('</b>, <b>')}</b> • </span>`;
     } else {
-        let member = room_data.members.find(x => x.id == seen_by.find(y => y !== client.id));
+        let seen_by_id = seen_by.find(y => y.id !== client.id);
+        let member = room_data.members.find(x => x.id == seen_by_id.id);
+        console.log("hello bro");
+        console.log(`client id ${client.id}`)
+        console.log(member);
         if (member) return `<span class="message-seen"><b>Seen</b> • </span>`;
     }
 }
