@@ -1,7 +1,7 @@
 function Alert(o) {
     if (!o) o = {}
-	if (!o.corner) o.corner = "top-right";
-	if (!o.max_elem) o.max_elem = 10;
+	  if (!o.corner) o.corner = "top-right";
+	  if (!o.max_elem) o.max_elem = 10;
     const alert_container = $(`<div class="alert-container alert-${o.corner}"><div>`); $('body').append(alert_container);
     const alert_count = $('.alert').length;
     this.render = (r) => {

@@ -7,7 +7,7 @@ const compression = require('compression'),
 
 const passport = require('passport'),
     mongoose = require("mongoose"),
-    redis_store = require('connect-redis')(session),
+    redis_store = require('connect-redis').default,
     local_strategy = require('./strategies/local'),
     routes = require('./routes');
 
@@ -15,10 +15,10 @@ require('dotenv').config();
 
 const Redis = require('ioredis'),
     redis = new Redis(process.env.REDIS_CLOUD ? {
-        port: 11017,
-        host: 'redis-11017.c250.eu-central-1-1.ec2.cloud.redislabs.com',
-        username: 'default',
-        password: 'fdIiQeGANkVleapx3YnvND60zQiJAtXc'
+        port: process.env.REDIS_CLOUD_PORT,
+        host: process.env.REDIS_CLOUD_HOST,
+        username: process.env.REDIS_CLOUD_USERNAME,
+        password: process.env.REDIS_CLOUD_PASSWORD
     } : {});
 
 redis.on('connect', () => {
@@ -35,12 +35,12 @@ redis.on('connect', () => {
 const path = require('path');
 app.set('trust proxy', true);
 
-mongoose.connect(`mongodb+srv://main:iVAFZ0z5YDcHf5jm@cluster0.pcm42.mongodb.net/${process.env.DEV ? 'dev' : 'main'}?retryWrites=true&w=majority`, { useNewUrlParser: true, useUnifiedTopology: true }).then(() =>
+mongoose.connect(process.env.DEV ? process.env.MONGODB_URL_DEV : process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true }).then(() =>
     console.log('[MongoDB] connected')).catch((err) => 
     console.log(`[MongoDB] error: ${err}`));
 
 const session_store = session({
-    secret: '1p@d20&f#JtceK0jso,!h9&,7N@7@?',
+    secret: process.env.SESSION_STORE_SECRET,
     cookie: { maxAge: 2 * 30 * 24 * 60 * 60 * 1000 },
     resave: false,
     saveUninitialized: false,
@@ -63,7 +63,6 @@ client.database.room = require("./models/Room");
 client.database.chat = require("./models/Chat");
 client.database.token = require("./models/Token");
 client.database._user = require("./models/_User");
-client.database.game_room = require("./models/Game_Room");
 client.database.functions = {};
 
 client.database_cache = {};
@@ -73,11 +72,8 @@ client.database_cache.rooms = new Map();
 client.io = io;
 client.redis = redis;
 
-// client.database.user.find().then(users => users.forEach(user => user.save()));
-
 require("./libs/ip")(client);
 require("./libs/db")(client);
-require("./libs/game_room")(client);
 require("./libs/schedule")(client);
 require("./libs/mail")(client);
 require("./socket.io/index")(io, client);
@@ -91,19 +87,11 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "/views"));
 
 if (process.env.EXPRESS_STATIC) {
-    app.use(express.static(path.join(__dirname, "/public")));
     console.log('[Express] serving static files');
-}
-
-app.use(session_store);
-app.use(passport.initialize());
-app.use(passport.session());
-
-app.use('/', routes(client));
-
-if (process.env.DEV) {
 
     const fs = require('fs');
+
+    app.use(express.static(path.join(__dirname, "/public")));
 
     app.get('/uploads/users/:id/profile.png', async (req, res) => {
         let id = req.params.id;
@@ -119,6 +107,12 @@ if (process.env.DEV) {
         else res.sendFile(path.join(__dirname, '/public/dist/img/default-cover.png'));
     });
 }
+
+app.use(session_store);
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use('/', routes(client));
 
 app.get('*', (req, res) => res.render('404'));
 

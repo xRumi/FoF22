@@ -4,11 +4,11 @@ const fs = require("fs");
 const path = require('path');
 
 const chat = require("./chat");
-const game_room = require("./game_room");
 
 module.exports = (io, client) => {
     io.on('connection', async (socket) => {
         let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
+        console.log("user " + user.username + " connected");
         if (user) {
             socket.join(user.id);
             socket.user_id = user.id;
@@ -16,46 +16,56 @@ module.exports = (io, client) => {
             if (user.hide_presence) {
                 if (user.presence.status !== 'offline') {
                     client.redis.call('JSON.SET', `user:${user.id}`, `$.presence.status`, '"offline"');
-                    io.to(user.rooms.map(x => x.id)).emit('member-presence-update', { id: user.id, username: user.username, name: user.name, status: 'offline', date: Date.now() });
+                    io.to(user.rooms.map(x => x.id)).emit('member-presence-update', { id: user.id, status: 'offline', date: Date.now() });
+                    io.to(user.friends).emit('room-presence-update', { id: user.id, status: 'offline', date: Date.now() });
                 }
             } else {
                 if (user.presence.status !== 'online') {
                     client.redis.call('JSON.SET', `user:${user.id}`, '$.presence', `{"status":"online","date":${Date.now()}}`);
-                    io.to(user.rooms.map(x => x.id)).emit('member-presence-update', { id: user.id, username: user.username, name: user.name, status: 'online', date: Date.now() });
+                    io.to(user.rooms.map(x => x.id)).emit('member-presence-update', { id: user.id, status: 'online', date: Date.now() });
+                    io.to(user.friends).emit('room-presence-update', { id: user.id, status: 'online', date: Date.now() });
                     presence_ack_interval = setInterval(async () => {
                         user = await client.database.functions.get_user(socket.request.session?.passport?.user);
                         if (user.hide_presence) {
                             if (user.presence.status !== 'offline') {
                                 user.presence.status = 'offline';
                                 client.redis.call('JSON.SET', `user:${user.id}`, `$.presence.status`, '"offline"');
-                                io.to(user.rooms.map(x => x.id)).emit('member-presence-update', { id: user.id, username: user.username, name: user.name, status: 'offline', date: Date.now() });
+                                io.to(user.rooms.map(x => x.id)).emit('member-presence-update', { id: user.id, status: 'offline', date: Date.now() });
+                                io.to(user.friends).emit('room-presence-update', { id: user.id, status: 'offline', date: Date.now() });
                             }
                         } else {
                             let presence_ack_timeout = setTimeout(() => {
                                 if (user.presence.status !== 'offline') {
                                     user.presence.status = 'offline';
                                     client.redis.call('JSON.SET', `user:${user.id}`, `$.presence.status`, '"offline"');
-                                    io.to(user.rooms.map(x => x.id)).emit('member-presence-update', { id: user.id, username: user.username, name: user.name, status: 'offline', date: Date.now() });
+                                    io.to(user.rooms.map(x => x.id)).emit('member-presence-update', { id: user.id, status: 'offline', date: Date.now() });
+                                    io.to(user.friends).emit('room-presence-update', { id: user.id, status: 'offline', date: Date.now() });
+                                    // console.log("forceful disconnect");
+                                    // socket.disconnect();
                                 }
-                            }, 20 * 1000);
+                            }, 60 * 1000);
                             socket.emit('member-presence-ack', callback => {
                                 clearTimeout(presence_ack_timeout);
                                 if (user.presence.status !== 'online') {
                                     user.presence.status = 'online';
                                     client.redis.call('JSON.SET', `user:${user.id}`, '$.presence', `{"status":"online","date":${Date.now()}}`);
-                                    io.to(user.rooms.map(x => x.id)).emit('member-presence-update', { id: user.id, username: user.username, name: user.name, status: 'online', date: Date.now() });
+                                    io.to(user.rooms.map(x => x.id)).emit('member-presence-update', { id: user.id, status: 'online', date: Date.now() });
+                                    io.to(user.friends).emit('room-presence-update', { id: user.id, status: 'online', date: Date.now() });
                                 }
                             });
                         }
-                    }, 5 * 60 * 1000);
+                    }, 60 * 1000);
                 }
             }
             socket.on('disconnect', async () => {
+                console.log(`user ${user.username} disconnect`);
                 if (!io.sockets.adapter.rooms.has(user.id)) {
-                    if (user.presence.type !== 'online') {
+                    console.log(`no other user ${user.username} connected`);
+                    if (user.presence.type !== 'offline') {
                         user.presence.status = 'offline';
                         client.redis.call('JSON.SET', `user:${user.id}`, '$.presence', `{"status":"offline","date":${Date.now()}}`);
-                        io.to(user.rooms.map(x => x.id)).emit('member-presence-update', { id: user.id, username: user.username, name: user.name, status: 'offline', date: Date.now() });
+                        io.to(user.rooms.map(x => x.id)).emit('member-presence-update', { id: user.id, status: 'offline', date: Date.now() });
+                        io.to(user.friends).emit('room-presence-update', { id: user.id, status: 'offline', date: Date.now() });
                     }
                 }
                 clearInterval(presence_ack_interval);
@@ -65,20 +75,17 @@ module.exports = (io, client) => {
             chat(io, client, socket);
             // messaging stuff end
 
-            // game room stuff start
-            game_room(io, client, socket);
-            // game room stuff end
-
             // other stuff start
             socket.on('fr-find', async (term, callback) => {
                 if (!is_function(callback)) return false;
                 if (term) {
                     let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
                     if (!user) return;
+                    if (term.length > 20) return;
                     let result = {
                         names: null,
                     };
-                    let name_regex = new RegExp(term, 'i');
+                    let name_regex = new RegExp(term.replace(/[^A-Za-z0-9 ]/g, ''), 'i');
                     const [names] = await Promise.all([ client.database.user.find({
                         $and: [
                             { '_id': { $ne: user.id } },
@@ -106,7 +113,6 @@ module.exports = (io, client) => {
                 }
             });
             // other stuff end
-
-        }  else socket.emit('redirect', '/login?back_to=/spa/messages');
+        } else socket.emit('redirect', '/login?back_to=/spa/messages');
     });
 };

@@ -9,10 +9,6 @@ export default class extends Constructor {
     async render() {
         return `
             <div class="menu">
-                <div class="menu-entertainment">
-                    <div class="menu-header">Entertainment</div>
-                    <a href="/spa/game-room" class="menu-item" data-link><i class='bx bx-game'></i><span>Games</span></a>
-                </div>
                 <div class="menu-user">
                     <div class="menu-header">Account Settings</div>
                     <a class="menu-item"><i class='bx bx-edit-alt'></i><span>Manage Personal Informations</span></a>

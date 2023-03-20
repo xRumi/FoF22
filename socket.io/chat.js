@@ -159,6 +159,7 @@ module.exports = async (io, client, socket) => {
                 }
             }
         }
+        // TODO: unread and if loads last message, make it read and seen
     });
     socket.on('message-send', async ({ id, _message, _id, _attachments = [] }, callback) => {
         if (!is_function(callback)) return false;
@@ -239,13 +240,13 @@ module.exports = async (io, client, socket) => {
                             }
                             chat.messages.push(chat_data);
                             chat.mark_modified(`messages[${chat.messages.length - 1}]`);
-                            await chat.save();
+                            chat.save();
                             chat_data.username = user.username;
 
                             let pm = chat.messages[chat.messages.length - 2]?.id;
                             
                             callback({ success: true, user: user.id, id: room.id, chat: chat_data, _id, pm });
-                            socket.broadcast.to(socket.room_id).emit('message-receive', { user: user.id, id: room.id, chat: chat_data, _id, pm });
+                            // socket.broadcast.to(socket.room_id).emit('message-receive', { user: user.id, id: room.id, chat: chat_data, _id, pm });
 
                             /*
                                 Send a message to a user figure
@@ -281,18 +282,27 @@ module.exports = async (io, client, socket) => {
                                         }
                                     }
                                     let user_room = user.rooms.find(x => x.id == room.id);
-                                    if (chat_data.user !== user.id && !user_room.unread && user_room.last_read_id !== chat_data.id) {
-                                        user_room.unread = true;
-                                        user.mark_modified('rooms');
+                                    if (chat_data.user !== user.id && user_room.last_read_id !== chat_data.id) {
+                                        if (!user_room.unread) {
+                                            user_room.unread = true;
+                                            user.mark_modified('rooms');
+                                            save_user = true;
+                                        }
                                         io.to(user.id).emit('unread', ({ messages: {
                                             count: user.rooms.filter(x => x.unread).length,
-                                            unread: [user_room.id], npr
+                                            unread: [user_room.id], npr,
+                                            chat: {
+                                                message: chat_data.message,
+                                                has_attachment: chat_data.attachments.length > 1,
+                                                time: chat_data.time,
+                                            }
                                         } }));
-                                        save_user = true;
                                     }
                                     if (save_user) return user.save();
                                     else return true;
-                                })).then(() => {});
+                                })).then(() => {
+                                    socket.broadcast.to(socket.room_id).emit('message-receive', { user: user.id, id: room.id, chat: chat_data, _id, pm });
+                                });
                             });
                         } else callback({ error: 'chat does not exist' });
                     } else callback({ error: 'room does not exist' });
@@ -312,7 +322,7 @@ module.exports = async (io, client, socket) => {
         if (!user_room) return;
         let chat = await client.database.functions.get_chat(socket.chat_id);
         if (!chat || chat.room_id !== room_id) return;
-        let message_index = chat.messages.findIndex(x => x.id == id);
+        let message_index = chat.messages.findLastIndex(x => x.id == id);
         if (message_index == -1) return;
         let message = chat.messages[message_index];
         if (!message.seen_by.some(x => x.id == user.id)) {
@@ -332,13 +342,18 @@ module.exports = async (io, client, socket) => {
             save_user = true;
         }
         if (user_room.unread && (chat.messages.length - 1) == message_index) {
-            user_room.unread = false; save_user = true;
-            user.mark_modified('rooms');
+            user_room.unread = false;
+            if (!save_user) {
+                save_user = true;
+                user.mark_modified('rooms');
+            }
+            console.log("unread!!");
             io.to(user.id).emit('unread', ({ messages: {
                 count: user.rooms.filter(x => x.unread).length,
                 read: [user_room.id]
             } }));
         }
+        if (save_user) user.save();
     });
     socket.on('message-delete', async ({ ids, _id }, callback) => {
         if (!is_function(callback)) return false;

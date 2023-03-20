@@ -13,7 +13,7 @@ function reset_room_settings() {
     attachments = [];
     loading_more_messages_up = false;
     loading_more_messages_down = false;
-    room_data = [];
+    room_data = {};
     msg_opt_delete_selected = [];
     ignore_attachment_ids = [];
     client.messages.room_id = null;
@@ -28,9 +28,37 @@ on_socket_reconnect.views_messages_01 = () => {
 }
 
 let old_message_rooms = [], last_umrs;
+let old_messages = [];
+client.messages.old_message_rooms = old_message_rooms;
 
-const update_message_rooms = (new_message_rooms) => {
-    if (!new_message_rooms && !old_message_rooms.length || (last_umrs && (Date.now() - last_umrs) > 5 * 60 * 1000)) {
+const update_message_rooms = (new_message_rooms, updated_room_id, move_to_top) => {
+    if (updated_room_id && old_message_rooms.length) {
+        let x_index = old_message_rooms.findIndex(x => x.id == updated_room_id);
+        if (x_index != -1) {
+            let x = old_message_rooms[x_index];
+            $(`._people[data-id=${x.id}]`).html(`
+                <div class="_people-img">
+                    <img src="${x.image}">
+                </div>
+                ${!x.presence.hide ? `<span class="dot _people-online-status" style="background-color: ${x.presence.status == "online" ? "#00a67e" : x.presence.status == "idle" ? "yellow" : x.presence.status == "dnd" ? "red" : "grey"}"></span>` : ""}
+                <div class="_people-content">
+                    <span class="_people-time">${parse_message_time(x.time, true)}</span>
+                    <span class="_people-name">${x.name}</span>
+                    <p>${!x.deleted ? `${x.has_attachment ? 
+                        `<i class="bx bx-paperclip"></i> ` : ''}
+                        <span>${x.last_message ? x.last_message.replace(/[&<>]/g, (t) => ttr[t] || t) : ''}</span>` : '<span>This message was deleted</span>'}
+                    </p>
+                </div>
+            `).addClass(x.unread ? "_people-unread" : "").removeClass(!x.unread ? "_people-unread" : "").each(function() {
+                if (move_to_top) {
+                    $(this).parent().prepend(this);
+                    old_message_rooms.unshift(old_message_rooms.splice(x_index, 1)[0]);
+                }
+            });
+            return;
+        }
+    }
+    if (!new_message_rooms && !old_message_rooms.length || (last_umrs && (Date.now() - last_umrs) > 1 * 60 * 1000)) {
         if (ajax_process["umrs"]) return;
         nanobar.go(30);
         ajax_process["umrs"] = $.ajax({
@@ -45,19 +73,24 @@ const update_message_rooms = (new_message_rooms) => {
             },
             error: function(xhr, textStatus, errorThrown) {
                 /* do something */
+                nanobar.go(100);
                 delete ajax_process["umrs"];
             },
         });
         return;
     }
     if (new_message_rooms && JSON.stringify(new_message_rooms) == JSON.stringify(old_message_rooms)) return false;
-    if (new_message_rooms) old_message_rooms = new_message_rooms;
+    if (new_message_rooms) {
+        old_message_rooms = new_message_rooms;
+        client.messages.old_message_rooms = old_message_rooms;
+    }
     if (old_message_rooms && old_message_rooms.length && Array.isArray(old_message_rooms)) $('.people-list').html(old_message_rooms.map(x => {
         return $(`
             <div data-id="${x.id}" class="_people${client.messages.room_id == x.id ? ' _people-active' : ''}${x.unread ? ` _people-unread` : ''}" data-last-message-id="${x.last_message_id}">
                 <div class="_people-img">
                     <img src="${x.image}">
                 </div>
+                ${!x.presence.hide ? `<span class="dot _people-online-status" style="background-color: ${x.presence.status == "online" ? "#00a67e" : x.presence.status == "idle" ? "yellow" : x.presence.status == "dnd" ? "red" : "grey"}"></span>` : ""}
                 <div class="_people-content">
                     <span class="_people-time">${parse_message_time(x.time, true)}</span>
                     <span class="_people-name">${x.name}</span>
@@ -98,10 +131,40 @@ const update_message_rooms = (new_message_rooms) => {
                 document.title = name.innerHTML;
                 $('.messages-header-back-text').text(name.innerHTML);
             }
+            let old_message = old_messages.find(x => x.id == client.messages.room_id);
+            if (old_message) {
+                console.log("can use cache!!");
+                let { data, messages, id, name, mm } = old_message;
+                room_data = data;
+                document.title = name;
+                client.messages.room_name = name;
+                $('.messages-header-back-text').text(name);
+                let html = [], lm = {};
+                for (let i = 0; i < messages.length; i++) {
+                    let m = messages[i];
+                    html.push(format_message(m, lm));
+                    lm = m;
+                }
+                update_messages_top_text();
+                message_time(html, (_html, seen_by) => {
+                    $('.messages-list').html(_html);
+                    $('.messages-list .message:last-child.outgoing .message-foot').prepend(seen_by || '');
+                    // $('#message-input').prop('disabled', false);
+                    $('#message-input-files-button').prop('disabled', false);
+                    $('.message-send-icon').show();
+                    if ($(".message:last-child")[0]) $(".message:last-child")[0].scrollIntoView();
+                }, messages[messages.length - 1]);
+                if (mm) $('.message-load-more-up').show();
+                $(`._people[data-id="${id}"]`).css('background-color', '');
+                nanobar.go(100);
+                format_url_embed();
+            }
             nanobar.go(40);
         });
     }));
 }
+
+client.messages.update_message_rooms = update_message_rooms;
 
 export default class extends Constructor {
     constructor(params) {
@@ -393,10 +456,20 @@ export default class extends Constructor {
                                 let prev_message_time = prev_message ? prev_message.querySelector('.outgoing .message-foot') : false;
                                 if (prev_message_time && prev_message_time.innerText && (parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 7 * 60 * 1000) prev_message_time.style.display = 'none';
                                 message[0].querySelector('.message-content').insertAdjacentHTML('beforeend', `<div class="message-foot"><span class="message-time">${parse_message_time(chat.time)}</span></div>`);
-                                $(`._people[data-id="${id}"]`).find('._people-content p').html(`${!chat.deleted ? `${chat.attachments && chat.attachments.length ? 
-                                    `<i class="bx bx-paperclip"></i> ` : ''}
-                                    <span>${chat.message ? chat.message.replace(/[&<>]/g, (t) => ttr[t] || t) : ''}</span>` : '<i>This message was deleted</i>'}
-                                `);
+                                let room = old_message_rooms.find(x => x.id == id);
+                                if (room) {
+                                    if (chat.deleted) room.deleted = true;
+                                    else {
+                                        room.deleted = false;
+                                        if (chat.attachments && chat.attachments.length) room.has_attachment = true;
+                                        if (chat.message) {
+                                            room.last_message = chat.message;
+                                            room.last_message_id = chat.id;
+                                            room.time = chat.time;
+                                        }
+                                    }
+                                    update_message_rooms(null, id, true);
+                                }
                             }
                             $('.message.outgoing:not(:last-child) .message-foot .message-seen').remove();
                             format_url_embed();
@@ -419,12 +492,10 @@ export default class extends Constructor {
         }).on('click', '.message-load-more-up', e => {
             if (loading_more_messages_up) return false;
             $('.message-load-more-up .spinner').show();
-            loading_more_messages_up = true;
             message_load_more_up();
         }).on('click', '.message-load-more-down', e => {
             if (loading_more_messages_down) return false;
             $('.message-load-more-down .spinner').show();
-            loading_more_messages_down = true;
             message_load_more_down();
         }).on('click', '#message-input-files input:button', (e) => {
             e.preventDefault();
@@ -631,21 +702,24 @@ socket.on('message-receive', ({ id, chat, _id, pm }) => {
                 if (prev_message_time && prev_message_time.innerText && Math.abs(parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 7 * 60 * 1000) prev_message_time.style.display = 'none';
                 $('.messages-list').append(format_message(chat, {}, $('.message:last-child').hasClass('outgoing') ? false : true, true));
                 socket.emit('message-seen-ack', ({ id: chat.id, room_id: client.messages.room_id }));
-            } else loading_more_messages_down(() => {
-                if (!$('.message-load-more-down').is(':hidden')) return;
-                let prev_message = client.id == chat.user ? $('.message:last-child.outgoing')[0] : $('.message:last-child:not(.outgoing)')[0];
-                let prev_message_time = prev_message ? prev_message.querySelector('.message-foot') : false;
-                if (prev_message_time && prev_message_time.innerText && Math.abs(parseInt(chat.time) - parseInt(prev_message.dataset.time)) < 7 * 60 * 1000) prev_message_time.style.display = 'none';
-                $('.messages-list').append(format_message(chat, {}, $('.message:last-child').hasClass('outgoing') ? false : true, true));
-                socket.emit('message-seen-ack', ({ id: chat.id, room_id: client.messages.room_id }));
-            });
+            } else message_load_more_down();
         }
         if (chat.user == client.id) $('.message.outgoing:not(:last-child) .message-foot .message-seen').remove();
-        $(`._people[data-id="${id}"]`).find('._people-content p').html(`${!chat.deleted ? `${chat.attachments && chat.attachments.length ? 
-            `<i class="bx bx-paperclip"></i> ` : ''}
-            <span>${chat.message ? chat.message.replace(/[&<>]/g, (t) => ttr[t] || t) : ''}</span>` : '<i>This message was deleted</i>'}
-        `);
-        $(`._people[data-id="${id}"]`).removeClass("_people-unread");
+        let room = old_message_rooms.find(x => x.id == id);
+        if (room) {
+            if (chat.deleted) room.deleted = true;
+            else {
+                room.deleted = false;
+                if (chat.attachments && chat.attachments.length) room.has_attachment = true;
+                if (chat.message) {
+                    room.last_message = chat.message;
+                    room.last_message_id = chat.id;
+                    room.time = chat.time;
+                }
+            }
+            room.unread = false;
+            update_message_rooms(null, id, true);
+        }
         format_url_embed();
     }
 });
@@ -653,8 +727,18 @@ socket.on('message-receive', ({ id, chat, _id, pm }) => {
 socket.on('member-presence-update', (data) => {
     let member = room_data.members.find(x => x.id == data.id);
     if (member) {
-        for (let k in data) member[k] = data[k];
+        member.status = data.status;
+        member.date = data.date;
         update_messages_top_text();
+    }
+});
+
+socket.on('room-presence-update', (data) => {
+    let room = old_message_rooms.find(x => x._user_id == data.id || x.id == data.id);
+    if (room) {
+        room.presence.status = data.status;
+        room.presence.date = data.date;
+        update_message_rooms(null, room.id);
     }
 });
 
@@ -683,7 +767,12 @@ socket.on('message-seen', ({ id, seen_by }) => {
             let message_seen = tm.find('.message-foot .message-seen');
             if (message_seen.length) message_seen.html(seen_by_html);
             else tm.find('.message-foot').prepend(seen_by_html);
-            $(`._people[data-last-message-id="${id}"]`).removeClass('_people-unread');
+            let room = old_message_rooms.find(x => x.id == id);
+            if (room) {
+                room.unread = false;
+                update_message_rooms(null, room.id);
+                console.log("message seen")
+            }
         }
     }
 });
@@ -749,36 +838,49 @@ function format_seen(seen_by) {
 }
 
 function join_room(response) {
-    nanobar.go(60); if (response.error) {
+    nanobar.go(60);
+    if (response.error) {
         let { id, error } = response;
         if (client.messages.room_id == id) $('.messages-list').append(error);
         $('.messages-list .spinner').hide();
+        nanobar.go(100);
     } else {
         let { data, messages, id, name, mm } = response;
+        let old_message = old_messages.find(x => x.id == id);
         if (client.messages.room_id == id) {
-            room_data = data;
-            document.title = name;
-            client.messages.room_name = name;
-            $('.messages-header-back-text').text(name);
-            let html = [], lm = {};
-            for (let i = 0; i < messages.length; i++) {
-                let m = messages[i];
-                html.push(format_message(m, lm));
-                lm = m;
-            }
-            update_messages_top_text();
-            message_time(html, (_html, seen_by) => {
-                $('.messages-list').html(_html);
-                $('.messages-list .message:last-child.outgoing .message-foot').prepend(seen_by || '');
+            if (old_message && old_message.messages[old_message.messages.length - 1].id == messages[messages.length - 1].id) {
                 $('#message-input').prop('disabled', false);
-                $('#message-input-files-button').prop('disabled', false);
-                $('.message-send-icon').show();
-                if ($(".message:last-child")[0]) $(".message:last-child")[0].scrollIntoView();
-            }, messages[messages.length - 1]);
-            if (mm) $('.message-load-more-up').show();
-            $(`._people[data-id="${id}"]`).css('background-color', '');
-            nanobar.go(100);
-            format_url_embed();
+                room_data = data;
+                update_messages_top_text();
+                nanobar.go(100);
+            } else {
+                room_data = data;
+                document.title = name;
+                client.messages.room_name = name;
+                $('.messages-header-back-text').text(name);
+                let html = [], lm = {};
+                for (let i = 0; i < messages.length; i++) {
+                    let m = messages[i];
+                    html.push(format_message(m, lm));
+                    lm = m;
+                }
+                update_messages_top_text();
+                message_time(html, (_html, seen_by) => {
+                    $('.messages-list').html(_html);
+                    $('.messages-list .message:last-child.outgoing .message-foot').prepend(seen_by || '');
+                    $('#message-input').prop('disabled', false);
+                    $('#message-input-files-button').prop('disabled', false);
+                    $('.message-send-icon').show();
+                    if ($(".message:last-child")[0]) $(".message:last-child")[0].scrollIntoView();
+                }, messages[messages.length - 1]);
+                if (mm) $('.message-load-more-up').show();
+                $(`._people[data-id="${id}"]`).css('background-color', '');
+                nanobar.go(100);
+                format_url_embed();
+                if (old_message) {
+                    console.log("update oldmessage if there is missing in messahe");
+                } else old_messages.push(response);
+            }
         }
     }
 }
@@ -865,7 +967,6 @@ function update_messages_top_text() {
         let member = room_data.members.find(x => x.id !== client.id);
         if (member) {
             $('.messages-top-name').text(member.name);
-            console.log(Date.now() - member.date)
             $('.messages-top-status').replaceWith(`
                 <div class="messages-top-status" style="${member.status == 'online' ? 'color: green;' : ''}">
                     <span class="dot" style="background-color: ${member.status == 'online' ? 'green' : member.status == 'offline' ? 'grey' : member.status == 'idle' ? 'yellow' : 'grey'}; margin-right: 1px;"></span>
@@ -916,7 +1017,7 @@ function format_attachment(attachments) {
         return `<div class="msg-attachment" ${x.id ? `id="${x.id}"` : ''}>` +
             (x.type.match('image') ? `
                 <div class="msg-attachment-progress"><div></div></div>
-                <img ${x.width ? `width=\"${x.width}\"` : ''} ${x.height ? `height=\"${x.height}\"` : ''} src="${x.src_url || x.url}" data-name="${x.name}" ${x.url ? `data-url="${x.url}"` : ``} ${x.ext ? `data-ext="${x.ext}"` : ''} data-model>
+                <img ${x.width ? `width=\"${x.width}\"` : ''} ${x.height ? `height=\"${x.height}\"` : ''} src="${x.src_url || x.url}" data-name="${x.name}" ${x.url ? `data-url="${x.url}"` : ``} ${x.ext ? `data-ext="${x.ext}"` : ''} onerror="this.onerror = null; $.fn.attachment_not_Found(this);" data-model>
             ` :
             x.type.match('video') ? `
                 <div class="msg-attachment-progress"><div></div></div>
@@ -962,6 +1063,7 @@ function filesize(bytes, si = false, dp = 1) {
 }
 
 function format_message(m, lm = {}, stack_message, add_time) {
+    console.log("message format");
     if (m.message) m.message = m.message.trim();
     return m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
         <div class="message${client.id == m.user ? ' outgoing' : (lm.user == m.user || stack_message) ? ' stack-message' : ''}${m.deleted ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
@@ -990,6 +1092,8 @@ function message_load_more_up(callback) {
         loading_more_messages_up = false;
         return $('.message-load-more-up .spinner').hide();
     }
+    if (loading_more_messages_up) return;
+    loading_more_messages_up = true;
     socket.emit('message-load-more-up', $('.message:first-child').data('id'), 7, (response) => {
         if (response.error) {
             loading_more_messages_up = false;
@@ -1037,11 +1141,13 @@ function message_load_more_up(callback) {
     });
 }
 
-function message_load_more_down() {
+function message_load_more_down(callback) {
     if (!client.messages.room_id || !navigator.onLine || !socket.connected) {
         loading_more_messages_down = false;
         return $('.message-load-more-down .spinner').hide();
     }
+    if (loading_more_messages_down) return;
+    loading_more_messages_down = true;
     socket.emit('message-load-more-down', $('.message:last-child').data('id'), 7, (response) => {
         if (response.error) {
             loading_more_messages_down = false;
@@ -1067,6 +1173,7 @@ function message_load_more_down() {
                         first_message.find('.message-foot').hide();
                         previous_last_message.find('.message-foot').hide();
                     }
+                    _html.filter(':last-child').find('.message-foot').show();
                     if (!first_message.hasClass('outgoing') && !previous_last_message.hasClass('outgoing')) first_message.addClass('stack-message');
                     if ($('#mod-selected-messages').length) {
                         _html.each((index, value) => {
@@ -1096,6 +1203,8 @@ function message_load_more_down() {
                 input.attr({ 'disabled': false, 'placeholder': 'type your message', 'previous-message': '' });
                 $('.message-load-more-down').hide();
             }
+            format_url_embed();
+            if (callback) callback();
         }
     });
 }

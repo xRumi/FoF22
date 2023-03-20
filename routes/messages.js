@@ -25,6 +25,8 @@ module.exports = (client) => {
                                 } else name = 'Not Found';
                             } else name = room.name;
                             let user_room_unread = req.user.rooms.find(z => z.id == room.id)?.unread;
+                            let hide_presence = false;
+                            if (_user.presence_type == "friends-only" && !req.user.friends.includes(_user.id)) hide_presence = true;
                             data.push({
                                 id: room.id,
                                 name,
@@ -34,7 +36,9 @@ module.exports = (client) => {
                                 last_message_id: last_message.id,
                                 unread: user_room_unread,
                                 deleted: last_message?.deleted,
-                                has_attachment: last_message?.attachments?.length
+                                has_attachment: last_message?.attachments?.length,
+                                presence: { status: _user.presence?.status || 'offline', date: _user.presence?.date || 0, hide: hide_presence },
+                                _user_id: room.type == 'private' ? _user.id : null,
                             });
                         }
                     }

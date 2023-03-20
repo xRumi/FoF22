@@ -29,7 +29,7 @@ const client = {
         npr: false,
         room_name: null,
         should_mute_video: true,
-        should_mute_audio: false
+        should_mute_audio: false,
     },
     id: body.data('id'),
     username: body.data('username'),
@@ -88,12 +88,36 @@ const _alert = new Alert();
 
 socket.on('unread', unread => {
     Object.keys(unread).forEach(key => {
-        $(`#nav__link__${key} .nav__alart`).text(unread[key].count || '');
         if (key == 'messages') {
-            if (unread[key].unread) unread[key].unread.forEach(m => $(`._people[data-id=${m}]`).addClass('_people-unread'));
-            if (unread[key].read) unread[key].read.forEach(m => $(`._people[data-id=${m}]`).removeClass('_people-unread'));
+            if (unread[key].unread && unread[key].unread.includes(client.messages.room_id)) $(`#nav__link__${key} .nav__alart`).text((unread[key].count - 1) || '');
+            else $(`#nav__link__${key} .nav__alart`).text(unread[key].count || '');
+            if (unread[key].unread) unread[key].unread.forEach(m => {
+                if (client.messages.old_message_rooms) {
+                    let room = client.messages.old_message_rooms.find(x => x.id == m);
+                    if (room) {
+                        if (client.messages.room_id !== room.id) room.unread = true;
+                        if (unread[key].chat) {
+                            room.last_message = unread[key].chat.message;
+                            room.last_message_id = unread[key].chat.id;
+                            room.has_attachment = unread[key].chat.has_attachment;
+                            room.time = unread[key].chat.time || Date.now();
+                        }
+                        client.messages.update_message_rooms(null, m, true);
+                    }
+                }
+            });
+            if (unread[key].read) unread[key].read.forEach(m => {
+                if (client.messages.old_message_rooms) {
+                    let room = client.messages.old_message_rooms.find(x => x.id == m);
+                    if (room) {
+                        room.unread = false;
+                        client.messages.update_message_rooms(null, m);
+                    }
+                }
+            });
             if (unread[key].npr && !client.messages.npr) client.messages.npr;
         } else if (key == 'notifications') {
+            $(`#nav__link__${key} .nav__alart`).text(unread[key].count || '');
             if (unread[key].unread) unread[key].unread.forEach(unread_info => {
                 if (!unread_info.no_alert) _alert.render({
                     head: unread_info.header,
@@ -103,6 +127,8 @@ socket.on('unread', unread => {
                 });
             });
             if (unread[key].read) unread[key].read.forEach(x => $(`.notifications-item.nic-unread[data-id="${x}"]`).removeClass('nic-unread'));
+        } else {
+            $(`#nav__link__${key} .nav__alart`).text(unread[key].count || '');
         }
     });
 });

@@ -11,13 +11,6 @@ import Messages from "./views/messages.js";
 import Menu from "./views/menu.js";
 import Menu_Change_Password from "./views/menu/change-password.js";
 
-// game room
-import Game_Room from "./views/game_room.js";
-import Game_Room_Create from "./views/game_room/create.js";
-import Game_Room_Join from "./views/game_room/join.js";
-import Game_Room_Solo from "./views/game_room/solo.js";
-import Game_Room_Solo_TTT from "./views/game_room/games/solo/tictactoe.js";
-
 const path_to_regex = path => new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
 
 const get_params = match => {
@@ -54,17 +47,12 @@ const routes = [
     { path: "/spa/profile/:id", view: Profile },
     
     { path: "/spa/search", view: Search },
-
-    { path: "/spa/game-room", view: Game_Room },
-    { path: "/spa/game-room/create", view: Game_Room_Create },
-    { path: "/spa/game-room/join", view: Game_Room_Join },
-    { path: "/spa/game-room/solo", view: Game_Room_Solo },
-    { path: "/spa/game-room/solo/tictactoe", view: Game_Room_Solo_TTT },
-    { path: "/spa/game-room/:id/:game", view: Game_Room },
-    { path: "/spa/game-room/:id", view: Game_Room },
 ];
 
-let before_new_render, current_need_refresh;
+let before_new_render, current_need_refresh = () => {
+    console.log("empty need refresh");
+};
+
 
 const router = async () => {
 
@@ -217,3 +205,7 @@ if (typeof document.addEventListener === "undefined" || hidden === undefined) {
 } else document.addEventListener(visibility_change, () => {
     if (!document[hidden]) current_need_refresh();
 }, false);
+
+$.fn.attachment_not_Found = (terget) => {
+    $(terget).parent().html("<div class=\"msg-attachment-not-found\">Message attachment does not exist</div>");
+}
