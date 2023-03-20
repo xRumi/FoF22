@@ -2,10 +2,10 @@ require('dotenv').config();
 const mongoose = require("mongoose"),
     Redis = require("ioredis"),
     redis = new Redis(process.env.REDIS_CLOUD ? {
-        port: 11017,
-        host: 'redis-11017.c250.eu-central-1-1.ec2.cloud.redislabs.com',
-        username: 'default',
-        password: 'fdIiQeGANkVleapx3YnvND60zQiJAtXc'
+        port: process.env.REDIS_CLOUD_PORT,
+        host: process.env.REDIS_CLOUD_HOST,
+        username: process.env.REDIS_CLOUD_USERNAME,
+        password: process.env.REDIS_CLOUD_PASSWORD
     } : {});
 
 const User = require("./models/User"),
@@ -84,7 +84,7 @@ process.stdin.on('data', async data => {
 
 redis.on('connect', async () => {
     console.log('[Redis] connected');
-    mongoose.connect(`mongodb+srv://main:iVAFZ0z5YDcHf5jm@cluster0.pcm42.mongodb.net/${process.env.DEV ? 'dev' : 'main'}?retryWrites=true&w=majority`, { useNewUrlParser: true, useUnifiedTopology: true })
+    mongoose.connect(process.env.DEV ? process.env.MONGODB_URL_DEV : process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
         .then(async () => {
             console.log('[MongoDB] connected'); db_connected = true;
             await redis.call('FT.INFO', 'users').catch(() => redis.call(
