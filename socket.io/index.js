@@ -8,7 +8,7 @@ const chat = require("./chat");
 module.exports = (io, client) => {
     io.on('connection', async (socket) => {
         let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
-        console.log("user " + user.username + " connected");
+        // console.log("user " + user.username + " connected");
         if (user) {
             socket.join(user.id);
             socket.user_id = user.id;
@@ -58,9 +58,9 @@ module.exports = (io, client) => {
                 }
             }
             socket.on('disconnect', async () => {
-                console.log(`user ${user.username} disconnect`);
+                // console.log(`user ${user.username} disconnect`);
                 if (!io.sockets.adapter.rooms.has(user.id)) {
-                    console.log(`no other user ${user.username} connected`);
+                    // console.log(`no other user ${user.username} connected`);
                     if (user.presence.type !== 'offline') {
                         user.presence.status = 'offline';
                         client.redis.call('JSON.SET', `user:${user.id}`, '$.presence', `{"status":"offline","date":${Date.now()}}`);
