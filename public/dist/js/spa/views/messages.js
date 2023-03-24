@@ -784,10 +784,10 @@ function parse_message_time(message_time, minimal) {
     if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
     else if (diff < periods.day && _time.getDate() === today.getDate()) time = `${!minimal ? `Today at ` : ''}${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
     else {
-        if (diff < periods.week) time = `${days[_time.getDay()]}${!minimal ? ` at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}` : ``}`;
+        if (diff < periods.week) time = `${(minimal ? days_short : days)[_time.getDay()]}${!minimal ? ` at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}` : ``}`;
         else time = `${_time.getDate()} ${months[_time.getMonth()]}${!minimal ? ` at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}` : ``}${_time.getFullYear() !== today.getFullYear() ? `, ${_time.getFullYear()}` : ''}`
     }
-    return time;
+    return minimal ? time.replace('ago', '') : time;
 }
 
 function message_time(html, callback, last_message = {}) {
@@ -860,10 +860,16 @@ function join_room(response) {
                 client.messages.room_name = name;
                 $('.messages-header-back-text').text(name);
                 let html = [], lm = {};
+                let prev_message_date;
                 for (let i = 0; i < messages.length; i++) {
                     let m = messages[i];
+                    let curr_message_date = (new Date(messages[i].time));
+                    if (prev_message_date && curr_message_date != prev_message_date) {
+                        console.log(parse_message_time(prev_message_date));
+                    } 
                     html.push(format_message(m, lm));
                     lm = m;
+                    prev_message_date = curr_message_date;
                 }
                 update_messages_top_text();
                 message_time(html, (_html, seen_by) => {

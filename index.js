@@ -142,3 +142,5 @@ client.parse = function (str) {
         i = 0;
     return str.replace(/%s/g, () => args[i++]);
 }
+
+client.esr = (str) => str.replace(/[|\\{}()[\]^$+*?.@]/g, '\\$&').replace(/-/g, '\\x2d');

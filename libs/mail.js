@@ -1,10 +1,30 @@
-const mailgun = require("mailgun-js")({
-    apiKey: process.env.MAILGUN_API_KEY,
-    domain: process.env.DOMAIN
-});
+const fetch = require("node-fetch");
+const auth = Buffer.from(`api:${process.env.MAILGUN_API_KEY}`).toString('base64');
+const FormData = require("form-data");
+const mailgunAPI = `https://api.mailgun.net/v3/${process.env.DOMAIN_NAME}/messages`;
 
 module.exports = (client) => {
     client.mail.send = async (data, callback) => {
-        mailgun.messages().send(data, (error, body) => callback(body.id ? true : false));
+        const formData = new FormData();
+        for (let key in data) formData.append(key, data[key]);
+        fetch(mailgunAPI, {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Basic ' + auth
+            },
+            body: formData
+        }).then(res => res.json()).then(body => callback(body.id ? true : false)).catch(err => {
+            console.log(err);
+            fetch(mailgunAPI, {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Basic ' + auth
+                },
+                body: formData
+            }).then(res => res.json()).then(body => callback(body.id ? true : false)).catch(err => {
+                console.log(err)
+                callback(false);
+            });
+        });
     }
 }

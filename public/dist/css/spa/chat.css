@@ -8,7 +8,7 @@
 	width: 310px;
 	float: left;
 	height: calc(100vh - 50px);
-	overflow: hidden;
+	overflow: scroll;
 	box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
 }
 
@@ -68,7 +68,7 @@
 	margin-top: 5px;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	width: 55%;
+	width: 65%;
 	white-space: nowrap;
 }
 
@@ -142,6 +142,7 @@
     clear: both;
     height: auto;
     min-width: 15px;
+    color: black;
 }
 
 .message-content > p > a {
@@ -197,7 +198,7 @@
 	}
 
     ._people-name {
-        width: 60%;
+        width: 65%;
     }
 }
 
@@ -393,6 +394,10 @@
     padding: 7px;
 	cursor: pointer;
     min-width: 220px;
+}
+
+.messages-option:hover {
+    background-color: rgb(230, 220, 220);
 }
 
 .messages-option > span {
@@ -604,10 +609,12 @@
 }
 
 ._people-online-status {
-    position: absolute;
-    height: 15px;
-    width: 15px;
-    margin-top: 30px;
-    left: 40px;
+    position: relative;
+    height: 14px;
+    width: 14px;
     border: solid 2px white;
+    float: left;
+    margin-right: -14px;
+    top: 30px;
+    right: 13px;    
 }

@@ -347,7 +347,6 @@ module.exports = async (io, client, socket) => {
                 save_user = true;
                 user.mark_modified('rooms');
             }
-            console.log("unread!!");
             io.to(user.id).emit('unread', ({ messages: {
                 count: user.rooms.filter(x => x.unread).length,
                 read: [user_room.id]

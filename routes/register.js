@@ -149,7 +149,7 @@ module.exports = (client) => {
                             coordinates: ip_info.ll,
                         }
                     }
-                    await _user.remove();
+                    await client.database._user.findByIdAndDelete(_user.id);
                     await user.save();
                     res.status(200).send('Password changed successfully, redirecting to login page in 3 seconds');  
                 } else res.status(400).send('Error activating account, try again later');

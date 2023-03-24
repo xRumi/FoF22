@@ -51,7 +51,6 @@ module.exports = (client) => {
                 }, (done) => {
                     if (done) {
                         token.mailed++;
-                        token.mark_modified('mailed');
                         token.save();
                         res.sendStatus(200);
                     } else res.sendStatus(400);
@@ -74,7 +73,7 @@ module.exports = (client) => {
                     let user = await client.database.functions.get_user(token.user_id);
                     if (user) res.render("reset-password", { expire: humanize_duration(token.expire_at - Date.now()) });
                     else {
-                        await token.remove();
+                        await client.database.token.findByIdAndDelete(token.id);
                         res.redirect('/login');
                     }
                 } else res.status(400).send('token is invalid');
@@ -104,7 +103,7 @@ module.exports = (client) => {
                 if (user) {
                     if (user.account_status == 'deleted') res.status(400).send('You can\'t change password of a deleted account');
                     else {
-                        await token.remove();
+                        await client.database.token.findByIdAndDelete(token.id);
                         user.password = password;
                         await req.session.destroy();
                         await client.database.functions.delete_all_sessions(user.id);
@@ -113,7 +112,7 @@ module.exports = (client) => {
                         res.status(200).send('Password changed successfully, redirecting to login page in 3 seconds');
                     }
                 } else {
-                    await token.remove();
+                    await client.database.token.findByIdAndDelete(token.id);
                     res.status(400).send('User does not exist');
                 }
             } else res.status(400).send('Invalid or expired token was provided');

@@ -57,7 +57,7 @@ module.exports = (client) => {
     client.database.functions.get_user_by_email = async ( email ) => {
         if (!email) return false;
         if (!email.match(/^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i)) return false;
-        let user = await client.redis.call('FT.SEARCH', 'users', `@email:${email}`, 'LIMIT', '0', '1', 'NOCONTENT');
+        let user = await client.redis.call('FT.SEARCH', 'users', `@email:'${client.esr(email)}'`, 'LIMIT', '0', '1', 'NOCONTENT');
         if (user[0]) user = await redis_user.get(user[1].split(':')[1])
         else {
             user = await client.database.user.findOne({ email }).lean();
@@ -238,7 +238,7 @@ module.exports = (client) => {
         },
         set: async (id, obj) => await client.redis.call('JSON.SET', `token:${id}`, '$', JSON.stringify(obj)),
     };
-    client.database.functions.create_token = async ( user_id, type = 'verification', expire_at = Date.now() + 24 * 60 * 60 * 1000 ) => {
+    client.database.functions.create_token = async ( user_id, type = 'reset-token', expire_at = Date.now() + 24 * 60 * 60 * 1000 ) => {
         let token = await client.database.token.findOne({ user_id, type });
         if (token) return token;
         else {

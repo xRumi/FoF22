@@ -61,7 +61,7 @@ function init(id, username, name) {
 let n_time = new Date();
 let today = new Date();
 
-let months = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ];
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const periods = {
     year: 12 * 30 * 24 * 60 * 60 * 1000,
@@ -73,6 +73,8 @@ const periods = {
     second: 1000
 };
 const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const days_short = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
 const ttr = {
     '&': '&amp;',
     '<': '&lt;',
