@@ -276,10 +276,10 @@ export default class extends Constructor {
                         foot.show();
                         foot.attr('data-was-hidden', true);
                     }
-                    foot.prepend(`<button class="modm-select">Select</button>`);
+                    foot.prepend(`<button class="modm-select">select</button>`);
                 } else msg_content.append(`
                     <div class="message-foot">
-                        <button style="margin-right: unset;" class="modm-select">Select</button>
+                        <button style="margin-right: unset;" class="modm-select">select</button>
                     </div>
                 `);
             });
@@ -296,7 +296,7 @@ export default class extends Constructor {
             $('.outgoing .message-content .message-foot').each((index, value) => {
                 let msg_foot = $(value);
                 let msg_btn = msg_foot.find('button');
-                if (msg_btn.text() == 'Selected') {
+                if (msg_btn.text() == 'selected') {
                     msg_btn.attr('disabled', '').removeClass('modm-selected');
                     msg_btn.html(`Deleting<span style="margin-left: 5px; color: red; position: relative; top: 1px;" class="blinking">•</span>`);
                 } else msg_btn.remove();
@@ -378,10 +378,10 @@ export default class extends Constructor {
             let message = that.parent().parent().parent();
             let id = message.data('id');
             if (id) {
-                if (that.html() == 'Selected') {
+                if (that.html() == 'selected') {
                     let index = msg_opt_delete_selected.findIndex(x => x == id);
                     if (index > -1) msg_opt_delete_selected.splice(index, 1);
-                    that.html('Select');
+                    that.html('select');
                     that.removeClass('modm-selected');
                     if (msg_opt_delete_selected.length) $('#mod-selected-messages')
                         .css({ 'background-color': 'red', 'color': 'white' })
@@ -391,7 +391,7 @@ export default class extends Constructor {
                         .find('span').text(`Cancel Message Delete`);
                 } else {
                     msg_opt_delete_selected.push(id);
-                    that.html('Selected');
+                    that.html('selected');
                     that.addClass('modm-selected');
                     $('#mod-selected-messages')
                         .css({ 'background-color': 'red', 'color': 'white' })
@@ -769,9 +769,10 @@ socket.on('message-seen', ({ id, seen_by }) => {
             else tm.find('.message-foot').prepend(seen_by_html);
             let room = old_message_rooms.find(x => x.id == id);
             if (room) {
-                room.unread = false;
-                update_message_rooms(null, room.id);
-                console.log("message seen")
+                if (room.unread) {
+                    room.unread = false;
+                    update_message_rooms(null, room.id);
+                }
             }
         }
     }
@@ -1063,7 +1064,6 @@ function filesize(bytes, si = false, dp = 1) {
 }
 
 function format_message(m, lm = {}, stack_message, add_time) {
-    console.log("message format");
     if (m.message) m.message = m.message.trim();
     return m.user == '61d001de9b64b8c435985da9' ? `<div class="system-message" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">${m.message}</div>` : `
         <div class="message${client.id == m.user ? ' outgoing' : (lm.user == m.user || stack_message) ? ' stack-message' : ''}${m.deleted ? ' message-deleted' : ''}" data-username="${m.username}" data-user-id="${m.user}" data-id="${m.id}" data-time="${m.time}">
@@ -1122,10 +1122,10 @@ function message_load_more_up(callback) {
                             if (!msg.hasClass('outgoing') || msg.hasClass('message-deleted')) return;
                             let msg_content = msg.find('.message-content');
                             let foot = msg_content.find('.message-foot');
-                            if (foot.length) foot.prepend(`<button class="modm-select">Select</button>`);
+                            if (foot.length) foot.prepend(`<button class="modm-select">select</button>`);
                             else msg_content.append(`
                                 <div class="message-foot">
-                                    <button style="margin-right: unset;" class="modm-select">Select</button>
+                                    <button style="margin-right: unset;" class="modm-select">select</button>
                                 </div>
                             `);
                         });
@@ -1181,10 +1181,10 @@ function message_load_more_down(callback) {
                             if (!msg.hasClass('outgoing') || msg.hasClass('message-deleted')) return;
                             let msg_content = msg.find('.message-content');
                             let foot = msg_content.find('.message-foot');
-                            if (foot.length) foot.prepend(`<button class="modm-select">Select</button>`);
+                            if (foot.length) foot.prepend(`<button class="modm-select">select</button>`);
                             else msg_content.append(`
                                 <div class="message-foot">
-                                    <button style="margin-right: unset;" class="modm-select">Select</button>
+                                    <button style="margin-right: unset;" class="modm-select">select</button>
                                 </div>
                             `);
                         });

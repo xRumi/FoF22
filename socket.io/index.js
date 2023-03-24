@@ -5,11 +5,21 @@ const path = require('path');
 
 const chat = require("./chat");
 
-module.exports = (io, client) => {
+module.exports = (io, client, session_store) => {
     io.on('connection', async (socket) => {
         let user =  await client.database.functions.get_user(socket.request.session?.passport?.user);
-        // console.log("user " + user.username + " connected");
         if (user) {
+            socket.use((data, next) => {
+                client.redis.exists("session:" + socket.request.session.id).then(x => {
+                    if (x == 1) next();
+                    else {
+                        socket.emit('redirect', '/login?back_to=/spa/messages');
+                        socket.disconnect();
+                    }
+                }).catch(x => {
+                    console.log(x);
+                });
+            });
             socket.join(user.id);
             socket.user_id = user.id;
             let presence_ack_interval;
@@ -113,6 +123,9 @@ module.exports = (io, client) => {
                 }
             });
             // other stuff end
-        } else socket.emit('redirect', '/login?back_to=/spa/messages');
+        } else {
+            socket.emit('redirect', '/login?back_to=/spa/messages');
+            socket.disconnect();
+        }
     });
 };

@@ -76,7 +76,7 @@ require("./libs/ip")(client);
 require("./libs/db")(client);
 require("./libs/schedule")(client);
 require("./libs/mail")(client);
-require("./socket.io/index")(io, client);
+require("./socket.io/index")(io, client, session_store);
 
 app.use(compression());
 app.use(express.json());

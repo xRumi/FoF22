@@ -72,7 +72,7 @@ process.stdin.on('data', async data => {
         console.log('[Sync] are you sure? it will break the main application. type [yes] to reset');
         reset = true; process.stdout.write('\n> ');
     } else if (input.split(' ')[0] == 'redis') {
-        let command = input.split(' ').slice(1);
+        let command = input.replace(/[',]/g, "").split(' ').slice(1);
         try { await redis.call(...command).then(console.log).catch(console.log);
         } catch (err) { console.log(err); } process.stdout.write('\n> ');
     } else if (input == 'help') process.stdout.write(promot_opt);

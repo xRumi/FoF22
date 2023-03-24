@@ -14,7 +14,7 @@ let socket_connected = true,
             for (let key in on_socket_reconnect)
                 if (on_socket_reconnect.hasOwnProperty(key) && on_socket_reconnect[key]) on_socket_reconnect[key]();
         }
-    }).on('disconnect', () => {
+    }).on('disconnect', (reason) => {
         for (let key in on_socket_disconnect)
             if (on_socket_disconnect.hasOwnProperty(key)) on_socket_disconnect[key]();
         socket_connected = false;

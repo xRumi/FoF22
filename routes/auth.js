@@ -25,6 +25,7 @@ module.exports = (client) => {
             req.logIn(user, async (err) => {
                 if (err) return res.status(400).send('Something went wrong, try again later');
                 if (req.body.remember == 'false') {
+                    client.redis.expire(req.session.id, 24 * 60 * 60);
                     req.session.cookie.expires = false;
                     req.session.save();
                 }
