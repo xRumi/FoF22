@@ -849,45 +849,54 @@ function join_room(response) {
         let { data, messages, id, name, mm } = response;
         let old_message = old_messages.find(x => x.id == id);
         if (client.messages.room_id == id) {
-            if (old_message && old_message.messages[old_message.messages.length - 1].id == messages[messages.length - 1].id) {
-                $('#message-input').prop('disabled', false);
-                room_data = data;
-                update_messages_top_text();
-                nanobar.go(100);
-            } else {
-                room_data = data;
-                document.title = name;
-                client.messages.room_name = name;
-                $('.messages-header-back-text').text(name);
-                let html = [], lm = {};
-                let prev_message_date;
-                for (let i = 0; i < messages.length; i++) {
-                    let m = messages[i];
-                    let curr_message_date = (new Date(messages[i].time));
-                    if (prev_message_date && curr_message_date != prev_message_date) {
-                        console.log(parse_message_time(prev_message_date));
-                    } 
-                    html.push(format_message(m, lm));
-                    lm = m;
-                    prev_message_date = curr_message_date;
+            if (old_message && old_message.messages.length != messages.length) {
+                let old_message_id = old_message.messages[old_message.messages.length - 1].id;
+                if (old_message_id == messages[messages.length - 1].id) {
+                    messages = old_message.messages;
+                    mm = old_message.mm;
+                } else {
+                    for (let i = messages.length - 1; i >= 0; --i)
+                        if (messages[i].id == old_message_id) {
+                            for (let j = i + 1; j < messages.length; ++j) old_message.messages.push(messages[j]);
+                            messages = old_message.messages;
+                            mm = old_message.mm;
+                            break;
+                        }
+                    console.log("cache expired, using new one");
+                    old_message.messages = messages;
+                    old_message.mm = mm;
                 }
-                update_messages_top_text();
-                message_time(html, (_html, seen_by) => {
-                    $('.messages-list').html(_html);
-                    $('.messages-list .message:last-child.outgoing .message-foot').prepend(seen_by || '');
-                    $('#message-input').prop('disabled', false);
-                    $('#message-input-files-button').prop('disabled', false);
-                    $('.message-send-icon').show();
-                    if ($(".message:last-child")[0]) $(".message:last-child")[0].scrollIntoView();
-                }, messages[messages.length - 1]);
-                if (mm) $('.message-load-more-up').show();
-                $(`._people[data-id="${id}"]`).css('background-color', '');
-                nanobar.go(100);
-                format_url_embed();
-                if (old_message) {
-                    console.log("update oldmessage if there is missing in messahe");
-                } else old_messages.push(response);
             }
+            room_data = data;
+            document.title = name;
+            client.messages.room_name = name;
+            $('.messages-header-back-text').text(name);
+            let html = [], lm = {};
+            let prev_message_date;
+            for (let i = 0; i < messages.length; i++) {
+                let m = messages[i];
+                let curr_message_date = (new Date(messages[i].time));
+                if (prev_message_date && curr_message_date != prev_message_date) {
+                    console.log(parse_message_time(prev_message_date));
+                }
+                html.push(format_message(m, lm));
+                lm = m;
+                prev_message_date = curr_message_date;
+            }
+            update_messages_top_text();
+            message_time(html, (_html, seen_by) => {
+                $('.messages-list').html(_html);
+                $('.messages-list .message:last-child.outgoing .message-foot').prepend(seen_by || '');
+                $('#message-input').prop('disabled', false);
+                $('#message-input-files-button').prop('disabled', false);
+                $('.message-send-icon').show();
+                if ($(".message:last-child")[0]) $(".message:last-child")[0].scrollIntoView();
+            }, messages[messages.length - 1]);
+            if (mm) $('.message-load-more-up').show();
+            $(`._people[data-id="${id}"]`).css('background-color', '');
+            nanobar.go(100);
+            format_url_embed();
+            if (!old_message) old_messages.push(response);
         }
     }
 }
@@ -1106,6 +1115,11 @@ function message_load_more_up(callback) {
         } else if (response.join_room) socket.emit('join-room', client.messages.room_id, () => message_load_more_up());
         else {
             let { id, messages, mm } = response;
+            let old_response = old_messages.find(x => x.id == id);
+            if (old_response) {
+                old_response.messages = messages.concat(old_response.messages);
+                old_response.mm = mm;
+            }
             loading_more_messages_up = false;
             if (client.messages.room_id == id && messages.length) {
                 let html = [], lm = {};
