@@ -133,7 +133,6 @@ const update_message_rooms = (new_message_rooms, updated_room_id, move_to_top) =
             }
             let old_message = old_messages.find(x => x.id == client.messages.room_id);
             if (old_message) {
-                console.log("can use cache!!");
                 let { data, messages, id, name, mm } = old_message;
                 room_data = data;
                 document.title = name;
@@ -178,9 +177,9 @@ export default class extends Constructor {
     async render() {
         return $(`
             <div class="chat">
-                <div class="people">
+                <div class="people scrollbar">
                     <div class="people-header"></div>
-                    <div class="people-list scrollbar">
+                    <div class="people-list">
                         <svg class="spinner" style="width: 30px; margin-left: 30px; margin-top: 20px;" viewBox="0 0 50 50">
                             <circle class="spinner-path" cx="25" cy="25" r="20" fill="none" stroke-width="3"></circle>
                         </svg>
@@ -780,14 +779,22 @@ socket.on('message-seen', ({ id, seen_by }) => {
 
 function parse_message_time(message_time, minimal) {
     let _time = new Date(message_time),
-        diff = Math.abs(Date.now() - message_time), time;
-    if (diff < 2 * 60 * 60 * 1000) time = Math.floor(diff / periods.hour) ? Math.floor(diff / periods.hour) + "h ago" : Math.floor(diff / periods.minute) ? Math.floor(diff / periods.minute) + "m ago" : Math.floor(diff / periods.second) ? Math.floor(diff / periods.second) + "s ago" : 'just now';
-    else if (diff < periods.day && _time.getDate() === today.getDate()) time = `${!minimal ? `Today at ` : ''}${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
-    else {
-        if (diff < periods.week) time = `${(minimal ? days_short : days)[_time.getDay()]}${!minimal ? ` at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}` : ``}`;
-        else time = `${_time.getDate()} ${months[_time.getMonth()]}${!minimal ? ` at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}` : ``}${_time.getFullYear() !== today.getFullYear() ? `, ${_time.getFullYear()}` : ''}`
-    }
-    return minimal ? time.replace('ago', '') : time;
+        diff = Math.abs(Date.now() - message_time), time = "";
+    if (diff < 10 * 1000) time = `just now`;
+    else if (diff < 1.1 * 60 * 60 * 1000) {
+        let hour = Math.floor(diff / periods.hour),
+            minute = Math.floor(diff / periods.minute),
+            second = Math.floor(diff / periods.second);
+        if (hour) time += hour + (minimal ? "h" : " hour" + (hour > 1 ? "s" : "") + " ago");
+        else if (minute) time += minute + (minimal ? "m" : " minute" + (minute > 1 ? "s" : "") + " ago");
+        else if (second) time += second + (minimal ? "s" : " second" + (second > 1 ? "s" : "") + " ago");
+        else time = "unknown ago";
+    } else if (diff < periods.day && _time.getDate() === today.getDate()) time = `${!minimal ? `Today at ` : ''}${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`;
+    else if (diff < periods.week) time = `${(minimal ? days_short : days)[_time.getDay()]}${!minimal ? ` at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}` : ``}`;
+    else if (_time.getFullYear() == today.getFullYear()) time = `${_time.getDate()} ${months[_time.getMonth()]}${!minimal ? ` at ${_time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}` : ``}`;
+    else if (minimal) time = `${_time.getFullYear()}`;
+    else time = `${_time.getDate()} ${months[_time.getMonth()]}${_time.getFullYear() !== today.getFullYear() ? `, ${_time.getFullYear()}` : ''}`;
+    return minimal ? time.replace('just', '').trim() : time.trim();
 }
 
 function message_time(html, callback, last_message = {}) {
@@ -876,9 +883,6 @@ function join_room(response) {
             for (let i = 0; i < messages.length; i++) {
                 let m = messages[i];
                 let curr_message_date = (new Date(messages[i].time));
-                if (prev_message_date && curr_message_date != prev_message_date) {
-                    console.log(parse_message_time(prev_message_date));
-                }
                 html.push(format_message(m, lm));
                 lm = m;
                 prev_message_date = curr_message_date;
@@ -1102,18 +1106,35 @@ function format_message(m, lm = {}, stack_message, add_time) {
     `;
 }
 
-function message_load_more_up(callback) {
+let message_load_more_up_timeout = null;
+
+function message_load_more_up(callback, ignore_is_loading = false) {
     if (!client.messages.room_id || !navigator.onLine || !socket.connected) {
         loading_more_messages_up = false;
-        return $('.message-load-more-up .spinner').hide();
+        $('.message-load-more-up .spinner').hide();
+        return;
     }
-    if (loading_more_messages_up) return;
+    if (!ignore_is_loading && loading_more_messages_up) return;
     loading_more_messages_up = true;
+    let timed_out = false;
+    if (ignore_is_loading) clearInterval(message_load_more_up_timeout);
+    message_load_more_up_timeout = setTimeout(() => {
+        timed_out = true;
+        loading_more_messages_up = false;
+        $('.message-load-more-up .spinner').hide();
+    }, 5000);
     socket.emit('message-load-more-up', $('.message:first-child').data('id'), 7, (response) => {
+        if (timed_out) return;
+        clearInterval(message_load_more_up_timeout);
         if (response.error) {
             loading_more_messages_up = false;
-        } else if (response.join_room) socket.emit('join-room', client.messages.room_id, () => message_load_more_up());
-        else {
+        } else if (response.join_room) {
+            socket.emit('join-room', client.messages.room_id, (response) => {
+                join_room(response);
+                message_load_more_up(null, true);
+            });
+            // socket.emit('join-room', client.messages.room_id, (response) => join_room(response));
+        } else {
             let { id, messages, mm } = response;
             let old_response = old_messages.find(x => x.id == id);
             if (old_response) {
