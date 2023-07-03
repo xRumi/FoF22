@@ -31,7 +31,7 @@ module.exports = (client) => {
                 if (_user) return res.status(400).send('Email address is not available');
                 _user = new client.database._user({ email });
                 client.mail.send({
-                    from: `FoF22 <supportfof22.me>`,
+                    from: `FoF22 <no-reply@${process.env.DOMAIN}>`,
                     to: email,
                     subject: `Please verify your email address`,
                     html: `
@@ -39,15 +39,15 @@ module.exports = (client) => {
                             Please confirm your email address for registration by clicking the link below. This link will expire in a day.
                         </div>
                         <br>
-                        <a style="text-decoration: none;" href="https://fof22.me/register/confirm/?token=${_user.id}">https://fof22.me/register/confirm/?token=${_user.id}</a>
+                        <a style="text-decoration: none;" href="${process.env.BASE_URL}/register/confirm/?token=${_user.id}">${process.env.BASE_URL}/register/confirm/?token=${_user.id}</a>
                         <br><br><hr>
                         <div>
-                            If you did not request for this email, you don’t have to do anything.
+                            If you did not request for this email, you don't have to do anything.
                         </div>
                         <div>
                             Just ignore this email the way your cat ignores you.
                         </div>
-                        <p>Please do not respond, this email was auto-generated. If you need additional help, send an email to <a href="mailto:help@fof22.me">help@fof22.me</p>
+                        <p>Please do not respond, this email was auto-generated. If you need additional help, send an email to <a href="mailto:${process.env.MAIL_TO}">${process.env.MAIL_TO}</p>
                     `
                 }, (done) => {
                     if (done) {
@@ -58,12 +58,12 @@ module.exports = (client) => {
                 });
                 await _user.save();
             } else {
-                if (_user.mailed > 5) res.status(400).send(`You have reached the maximum resend limit for this email, send an email to <a style="text-decoration: none;" href="mailto:help@fof22.me">help@fof22.me</a> for help`);
+                if (_user.mailed > 5) res.status(400).send(`You have reached the maximum resend limit for this email, send an email to <a style="text-decoration: none;" href="mailto:${process.env.MAIL_TO}">${process.env.MAIL_TO}</a> for help`);
                 else {
                     let diff = _user.mailed ? Date.now() - _user.created_at : 6 * 60 * 1000;
                     if (diff > 2 * 60 * 1000) {
                         client.mail.send({
-                            from: `FoF22 <support@fof22.me>`,
+                            from: `FoF22 <no-reply@${process.env.DOMAIN}>`,
                             to: email,
                             subject: `Please verify your email address`,
                             html: `
@@ -71,15 +71,15 @@ module.exports = (client) => {
                                     Please confirm your email address for registration by clicking the link below.
                                 </div>
                                 <br>
-                                <a style="text-decoration: none;" href="https://fof22.me/register/confirm/?token=${_user.id}">https://fof22.me/register/confirm/?token=${_user.id}</a>
+                                <a style="text-decoration: none;" href="${process.env.BASE_URL}/register/confirm/?token=${_user.id}">${process.env.BASE_URL}/register/confirm/?token=${_user.id}</a>
                                 <br><br><hr>
                                 <div>
-                                    If you did not request for this email, you don’t have to do anything.
+                                    If you did not request for this email, you don't have to do anything.
                                 </div>
                                 <div>
                                     Just ignore this email the way your cat ignores you.
                                 </div>
-                                <p>Please do not respond, this email was auto-generated. If you need additional help, send an email to <a href="mailto:help@fof22.me">help@fof22.me</p>
+                                <p>Please do not respond, this email was auto-generated. If you need additional help, send an email to <a href="mailto:${process.env.MAIL_TO}">${process.env.MAIL_TO}</p>
                             `
                         }, (done) => {
                             if (done) {

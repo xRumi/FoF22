@@ -27,10 +27,10 @@ module.exports = (client) => {
         const user = req.body.email ? await client.database.functions.get_user_by_email(req.body.email) : false;
         if (user) {
             const token = await client.database.functions.create_token(user.id);
-            if (token.mailed > 6) res.status(400).send(`You have reached the maximum resend limit for this email, you can try again in ${humanize_duration(token.expire_at - Date.now())} or send an email to <a style="text-decoration: none;" href="mailto:help@fof22.me">help@fof22.me</a> for help`);
+            if (token.mailed > 6) res.status(400).send(`You have reached the maximum resend limit for this email, you can try again in ${humanize_duration(token.expire_at - Date.now())} or send an email to <a style="text-decoration: none;" href="mailto:${process.env.MAIL_TO}">${process.env.MAIL_TO}</a> for help`);
             else {
                 client.mail.send({
-                    from: `FoF22 <no-reply@fof22.me>`,
+                    from: `FoF22 <no-reply@${process.env.DOMAIN_NAME}>`,
                     to: user.email,
                     subject: `Reset your password`,
                     html: `
@@ -38,15 +38,15 @@ module.exports = (client) => {
                             Reset your account password by clicking the link below. This link will expire in a day.
                         </div>
                         <br>
-                        <a style="text-decoration: none;" href="https://fof22.me/reset-password/?token=${token.id}">https://fof22.me/reset-password/?token=${token.id}</a>
+                        <a style="text-decoration: none;" href="${process.env.BASE_URL}/reset-password/?token=${token.id}">${process.env.BASE_URL}/reset-password/?token=${token.id}</a>
                         <br><br><hr>
                         <div>
-                            If you did not request for this email, you don’t have to do anything.
+                            If you did not request for this email, you don't have to do anything.
                         </div>
                         <div>
                             Just ignore this email the way your cat ignores you.
                         </div>
-                        <p>Please do not respond, this email was auto-generated. If you need additional help, send an email to <a href="mailto:help@fof22.me">help@fof22.me</p>
+                        <p>Please do not respond, this email was auto-generated. If you need additional help, send an email to <a href="mailto:${process.env.MAIL_TO}">${process.env.MAIL_TO}</p>
                     `
                 }, (done) => {
                     if (done) {

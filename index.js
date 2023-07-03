@@ -14,12 +14,17 @@ const passport = require('passport'),
 require('dotenv').config();
 
 const Redis = require('ioredis'),
-    redis = new Redis(process.env.REDIS_CLOUD ? {
-        port: process.env.REDIS_CLOUD_PORT,
-        host: process.env.REDIS_CLOUD_HOST,
-        username: process.env.REDIS_CLOUD_USERNAME,
-        password: process.env.REDIS_CLOUD_PASSWORD
-    } : {});
+    redis = new Redis(process.env.DEV ? {
+        port: process.env.REDIS_DEV_PORT,
+        host: process.env.REDIS_DEV_HOST,
+        username: process.env.REDIS_DEV_USERNAME,
+        password: process.env.REDIS_DEV_PASSWORD
+    } : {
+        port: process.env.REDIS_PORT,
+        host: process.env.REDIS_HOST,
+        username: process.env.REDIS_USERNAME,
+        password: process.env.REDIS_PASSWORD
+    });
 
 redis.on('connect', () => {
     console.log('[Redis] connected');

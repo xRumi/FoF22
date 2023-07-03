@@ -59,12 +59,12 @@ process.stdin.on('data', async data => {
         let input2 = input.split(' ')[1];
         if (input2) {
             if (input2 == 'user') await redis.del(await redis.keys('user:*')).then(() => console.log('[Redis] user cache cleared')).catch(() => {});
-            else if (input2 == 'room') await redis.del(await redis.keys('room:*')).then(() => console.log('[Redis] rome cache cleared')).catch(() => {});
+            else if (input2 == 'room') await redis.del(await redis.keys('room:*')).then(() => console.log('[Redis] room cache cleared')).catch(() => {});
             else if (input2 == 'chat') await redis.del(await redis.keys('chat:*')).then(() => console.log('[Redis] chat cache cleared')).catch(() => {});
             else return console.log('[Sync] invaild cache db provided');
         } else {
             await redis.del(await redis.keys('user:*')).then(() => console.log('[Redis] user cache cleared')).catch(() => {});
-            await redis.del(await redis.keys('room:*')).then(() => console.log('[Redis] rome cache cleared')).catch(() => {});
+            await redis.del(await redis.keys('room:*')).then(() => console.log('[Redis] room cache cleared')).catch(() => {});
             await redis.del(await redis.keys('chat:*')).then(() => console.log('[Redis] chat cache cleared')).catch(() => {});
         }
         console.log('[Sync] done'); process.stdout.write('\n> ');

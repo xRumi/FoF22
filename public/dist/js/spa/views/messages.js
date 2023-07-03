@@ -1272,11 +1272,17 @@ function format_url_embed() {
         for (let i = 0; i < urls.length; i++) {
             let metadata_scraper_cached = localStorage["metadata-scraper:" + urls[i].url];
             if (metadata_scraper_cached) {
+                let result;
+                try {
+                    result = JSON.parse(metadata_scraper_cached);
+                } catch (err) {
+                    return false;
+                }
                 let url = urls[i];
                 _result.push({
                     url: url.url,
                     id: url.id,
-                    result: JSON.parse(metadata_scraper_cached)
+                    result,
                 });
                 _urls.push(url);
                 urls[i] = null;
