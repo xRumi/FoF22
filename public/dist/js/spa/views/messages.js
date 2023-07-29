@@ -1095,7 +1095,7 @@ function format_message(m, lm = {}, stack_message, add_time) {
                     ${m.message ? `<p style="${(m.message.match(emoji_regex) || []).length == 1 && (m.message == '❤️' || !m.message.replace(emoji_regex, '').length) ? 'background-color: unset; padding-left: unset; padding-right: unset; font-size: 45px; line-height: 1;' : ''}${m.attachments && m.attachments.length ? 'margin-top: 5px;' : ''}">` + 
                         linkify(m.message.replace(/[&<>]/g, (t) => ttr[t] || t))
                     + '</p>' : ''}
-                ` : `<p><i>This message was deleted</i>`}
+                ` : `<p>This message was deleted</p>`}
                 ${add_time && m.time ? `
                     <div class="message-foot">
                         <span class="message-time">${parse_message_time(m.time)}</span>

@@ -309,17 +309,9 @@
 }
 
 .message-deleted p {
-	background-color: #fff;
-	border: solid 0.1px;
-	color: gray;
-	font-style: italic;
-}
-
-.message-deleted.outgoing p {
-	color: gray;
-	background-color: #fff;
-	border: solid 0.1px;
-	font-style: italic;
+	background-color: #fff !important;
+	color: gray !important;
+	border: solid 0.1px lightgray !important;
 }
 
 #message-input-files {
@@ -603,8 +595,7 @@
 
 .msg-attachment-not-found {
     padding: 8px;
-    border: solid 1px grey;
-    border-radius: 10px;
+    border: solid 1px lightgrey;
 }
 
 ._people-online-status {

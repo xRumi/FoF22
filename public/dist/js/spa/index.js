@@ -207,5 +207,9 @@ if (typeof document.addEventListener === "undefined" || hidden === undefined) {
 }, false);
 
 $.fn.attachment_not_Found = (terget) => {
-    $(terget).parent().html("<div class=\"msg-attachment-not-found\">Message attachment does not exist</div>");
+    $(terget).parent()
+    .html(`<div class=\"msg-attachment-not-found\">
+        <b>Oops! Attachment Not Be Found</b><br><br>
+        Sorry but the attachment you are looking for does not exist, have been removed. id changed or is temporarily unavailable
+    </div>`);
 }
