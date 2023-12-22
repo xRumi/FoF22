@@ -1,7 +1,7 @@
 const fetch = require("node-fetch");
 const auth = Buffer.from(`api:${process.env.MAILGUN_API_KEY}`).toString('base64');
 const FormData = require("form-data");
-const mailgunAPI = `https://api.mailgun.net/v3/${process.env.DOMAIN_NAME}/messages`;
+const mailgunAPI = `https://api.mailgun.net/v3/${process.env.MAILGUN_DOMAIN_NAME}/messages`;
 
 module.exports = (client) => {
     client.mail.send = async (data, callback) => {
