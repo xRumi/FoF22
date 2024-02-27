@@ -32,12 +32,14 @@ function stringify(obj) {
 module.exports = (client) => {
 
     router.get('/', async (req, res) => {
-        if (req.user?.username == 'rumi') res.render('debug');
+        if (process.env.DISABLE_DEBUG_PAGE || !process.env.ADMIN) return res.render('404');
+        if (req.user?.username == process.env.ADMIN) res.render('debug');
         else res.render('404');
     });
 
     router.post('/js', async (req, res, next) => {
-        if (req.user?.username == 'rumi') {
+        if (process.env.DISABLE_DEBUG_PAGE || !process.env.ADMIN) return next();
+        if (req.user?.username == process.env.ADMIN) {
             if (req.body.code) {
                 let output = await _eval(req.body.code, client, req.user, client.io);
                 res.status(200).send(output);

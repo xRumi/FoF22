@@ -13,18 +13,12 @@ module.exports = (client) => {
                 'Authorization': 'Basic ' + auth
             },
             body: formData
-        }).then(res => res.json()).then(body => callback(body.id ? true : false)).catch(err => {
+        }).then(res => res.json()).then(body => {
+            console.log(body);
+            callback(body.id ? true : false);
+        }).catch(err => {
             console.log(err);
-            fetch(mailgunAPI, {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Basic ' + auth
-                },
-                body: formData
-            }).then(res => res.json()).then(body => callback(body.id ? true : false)).catch(err => {
-                console.log(err)
-                callback(false);
-            });
+            callback(false);
         });
     }
 }

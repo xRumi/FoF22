@@ -23,6 +23,7 @@ module.exports = (client) => {
     });
 
     router.post('/new', limiter1, _limiter1, async (req, res) => {
+        if (process.env.DISABLE_REGISTRATION) return res.status(400).send("Registration process is disabled. Contact support for help.");
         const email = xss(req.body.email);
         if (email && email.match(/^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i)) {
             let _user = await client.database._user.findOne({ email });
