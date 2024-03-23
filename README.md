@@ -1,3 +1,2 @@
-**test user**
-username: test
-password: testpass
+**username:** test<br>
+**password:** testpass
