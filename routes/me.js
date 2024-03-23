@@ -54,7 +54,7 @@ module.exports = (client) => {
     });
 
     router.post('/password/edit', limiter2, _limiter2, async (req, res) => {
-        if (req.user) {
+        if (req.user && req.user.username != process.env.TEST_USER) {
             const new_pass = req.body.new_pass,
                 old_pass = req.body.old_pass;
             if (!new_pass || !old_pass) res.status(406).send('not enough information provided');
