@@ -27,6 +27,9 @@ on_socket_reconnect.views_messages_01 = () => {
     message_load_more_down();
 }
 
+let IMAGE_PREVIEW_SIZE_LIMIT = 0.5; //MiB
+let FILE_UPLOAD_SIZE_LIMIT = 30; //MiB
+
 let old_message_rooms = [], last_umrs;
 let old_messages = [];
 client.messages.old_message_rooms = old_message_rooms;
@@ -425,14 +428,6 @@ export default class extends Constructor {
                 do_send_message();
             });
             let _attachments = attachments.filter(x => x.file).map(x => Object.assign({}, x));
-            for (let i = 0; i < _attachments.length; i++) {
-                let _a = _attachments[i];
-                if (_a.type.match('image') || _a.type.match('video')) {
-                    let $t = $(`#${_a.id}`).find(_a.type.match('image') ? 'img' : 'video');
-                    _a.width = $t.width();
-                    _a.height = $t.height();
-                } else continue;
-            }
             function do_send_message() {
                 send_message(_message, _attachments, _id, (response) => {
                     if (response.error) {
@@ -503,8 +498,8 @@ export default class extends Constructor {
             let files = e.target.files;
             for (let i = 0; i < files.length; i++) {
                 let file = files[i];
-                if (file.size > 30 * 1024 * 1024) {
-                    alert(`Upload limit 30mb, skipping ${file.name}`);
+                if (file.size > FILE_UPLOAD_SIZE_LIMIT * 1024 * 1024) {
+                    alert(`Upload limit ${FILE_UPLOAD_SIZE_LIMIT}mb, skipping ${file.name}`);
                     continue;
                 } else if (attachments.some(x => x.name == file.name && file.type == x.type && file.size == x.size && x.lastModified == file.lastModified)) {
                     alert(`Duplicate file, skipping ${file.name}`);
@@ -549,30 +544,29 @@ export default class extends Constructor {
                 if (file.type.match('image')) {
                     let image = new Image(), src_url = URL.createObjectURL(file);
                     image.src = src_url;
+                    image.onerror = () => {
+                        alert(`image error while processing ${file.name}`);
+                        message_input_file_preview.remove();
+                        let attachment_length = attachments.length;
+                        $('#message-input-file-text').text(attachment_length ? `${attachment_length} file${attachment_length > 1 ? 's' : ''} selected, click to remove` : 'No file selected');
+                        $('#message-input-files-button').prop('disabled', false);
+                    }
                     image.onload = () => {
                         if (ignore_attachment_ids.includes(attachment_data.id)) return false;
-                        const canvas = document.createElement('canvas');
-                        canvas.setAttribute("style", "background-color: red;");
-                        canvas.width = image.width;
-                        canvas.height = image.height;
-                        let ctx = canvas.getContext('2d');
-                        ctx.drawImage(image, 0, 0, image.width, image.height);
-                        canvas.toBlob(blob => {
-                            if (ignore_attachment_ids.includes(attachment_data.id)) return false;
-                            message_input_file_preview.html(`<img src="${src_url}">`);
-                            attachment_data.file = blob;
-                            attachment_data.src_url = src_url;
-                            attachment_data.ext = 'png';
-                            attachments.push(attachment_data);
-                            $('#message-input-files-button').prop('disabled', false);
-                        }, 'image/png', 0.8);
+                        attachment_data.src_url = URL.createObjectURL(file);
+                        attachment_data.file = file;
+                        attachment_data.image = true;
+                        attachment_data.width = image.width;
+                        attachment_data.height = image.height;
+                        attachments.push(attachment_data);
+                        message_input_file_preview.html(`<img src="${src_url}">`);
+                        $('#message-input-files-button').prop('disabled', false);
                     }
                 } else if (file.type.match('video')) {
                     let video = document.createElement('video'), src_url = URL.createObjectURL(file);
                     video.src = src_url;
                     video.load();
                     video.onerror = () => {
-                        if (ignore_attachment_ids.includes(attachment_data.id)) return false;
                         alert(`video error while processing ${file.name}`);
                         message_input_file_preview.remove();
                         let attachment_length = attachments.length;
@@ -599,6 +593,8 @@ export default class extends Constructor {
                                 attachment_data.thumbnail_src = thumbnail_src;
                                 attachment_data.src_url = src_url;
                                 attachment_data.duration = video.duration;
+                                attachment_data.width = video.width;
+                                attachment_data.height = video.height;
                                 attachments.push(attachment_data);
                                 $('#message-input-files-button').prop('disabled', false);
                             }, 'image/jpeg', 1);

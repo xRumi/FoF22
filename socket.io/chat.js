@@ -191,28 +191,24 @@ module.exports = async (io, client, socket) => {
                                         if (thumbnail_path && !fs.existsSync(thumbnail_path)) {
                                             callback({ error: `Attachment thumbnail does not exist` }); callback_done = true;
                                             break;
-                                            return;
                                         }
                                         let attachment_info = !type.match('video') ? fs.statSync(attachment_path) :
                                             await video_length(attachment_path, { bin: 'mediainfo', extended: true });
                                         if (!attachment_info) {
                                             callback({ error: `Error processing attachment` }); callback_done = true;
                                             break;
-                                            return;
                                         }
                                         let attachment_data = {
-                                            type: type?.substring(0, 20),
+                                            type: type?.substring(0, 10),
                                             url: `/uploads/rooms/${room.id}/${filename}`,
                                             size: attachment_info.size,
                                             name: xss((name?.substring(0, 200) || 'unknown') + (ext ? '.' + ext : '')),
                                         };
                                         if (width) {
-                                            let width_float = Math.abs(parseFloat(width).toFixed(4));
-                                            if (width_float) attachment_data.width = width_float > 1000 ? 1000 : width_float;
+                                            attachment_data.width = width;
                                         }
                                         if (height) {
-                                            let height_float = Math.abs(parseFloat(height).toFixed(4));
-                                            if (height_float) attachment_data.height = height_float > 1000 ? 1000 : height_float;
+                                            attachment_data.height = height;
                                         }
                                         if (type.match('video')) {
                                             attachment_data.thumbnail = `/uploads/rooms/${room.id}/${thumbnail_filename}`;
