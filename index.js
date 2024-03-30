@@ -1,3 +1,4 @@
+require('dotenv').config();
 const compression = require('compression'),
     express = require('express'),
     session = require('express-session'),
@@ -11,11 +12,6 @@ const passport = require('passport'),
     local_strategy = require('./strategies/local'),
     routes = require('./routes');
 
-require('dotenv').config();
-
-console.log(FILE_UPLOAD_SIZE_LIMIT);
-process.env.FILE_UPLOAD_SIZE_LIMIT = parseInt(process.env.FILE_UPLOAD_SIZE_LIMIT, 10);
-console.log(process.FILE_UPLOAD_SIZE_LIMIT);
 
 const Redis = require('ioredis'),
     redis = new Redis(process.env.DEV ? {
