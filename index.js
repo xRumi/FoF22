@@ -13,6 +13,9 @@ const passport = require('passport'),
 
 require('dotenv').config();
 
+process.env.FILE_UPLOAD_SIZE_LIMIT = parseInt(process.env.FILE_UPLOAD_SIZE_LIMIT, 10);
+console.log(process.FILE_UPLOAD_SIZE_LIMIT);
+
 const Redis = require('ioredis'),
     redis = new Redis(process.env.DEV ? {
         port: process.env.REDIS_DEV_PORT,
