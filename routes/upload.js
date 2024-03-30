@@ -16,7 +16,7 @@ const room_upload = multer({
         }
     }),
     limits: {
-        fileSize: 1024 * 1024 * 30,
+        fileSize: 1024 * 1024 * parseInt(process.env.FILE_UPLOAD_SIZE_LIMIT, 10),
     },
     fileFilter: (req, file, cb) => {
         let { room_id } = req.body;
