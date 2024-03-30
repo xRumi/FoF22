@@ -13,6 +13,7 @@ const passport = require('passport'),
 
 require('dotenv').config();
 
+console.log(FILE_UPLOAD_SIZE_LIMIT);
 process.env.FILE_UPLOAD_SIZE_LIMIT = parseInt(process.env.FILE_UPLOAD_SIZE_LIMIT, 10);
 console.log(process.FILE_UPLOAD_SIZE_LIMIT);
 
